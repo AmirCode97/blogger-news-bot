@@ -40,16 +40,11 @@ class NewsFetcher:
         self.session = requests.Session()
         self.session.headers.update({
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'fa-IR,fa;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate, br',
+            'Accept-Encoding': 'gzip, deflate',  # align with standard requests
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
-            'Sec-Fetch-Dest': 'document',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-User': '?1',
-            'Cache-Control': 'max-age=0',
         })
     
     def _get_proxy(self) -> Optional[Dict]:
@@ -224,6 +219,7 @@ class NewsFetcher:
                 links = soup.select('a[href*="?p="], a[href*="/20"]')
                 for link in links[:20]:
                     title = link.get_text().strip()
+                    title = " ".join(title.split())  # Remove newlines and extra spaces
                     href = link.get('href')
                     
                     if len(title) < 10 or not href:
@@ -258,6 +254,7 @@ class NewsFetcher:
                         continue
                     
                     title = title_el.get_text().strip()
+                    title = " ".join(title.split())  # Remove newlines and extra spaces
                     if len(title) < 5:
                         continue
                     

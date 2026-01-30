@@ -49,7 +49,7 @@ NEWS_SOURCES = [
     {
         "name": "کانون دفاع از حقوق بشر در ایران (بشریت)",
         "url": "https://bashariyat.org/",
-        "type": "scrape",  # نیاز به web scraping
+        "type": "scrape",
         "language": "fa",
         "enabled": True,
         "selectors": {
@@ -65,13 +65,27 @@ NEWS_SOURCES = [
         "url": "https://iranhrs.org/",
         "type": "scrape",
         "language": "fa",
-        "enabled": False,  # غیرفعال - Cloudflare protection
-        # این سایت نیاز به Playwright/Selenium دارد
+        "enabled": True,  # فعال شد - بررسی Cloudflare انجام شد
+        "use_proxy": False, # اتصال مستقیم بهتر جواب داد
         "selectors": {
-            "articles": "article, .jeg_post, .post",
-            "title": "h3 a, .jeg_post_title a",
-            "link": "h3 a, .jeg_post_title a",
-            "description": ".jeg_post_excerpt, .post-excerpt, p",
+            "articles": "article",
+            "title": "h2 a, h3 a",
+            "link": "h2 a, h3 a",
+            "description": "p",
+            "image": "img"
+        }
+    },
+    {
+        "name": "رادیو فردا",
+        "url": "https://www.radiofarda.com/",
+        "type": "scrape",
+        "language": "fa",
+        "enabled": True,
+        "selectors": {
+            "articles": ".media-block__content",
+            "title": "a",
+            "link": "a",
+            "description": "p",
             "image": "img"
         }
     },
