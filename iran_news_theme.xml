@@ -1,0 +1,782 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:templateVersion='1.0.0' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+<meta charset='UTF-8'/>
+<meta content='width=device-width, initial-scale=1.0' name='viewport'/>
+<meta content='IE=edge' http-equiv='X-UA-Compatible'/>
+<title><data:blog.pageTitle/></title>
+<meta expr:content='data:blog.metaDescription' name='description'/>
+<link expr:href='data:blog.blogspotFaviconUrl' rel='icon' type='image/x-icon'/>
+
+<!-- Google Fonts -->
+<link href='https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap' rel='stylesheet'/>
+<!-- Font Awesome -->
+<link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css' rel='stylesheet'/>
+
+<b:skin><![CDATA[
+/*
+=============================================
+   IRAN NEWS PRO - نسخه نهایی
+=============================================
+*/
+
+:root {
+  --primary: #1a1a2e;
+  --secondary: #16213e;
+  --accent: #e94560;
+  --accent-light: #ff6b6b;
+  --text-primary: #ffffff;
+  --text-secondary: #a0a0a0;
+  --text-muted: #666666;
+  --bg-dark: #0f0f1a;
+  --bg-card: #1a1a2e;
+  --border-color: rgba(255,255,255,0.08);
+  --shadow-hover: 0 12px 40px rgba(233,69,96,0.15);
+  --gradient-accent: linear-gradient(135deg, #e94560, #ff6b6b);
+  --radius: 12px;
+  --radius-small: 8px;
+  --transition: all 0.3s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Vazirmatn', 'Inter', sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-primary);
+  line-height: 1.7;
+  direction: rtl;
+  min-height: 100vh;
+}
+
+body.en {
+  direction: ltr;
+  font-family: 'Inter', 'Vazirmatn', sans-serif;
+}
+
+a { color: inherit; text-decoration: none; transition: var(--transition); }
+a:hover { color: var(--accent); }
+img { max-width: 100%; height: auto; display: block; }
+
+/* ===== HEADER ===== */
+.header-wrapper {
+  background: var(--primary);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+.header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+  gap: 20px;
+}
+
+.blog-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.site-logo {
+  height: 40px;
+  width: auto;
+  border-radius: 8px;
+}
+
+.blog-title h1 {
+  font-size: 20px;
+  font-weight: 700;
+  background: var(--gradient-accent);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Navigation */
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+}
+
+.nav-link {
+  padding: 8px 14px;
+  border-radius: var(--radius-small);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.nav-link:hover, .nav-link.active {
+  background: rgba(233,69,96,0.15);
+  color: var(--accent);
+}
+
+.nav-link i { font-size: 12px; }
+
+/* Language Switch */
+.lang-switch {
+  display: flex;
+  gap: 6px;
+  margin-right: 16px;
+}
+
+.lang-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.lang-btn:hover, .lang-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* Search */
+.header-search {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.header-search input {
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  width: 160px;
+  outline: none;
+}
+
+.header-search input::placeholder { color: var(--text-muted); }
+
+.header-search button {
+  background: var(--accent);
+  border: none;
+  padding: 10px 14px;
+  color: white;
+  cursor: pointer;
+}
+
+/* ===== BREAKING NEWS ===== */
+.breaking-news {
+  background: var(--accent);
+  padding: 10px 0;
+  overflow: hidden;
+}
+
+.breaking-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+}
+
+.breaking-label {
+  background: rgba(0,0,0,0.25);
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 11px;
+  margin-left: 16px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ticker-wrapper {
+  overflow: hidden;
+  flex: 1;
+}
+
+.ticker-content {
+  display: inline-block;
+  white-space: nowrap;
+  animation: ticker 30s linear infinite;
+  font-size: 13px;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* ===== MAIN ===== */
+.main-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 24px;
+  background: var(--gradient-accent);
+  border-radius: 2px;
+}
+
+/* ===== POSTS GRID ===== */
+.blog-posts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1024px) { .blog-posts { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .blog-posts { grid-template-columns: 1fr; } }
+
+.post-outer {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+}
+
+.post-outer:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(233,69,96,0.3);
+}
+
+.post-thumbnail {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+}
+
+.post-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition);
+}
+
+.post-outer:hover .post-thumbnail img { transform: scale(1.08); }
+
+.post-thumbnail::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50%;
+  background: linear-gradient(to top, rgba(26,26,46,0.9), transparent);
+  pointer-events: none;
+}
+
+.post-category {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: var(--gradient-accent);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 11px;
+  font-weight: 600;
+  z-index: 2;
+}
+
+.post-body-container { padding: 18px; }
+
+.post-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.post-title a:hover { color: var(--accent); }
+
+.post-snippet {
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.7;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+
+.post-footer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.read-more {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.read-more:hover { gap: 8px; }
+
+.post-stats {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* ===== SINGLE POST ===== */
+.single-post-wrapper { max-width: 900px; margin: 0 auto; }
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  transition: var(--transition);
+}
+
+.back-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+.single-post {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+}
+
+.single-post .featured-image { height: 400px; overflow: hidden; }
+.single-post .featured-image img { width: 100%; height: 100%; object-fit: cover; }
+.single-post .post-content-area { padding: 30px; }
+.single-post .post-title { font-size: 24px; margin-bottom: 20px; -webkit-line-clamp: unset; }
+
+.post-content { font-size: 16px; line-height: 2; color: var(--text-secondary); }
+.post-content p { margin-bottom: 18px; }
+.post-content img { border-radius: var(--radius-small); margin: 20px 0; }
+
+/* Share */
+.share-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 30px 0;
+  padding: 20px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius-small);
+}
+
+.share-label { font-size: 13px; color: var(--text-secondary); margin-left: 12px; }
+
+.share-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.share-btn:hover { transform: translateY(-3px); color: white; }
+.share-btn.telegram { background: #0088cc; }
+.share-btn.twitter { background: #1da1f2; }
+.share-btn.whatsapp { background: #25d366; }
+
+/* Comments */
+.comments-section {
+  margin-top: 30px;
+  padding: 24px;
+  background: rgba(255,255,255,0.02);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+}
+
+.comments-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--accent);
+}
+
+/* Pagination */
+.blog-pager {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 40px;
+}
+
+.blog-pager a {
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-small);
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.blog-pager a:hover { background: var(--accent); border-color: var(--accent); }
+
+/* ===== ABOUT PAGE ===== */
+.about-page {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--bg-card);
+  padding: 40px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+}
+
+.about-page h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: var(--accent);
+}
+
+.about-page p {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+  line-height: 2;
+}
+
+/* ===== FOOTER ===== */
+.footer-wrapper {
+  background: var(--primary);
+  border-top: 1px solid var(--border-color);
+  margin-top: 50px;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.footer-text {
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* Mobile */
+.menu-toggle {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 22px;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .main-nav { display: none; }
+  .menu-toggle { display: block; }
+  .header-search { display: none; }
+  .lang-switch { display: none; }
+}
+
+@media (max-width: 640px) {
+  .blog-title h1 { font-size: 16px; }
+  .post-thumbnail { height: 200px; }
+  .single-post .featured-image { height: 250px; }
+}
+
+/* Labels Page */
+.label-page-title {
+  font-size: 22px;
+  margin-bottom: 24px;
+  color: var(--accent);
+}
+
+/* English Text */
+.en-text { display: none; }
+body.en .fa-text { display: none; }
+body.en .en-text { display: inline; }
+
+/* Hide default widgets */
+.widget { display: none; }
+.Blog { display: block !important; }
+
+/* Fix for static pages visibility */
+#main { display: block !important; }
+.single-post-wrapper { display: block !important; visibility: visible !important; opacity: 1 !important; }
+.post-content { color: #ffffff !important; display: block !important; }
+.post-content-area { display: block !important; }
+
+]]></b:skin>
+
+</head>
+<body>
+
+<!-- Header -->
+<header class='header-wrapper'>
+  <div class='header-inner'>
+    <a class='blog-title' expr:href='data:blog.homepageUrl'>
+      <!-- LOGO -->
+      <img alt='Logo' class='site-logo' src='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhbd4xkUSDQ7_3WBSR2fG0fZVkBeTZbWB07eGmTDRlzAhj-LQrLSTw__YsHisrBFNKKLdL6LAWckwrQFd93nLnisFJ5tUw9hKrDSLgJa7mZjQ2T7_emLZOPUaGmqM1oSqlk-7ItnnZSfsQKDELGwfNtOieAQ6QpX2ca_KGki5cTfkvs0MTmKe7wh31LY_2z/s320/logo.png'/>
+      <h1><data:blog.title/></h1>
+    </a>
+    
+    <nav class='main-nav'>
+      <a class='nav-link active' expr:href='data:blog.homepageUrl'>
+        <i class='fas fa-home'/> <span class='fa-text'>خانه</span><span class='en-text'>Home</span>
+      </a>
+      <a class='nav-link' expr:href='data:blog.homepageUrl + &quot;search/label/بین‌الملل&quot;'>
+        <i class='fas fa-globe'/> <span class='fa-text'>بین‌الملل</span><span class='en-text'>International</span>
+      </a>
+      <a class='nav-link' expr:href='data:blog.homepageUrl + &quot;search/label/حقوق%20بشر&quot;'>
+        <i class='fas fa-user-shield'/> <span class='fa-text'>حقوق بشر</span><span class='en-text'>Human Rights</span>
+      </a>
+      <a class='nav-link' href='https://iranpolnews.blogspot.com/p/blog-page.html'>
+        <i class='fas fa-info-circle'/> <span class='fa-text'>درباره ما</span><span class='en-text'>About</span>
+      </a>
+    </nav>
+    
+    <div class='lang-switch'>
+      <button class='lang-btn active' id='btn-fa' onclick='setLang("fa")'>فارسی</button>
+      <button class='lang-btn' id='btn-en' onclick='setLang("en")'>EN</button>
+    </div>
+    
+    <form class='header-search' expr:action='data:blog.searchUrl' method='get'>
+      <input name='q' placeholder='جستجو...' type='text'/>
+      <button type='submit'><i class='fas fa-search'/></button>
+    </form>
+    
+    <button class='menu-toggle'><i class='fas fa-bars'/></button>
+  </div>
+</header>
+
+<!-- Breaking News -->
+<div class='breaking-news'>
+  <div class='breaking-inner'>
+    <span class='breaking-label'><i class='fas fa-circle' style='font-size:8px;'/> <span class='fa-text'>فوری</span><span class='en-text'>Breaking</span></span>
+    <div class='ticker-wrapper'>
+      <span class='ticker-content'>
+        <span class='fa-text'>آخرین اخبار ایران و جهان | پوشش ۲۴ ساعته رویدادها | خبرگزاری مستقل</span>
+        <span class='en-text'>Latest news from Iran | 24/7 coverage | Independent News Agency</span>
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- Main -->
+<main class='main-wrapper'>
+  <b:section class='main' id='main' showaddelement='no'>
+    <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2'>
+      <b:includable id='main'>
+        <!-- 1. Handle Multiple Items (Homepage, Labels, Search) -->
+        <b:if cond='data:view.isMultipleItems'>
+          <b:if cond='data:view.isLabelSearch'>
+            <h1 class='label-page-title'><data:view.search.label/></h1>
+          <b:else/>
+            <div class='section-header'>
+              <h2 class='section-title'>
+                <span class='fa-text'>آخرین اخبار</span>
+                <span class='en-text'>Latest News</span>
+              </h2>
+            </div>
+          </b:if>
+          
+          <div class='blog-posts'>
+            <b:loop values='data:posts' var='post'>
+              <article class='post-outer'>
+                <div class='post-thumbnail'>
+                  <a expr:href='data:post.url'>
+                    <b:if cond='data:post.featuredImage'>
+                      <img expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 600, &quot;4:3&quot;)'/>
+                    <b:else/>
+                      <img alt='News' src='https://via.placeholder.com/600x400/1a1a2e/e94560?text=News'/>
+                    </b:if>
+                  </a>
+                  <b:if cond='data:post.labels'>
+                    <span class='post-category'><data:post.labels.first.name/></span>
+                  <b:else/>
+                    <span class='post-category'>خبر</span>
+                  </b:if>
+                </div>
+                <div class='post-body-container'>
+                  <h2 class='post-title'><a expr:href='data:post.url'><data:post.title/></a></h2>
+                  <p class='post-snippet'><data:post.snippets.short/></p>
+                  <div class='post-footer-meta'>
+                    <a class='read-more' expr:href='data:post.url'>
+                      <span class='fa-text'>ادامه مطلب</span>
+                      <span class='en-text'>Read more</span>
+                      <i class='fas fa-arrow-left'/>
+                    </a>
+                    <div class='post-stats'>
+                      <span><i class='far fa-comment'/> <data:post.numberOfComments/></span>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </b:loop>
+          </div>
+          <b:include name='nextprev'/>
+
+        <!-- 2. Handle Single Items (Post OR Page) -->
+        <b:else/>
+          <div class='single-post-wrapper'>
+            <!-- Back to Home Button -->
+            <a class='back-btn' expr:href='data:blog.homepageUrl'>
+              <i class='fas fa-arrow-right'/> 
+              <span class='fa-text'>بازگشت به خانه</span>
+              <span class='en-text'>Back to Home</span>
+            </a>
+            
+            <b:loop values='data:posts' var='post'>
+              <article class='single-post'>
+                <!-- Show Featured Image ONLY for Posts, not Pages -->
+                <b:if cond='data:view.isPost and data:post.featuredImage'>
+                  <div class='featured-image'>
+                    <img expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 1200, &quot;16:9&quot;)'/>
+                  </div>
+                </b:if>
+                
+                <div class='post-content-area'>
+                  <h1 class='post-title'><data:post.title/></h1>
+                  <div class='post-content'>
+                    <data:post.body/>
+                  </div>
+                  
+                  <!-- Post Stats/Share ONLY for Posts -->
+                  <b:if cond='data:view.isPost'>
+                    <div class='share-buttons'>
+                      <span class='share-label'><i class='fas fa-share-alt'/> 
+                        <span class='fa-text'>اشتراک:</span>
+                        <span class='en-text'>Share:</span>
+                      </span>
+                      <a class='share-btn telegram' expr:href='&quot;https://t.me/share/url?url=&quot; + data:post.url' target='_blank'><i class='fab fa-telegram-plane'/></a>
+                      <a class='share-btn twitter' expr:href='&quot;https://twitter.com/intent/tweet?url=&quot; + data:post.url' target='_blank'><i class='fab fa-twitter'/></a>
+                      <a class='share-btn whatsapp' expr:href='&quot;https://api.whatsapp.com/send?text=&quot; + data:post.url' target='_blank'><i class='fab fa-whatsapp'/></a>
+                    </div>
+                    
+                    <div class='comments-section'>
+                      <h3 class='comments-title'><i class='fas fa-comments'/> 
+                        <span class='fa-text'>نظرات (<data:post.numberOfComments/>)</span>
+                        <span class='en-text'>Comments (<data:post.numberOfComments/>)</span>
+                      </h3>
+                      <b:if cond='data:post.allowComments'>
+                        <div id='comments'><data:post.commentFormIframeSrc/></div>
+                      </b:if>
+                    </div>
+                  </b:if>
+                </div>
+              </article>
+            </b:loop>
+          </div>
+        </b:if>
+      </b:includable>
+      
+      <b:includable id='nextprev'>
+        <div class='blog-pager'>
+          <b:if cond='data:newerPageUrl'>
+            <a expr:href='data:newerPageUrl'><i class='fas fa-arrow-right'/> 
+              <span class='fa-text'>جدیدتر</span><span class='en-text'>Newer</span>
+            </a>
+          </b:if>
+          <b:if cond='data:olderPageUrl'>
+            <a expr:href='data:olderPageUrl'>
+              <span class='fa-text'>قدیمی‌تر</span><span class='en-text'>Older</span>
+              <i class='fas fa-arrow-left'/>
+            </a>
+          </b:if>
+        </div>
+      </b:includable>
+    </b:widget>
+  </b:section>
+</main>
+
+<!-- Footer -->
+<footer class='footer-wrapper'>
+  <p class='footer-text'>© <data:blog.title/> - 
+    <span class='fa-text'>پوشش خبری مستقل از رویدادهای ایران</span>
+    <span class='en-text'>Independent news coverage from Iran</span>
+  </p>
+</footer>
+
+<!-- Language Script -->
+<script>
+//<![CDATA[
+function setLang(lang) {
+  if(lang === 'en') {
+    document.body.classList.add('en');
+    document.getElementById('btn-en').classList.add('active');
+    document.getElementById('btn-fa').classList.remove('active');
+  } else {
+    document.body.classList.remove('en');
+    document.getElementById('btn-fa').classList.add('active');
+    document.getElementById('btn-en').classList.remove('active');
+  }
+  localStorage.setItem('siteLang', lang);
+}
+document.addEventListener('DOMContentLoaded', function() {
+  var lang = localStorage.getItem('siteLang') || 'fa';
+  setLang(lang);
+});
+//]]>
+</script>
+
+</body>
+</html>

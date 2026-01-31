@@ -16,7 +16,7 @@ class AIProcessor:
             raise ValueError("GEMINI_API_KEY is not set in environment")
         
         genai.configure(api_key=GEMINI_API_KEY)
-        # Use gemini-2.0-flash model
+        # Use verified available model: gemini-2.0-flash
         self.model = genai.GenerativeModel('gemini-2.0-flash')
     
     def process_news(self, news_item: Dict) -> Dict:
@@ -65,10 +65,10 @@ class AIProcessor:
 عنوان انگلیسی: {title}
 متن خبر: {description}
 
-لطفاً خروجی را به این فرمت JSON بده:
+لطفاً خروجی را به این فرمت JSON بده. در متن (content) از تگ‌های HTML مثل <p>, <strong>, <ul> استفاده کن تا متن زیبا و خوانا شود:
 {{
     "title": "عنوان فارسی جذاب",
-    "content": "متن کامل خبر به فارسی (۲-۳ پاراگراف)",
+    "content": "متن کامل خبر به فارسی با فرمت HTML (۲-۳ پاراگراف)",
     "tags": ["تگ۱", "تگ۲", "تگ۳"]
 }}
 
@@ -87,10 +87,10 @@ class AIProcessor:
 عنوان خبر: {title}
 متن خبر: {description}
 
-لطفاً خروجی را به این فرمت JSON بده:
+لطفاً خروجی را به این فرمت JSON بده. در متن (content) از تگ‌های HTML مثل <p>, <strong>, <ul> استفاده کن تا متن زیبا و خوانا شود:
 {{
     "title": "عنوان بهبود یافته و جذاب",
-    "content": "متن خبر به صورت روان و مناسب وبلاگ (۲-۳ پاراگراف)",
+    "content": "متن خبر به صورت روان و مناسب وبلاگ با فرمت HTML (۲-۳ پاراگراف)",
     "tags": ["تگ۱", "تگ۲", "تگ۳"]
 }}
 
@@ -143,12 +143,18 @@ class AIProcessor:
 ''')
         
         # Add content
-        paragraphs = content.split('\n')
-        for p in paragraphs:
-            if p.strip():
-                html_parts.append(f'<p style="line-height: 1.8; text-align: justify;">{p.strip()}</p>')
+        # Check if content already contains HTML tags
+        if '<p>' in content or '<div>' in content:
+            html_parts.append(f'<div class="post-text" style="font-size: 18px; line-height: 1.8; text-align: justify;">{content}</div>')
+        else:
+            # Fallback for plain text
+            paragraphs = content.split('\n')
+            for p in paragraphs:
+                if p.strip():
+                    html_parts.append(f'<p style="font-size: 18px; line-height: 1.8; text-align: justify;">{p.strip()}</p>')
         
         # Add source
+
         html_parts.append(f'''
 <hr style="margin: 30px 0;" />
 <p style="font-size: 0.9em; color: #666;">

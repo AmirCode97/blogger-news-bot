@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اخبار ایران - پیش‌نمایش قالب کامل</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1a1a2e;
+            --secondary: #16213e;
+            --accent: #e94560;
+            --accent-light: #ff6b6b;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --bg-dark: #0f0f1a;
+            --bg-card: #1a1a2e;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --shadow-hover: 0 12px 40px rgba(233, 69, 96, 0.15);
+            --gradient-accent: linear-gradient(135deg, #e94560, #ff6b6b);
+            --radius: 12px;
+            --radius-small: 8px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Vazirmatn', 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        body.ltr {
+            direction: ltr;
+            font-family: 'Inter', 'Vazirmatn', sans-serif;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--accent);
+        }
+
+        /* Top Bar */
+        .top-bar {
+            background: #0a0a12;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 12px;
+        }
+
+        .top-bar-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-icons a {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .social-icons a:hover {
+            color: var(--accent);
+        }
+
+        .lang-switch {
+            display: flex;
+            gap: 8px;
+        }
+
+        .lang-switch button {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .lang-switch button:hover,
+        .lang-switch button.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* Header */
+        .header-wrapper {
+            background: var(--primary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 70px;
+        }
+
+        .blog-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 42px;
+            height: 42px;
+            background: var(--gradient-accent);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+        }
+
+        .blog-title h1 {
+            font-size: 22px;
+            font-weight: 700;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Navigation */
+        .main-nav {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link {
+            padding: 8px 14px;
+            border-radius: var(--radius-small);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(233, 69, 96, 0.1);
+            color: var(--accent);
+        }
+
+        .nav-link i {
+            font-size: 11px;
+        }
+
+        /* Search */
+        .header-search {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-small);
+            overflow: hidden;
+            width: 260px;
+        }
+
+        .header-search input {
+            background: transparent;
+            border: none;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 13px;
+            width: 100%;
+            outline: none;
+        }
+
+        .header-search input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .header-search button {
+            background: var(--accent);
+            border: none;
+            padding: 10px 14px;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Breaking News */
+        .breaking-news {
+            background: var(--accent);
+            padding: 10px 0;
+            overflow: hidden;
+        }
+
+        .breaking-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .breaking-label {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 11px;
+            margin-left: 16px;
+            white-space: nowrap;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .ticker-content {
+            font-size: 13px;
+            animation: ticker 25s linear infinite;
+            white-space: nowrap;
+        }
+
+        @keyframes ticker {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* Main */
+        .main-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--gradient-accent);
+            border-radius: 2px;
+        }
+
+        .view-all {
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Posts Grid */
+        .blog-posts {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+
+        .post-outer {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+
+        .post-outer:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .post-outer:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .post-outer:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .post-outer:nth-child(4) {
+            animation-delay: 0.2s;
+        }
+
+        .post-outer:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .post-outer:nth-child(6) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .post-outer:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(233, 69, 96, 0.3);
+        }
+
+        .post-thumbnail {
+            position: relative;
+            height: 180px;
+            overflow: hidden;
+        }
+
+        .post-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: var(--transition);
+        }
+
+        .post-outer:hover .post-thumbnail img {
+            transform: scale(1.08);
+        }
+
+        .post-thumbnail::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(to top, rgba(26, 26, 46, 0.95), transparent);
+        }
+
+        .post-category {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--gradient-accent);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 2;
+        }
+
+        .post-body-container {
+            padding: 18px;
+        }
+
+        .post-title {
+            font-size: 15px;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .post-title a:hover {
+            color: var(--accent);
+        }
+
+        .post-snippet {
+            color: var(--text-secondary);
+            font-size: 13px;
+            line-height: 1.7;
+            margin-bottom: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .post-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .read-more {
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .read-more:hover {
+            gap: 8px;
+        }
+
+        .post-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .post-stats span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Footer */
+        .footer-wrapper {
+            background: var(--primary);
+            border-top: 1px solid var(--border-color);
+            margin-top: 50px;
+            padding: 40px 20px 20px;
+        }
+
+        .footer-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .footer-col h4 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+
+        .footer-col ul {
+            list-style: none;
+        }
+
+        .footer-col li {
+            margin-bottom: 10px;
+        }
+
+        .footer-col a {
+            color: var(--text-secondary);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-col a:hover {
+            color: var(--accent);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .blog-posts {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .blog-posts {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-nav {
+                display: none;
+            }
+
+            .header-search {
+                display: none;
+            }
+
+            .top-bar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-bar-inner">
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-telegram"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-instagram"></i></a>
+                <a href="#"><i class="fab fa-youtube"></i></a>
+            </div>
+            <div class="lang-switch">
+                <button class="active" onclick="switchLang('fa')">فارسی</button>
+                <button onclick="switchLang('en')">English</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header-wrapper">
+        <div class="header-inner">
+            <div class="blog-title">
+                <div class="logo-icon"><i class="fas fa-newspaper"></i></div>
+                <h1>اخبار ایران</h1>
+            </div>
+
+            <nav class="main-nav">
+                <a class="nav-link active" href="#"><i class="fas fa-home"></i> خانه</a>
+                <a class="nav-link" href="#"><i class="fas fa-fire"></i> داغ‌ترین</a>
+                <a class="nav-link" href="#"><i class="fas fa-globe"></i> بین‌الملل</a>
+                <a class="nav-link" href="#"><i class="fas fa-user-shield"></i> حقوق بشر</a>
+                <a class="nav-link" href="#"><i class="fas fa-info-circle"></i> درباره ما</a>
+            </nav>
+
+            <div class="header-search">
+                <input type="text" placeholder="جستجو...">
+                <button><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breaking News -->
+    <div class="breaking-news">
+        <div class="breaking-inner">
+            <span class="breaking-label"><i class="fas fa-bolt"></i> فوری</span>
+            <span class="ticker-content">آخرین اخبار ایران و جهان | پوشش ۲۴ ساعته رویدادها | خبرگزاری مستقل فارسی
+                زبان</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-wrapper">
+        <div class="section-header">
+            <h2 class="section-title">آخرین اخبار</h2>
+            <a class="view-all" href="#">مشاهده همه <i class="fas fa-chevron-left"></i></a>
+        </div>
+
+        <div class="blog-posts">
+            <!-- Post 1 -->
+            <article class="post-outer">
+                <div class="post-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1495020689067-958852a7765e?w=600&h=400&fit=crop"
+                        alt="خبر">
+                    <span class="post-category">حقوق بشر</span>
+                </div>
+                <div class="post-body-container">
+                    <h2 class="post-title"><a href="#">گزارش رویدادی درباره پیگیری مسئولیت‌پذیری بابت نقض حقوق بشر</a>
+                    </h2>
+                    <p class="post-snippet">بررسی آخرین تحولات در زمینه نقض حقوق بشر و تلاش‌های بین‌المللی...</p>
+                    <div class="post-footer">
+                        <a href="#" class="read-more">ادامه مطلب <i class="fas fa-arrow-left"></i></a>
+                        <div class="post-stats">
+                            <span><i class="far fa-comment"></i> ۵</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 2 -->
+            <article class="post-outer">
+                <div class="post-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=600&h=400&fit=crop"
+                        alt="خبر">
+                    <span class="post-category">سیاسی</span>
+                </div>
+                <div class="post-body-container">
+                    <h2 class="post-title"><a href="#">شجاعت در قزلحصار؛ شعار دادن زندانیان سیاسی</a></h2>
+                    <p class="post-snippet">زندانیان سیاسی در زندان قزلحصار با شجاعت تمام به شعار دادن پرداختند...</p>
+                    <div class="post-footer">
+                        <a href="#" class="read-more">ادامه مطلب <i class="fas fa-arrow-left"></i></a>
+                        <div class="post-stats">
+                            <span><i class="far fa-comment"></i> ۳</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 3 -->
+            <article class="post-outer">
+                <div class="post-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1586339949916-3e9457bef6d3?w=600&h=400&fit=crop"
+                        alt="خبر">
+                    <span class="post-category">اجتماعی</span>
+                </div>
+                <div class="post-body-container">
+                    <h2 class="post-title"><a href="#">گفت‌وگو با بستگان قربانیان: تیر خلاص زدند</a></h2>
+                    <p class="post-snippet">جزئیات تازه از وقایع اخیر که نشان‌دهنده خشونت سیستماتیک است...</p>
+                    <div class="post-footer">
+                        <a href="#" class="read-more">ادامه مطلب <i class="fas fa-arrow-left"></i></a>
+                        <div class="post-stats">
+                            <span><i class="far fa-comment"></i> ۷</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 4 -->
+            <article class="post-outer">
+                <div class="post-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=600&h=400&fit=crop" alt="خبر">
+                    <span class="post-category">بین‌الملل</span>
+                </div>
+                <div class="post-body-container">
+                    <h2 class="post-title"><a href="#">اطلاعیه کمیته دفاع از حقوق کودک و نوجوان</a></h2>
+                    <p class="post-snippet">بررسی وضعیت کودکان در خیزش‌های اخیر ایران...</p>
+                    <div class="post-footer">
+                        <a href="#" class="read-more">ادامه مطلب <i class="fas fa-arrow-left"></i></a>
+                        <div class="post-stats">
+                            <span><i class="far fa-comment"></i> ۲</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 5 -->
+            <article class="post-outer">
+                <div class="post-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=600&h=400&fit=crop"
+                        alt="خبر">
+                    <span class="post-category">اقتصادی</span>
+                </div>
+                <div class="post-body-container">
+                    <h2 class="post-title"><a href="#">تحلیل وضعیت اقتصادی و تأثیر تحریم‌ها</a></h2>
+                    <p class="post-snippet">بررسی تأثیرات تحریم‌های بین‌المللی بر وضعیت معیشتی مردم...</p>
+                    <div class="post-footer">
+                        <a href="#" class="read-more">ادامه مطلب <i class="fas fa-arrow-left"></i></a>
+                        <div class="post-stats">
+                            <span><i class="far fa-comment"></i> ۴</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
+            <!-- Post 6 -->
+            <article class="post-outer">
+                <div class="post-thumbnail">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=400&fit=crop"
+                        alt="خبر">
+                    <span class="post-category">فرهنگی</span>
+                </div>
+                <div class="post-body-container">
+                    <h2 class="post-title"><a href="#">مقاومت فرهنگی: هنرمندان در برابر سانسور</a></h2>
+                    <p class="post-snippet">هنرمندان ایرانی با وجود فشارهای سانسور، صدای مردم را منتقل می‌کنند...</p>
+                    <div class="post-footer">
+                        <a href="#" class="read-more">ادامه مطلب <i class="fas fa-arrow-left"></i></a>
+                        <div class="post-stats">
+                            <span><i class="far fa-comment"></i> ۶</span>
+                        </div>
+                    </div>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-wrapper">
+        <div class="footer-inner">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4><i class="fas fa-link"></i> لینک‌های سریع</h4>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-home"></i> خانه</a></li>
+                        <li><a href="#"><i class="fas fa-fire"></i> اخبار داغ</a></li>
+                        <li><a href="#"><i class="fas fa-globe"></i> بین‌الملل</a></li>
+                        <li><a href="#"><i class="fas fa-user-shield"></i> حقوق بشر</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4><i class="fas fa-tags"></i> دسته‌بندی‌ها</h4>
+                    <ul>
+                        <li><a href="#">سیاسی</a></li>
+                        <li><a href="#">اجتماعی</a></li>
+                        <li><a href="#">اقتصادی</a></li>
+                        <li><a href="#">فرهنگی</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4><i class="fas fa-share-alt"></i> شبکه‌های اجتماعی</h4>
+                    <ul>
+                        <li><a href="#"><i class="fab fa-telegram"></i> تلگرام</a></li>
+                        <li><a href="#"><i class="fab fa-twitter"></i> توییتر</a></li>
+                        <li><a href="#"><i class="fab fa-instagram"></i> اینستاگرام</a></li>
+                        <li><a href="#"><i class="fab fa-youtube"></i> یوتیوب</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4><i class="fas fa-info-circle"></i> درباره ما</h4>
+                    <p style="color: var(--text-secondary); font-size: 13px; line-height: 1.8;">
+                        پوشش خبری مستقل و بی‌طرفانه از رویدادهای ایران و جهان
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                © اخبار ایران - تمامی حقوق محفوظ است
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function switchLang(lang) {
+            document.body.classList.toggle('ltr', lang === 'en');
+            document.querySelectorAll('.lang-switch button').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.includes(lang === 'fa' ? 'فارسی' : 'English'));
+            });
+        }
+    </script>
+
+</body>
+
+</html>

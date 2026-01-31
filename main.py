@@ -88,6 +88,7 @@ class BloggerNewsBot:
         self._init_telegram()
         
         processed_count = 0
+        posted_titles = []  # Track posted news titles
         
         for item in news_items:
             try:
@@ -101,24 +102,35 @@ class BloggerNewsBot:
                     processed_item = item
                     html_content = f"<p>{item['description']}</p>"
                 
-                # Create draft in Blogger
-                blogger_post_id = None
-                if self.blogger:
-                    post_result = self.blogger.create_post(
-                        title=processed_item.get('processed_title', item['title']),
-                        content=html_content,
-                        labels=processed_item.get('tags', ['ایران', 'اخبار']),
-                        is_draft=True  # Always create as draft first
-                    )
-                    if post_result:
-                        blogger_post_id = post_result['id']
-                        processed_item['blog_id'] = BLOG_ID
+                # Get category from source (default to حقوق بشر)
+                source_category = item.get('source_category', 'حقوق بشر')
+                default_tags = [source_category, 'ایران', 'اخبار']
                 
-                # Send to Telegram for review
+                # Get the title for reporting
+                news_title = processed_item.get('processed_title', item['title'])
+                
+                # STEP 1: Send to Telegram for review FIRST (before Blogger)
                 if self.telegram:
-                    self.telegram.send_for_review(processed_item, blogger_post_id)
+                    # Store the HTML content for later publishing
+                    processed_item['html_content'] = html_content
+                    processed_item['image_url'] = item.get('image_url')
+                    processed_item['labels'] = processed_item.get('tags', default_tags)
+                    self.telegram.send_for_review(processed_item, None)
+                    print(f"📱 Sent to Telegram - Category: {source_category}")
+                    posted_titles.append(f"• {news_title[:60]}...")
                 else:
-                    print("⚠️ Telegram review disabled - drafts created in Blogger")
+                    # No Telegram - create draft in Blogger directly
+                    print(f"⚠️ Telegram disabled - creating draft ({source_category})...")
+                    if self.blogger:
+                        post_result = self.blogger.create_post(
+                            title=news_title,
+                            content=html_content,
+                            labels=processed_item.get('tags', default_tags),
+                            is_draft=True  # Draft only when no Telegram review
+                        )
+                        if post_result:
+                            print(f"✅ Draft created: {post_result.get('url')}")
+                            posted_titles.append(f"• {news_title[:60]}...")
                 
                 # Mark as seen
                 self.fetcher.mark_as_seen(item['id'])
@@ -133,14 +145,19 @@ class BloggerNewsBot:
         
         print(f"\n✅ Processed {processed_count} news items")
         
-        # Send summary to Telegram
+        # Send detailed summary to Telegram
         if self.telegram:
-            self.telegram.send_notification(
-                f"📊 <b>خلاصه عملکرد</b>\n\n"
+            news_list = "\n".join(posted_titles) if posted_titles else "هیچ خبری پردازش نشد"
+            report = (
+                f"📊 <b>گزارش اجرای ربات</b>\n"
+                f"━━━━━━━━━━━━━━━━━━\n"
                 f"📰 اخبار دریافت شده: {len(news_items)}\n"
                 f"✅ پردازش شده: {processed_count}\n"
-                f"⏰ زمان: {datetime.now().strftime('%H:%M')}"
+                f"⏰ زمان: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+                f"━━━━━━━━━━━━━━━━━━\n\n"
+                f"<b>📝 لیست اخبار:</b>\n{news_list}"
             )
+            self.telegram.send_notification(report)
     
     def process_telegram_callbacks(self):
         """Process approve/reject callbacks from Telegram"""

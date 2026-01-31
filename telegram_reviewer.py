@@ -39,10 +39,14 @@ class TelegramReviewer:
     def _send_request(self, method: str, data: dict) -> Optional[Dict]:
         """Send request to Telegram API"""
         try:
+            # For long polling (getUpdates), the requests timeout should be 
+            # slightly longer than the API timeout to avoid "Read timed out" noise.
+            req_timeout = 45 if method == 'getUpdates' else 30
+            
             response = requests.post(
                 f"{self.base_url}/{method}",
                 json=data,
-                timeout=30
+                timeout=req_timeout
             )
             result = response.json()
             
@@ -52,6 +56,9 @@ class TelegramReviewer:
             
             return result.get('result')
             
+        except requests.exceptions.ReadTimeout:
+            # This is normal for long polling, just return empty list or None
+            return [] if method == 'getUpdates' else None
         except Exception as e:
             print(f"❌ Telegram request error: {e}")
             return None

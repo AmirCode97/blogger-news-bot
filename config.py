@@ -21,7 +21,7 @@ TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "")
 
 # ==================== News Settings ====================
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "5"))
-MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "10"))
+MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "3"))
 
 # ==================== Proxy Settings ====================
 # برای دور زدن محدودیت‌های Cloudflare
@@ -43,15 +43,27 @@ FREE_PROXIES = [
 ]
 
 # ==================== News Sources ====================
-# منابع خبری حقوق بشر - سایت‌های درخواستی کاربر
+# منابع خبری - شامل ایران اینترنشنال و سایت‌های حقوق بشری
 NEWS_SOURCES = [
-    # ==================== سایت‌های حقوق بشری (Web Scraping) ====================
+    # ==================== ایران اینترنشنال (بین‌الملل) ====================
+    {
+        "name": "ایران اینترنشنال",
+        "url": "https://www.iranintl.com/fa",
+        "rss_url": "https://www.iranintl.com/fa/rss",
+        "type": "rss",
+        "language": "fa",
+        "enabled": True,
+        "category": "بین‌الملل",  # دسته‌بندی برای وبلاگ
+        "priority": 1  # اولویت بالا
+    },
+    # ==================== سایت‌های حقوق بشری ====================
     {
         "name": "کانون دفاع از حقوق بشر در ایران (بشریت)",
         "url": "https://bashariyat.org/",
         "type": "scrape",
         "language": "fa",
         "enabled": True,
+        "category": "حقوق بشر",
         "selectors": {
             "articles": "article, .post, .entry",
             "title": "h2 a, .entry-title a",
@@ -65,8 +77,9 @@ NEWS_SOURCES = [
         "url": "https://iranhrs.org/",
         "type": "scrape",
         "language": "fa",
-        "enabled": True,  # فعال شد - بررسی Cloudflare انجام شد
-        "use_proxy": False, # اتصال مستقیم بهتر جواب داد
+        "enabled": True,
+        "category": "حقوق بشر",
+        "use_proxy": False,
         "selectors": {
             "articles": "article",
             "title": "h2 a, h3 a",
@@ -81,9 +94,10 @@ NEWS_SOURCES = [
         "type": "scrape",
         "language": "fa",
         "enabled": True,
+        "category": "حقوق بشر",
         "selectors": {
-            "articles": ".media-block__content",
-            "title": "a",
+            "articles": ".media-block",
+            "title": ".media-block__title",
             "link": "a",
             "description": "p",
             "image": "img"
@@ -95,7 +109,8 @@ NEWS_SOURCES = [
         "rss_url": "https://www.hra-iran.org/fa/feed/",
         "type": "rss",
         "language": "fa",
-        "enabled": True
+        "enabled": True,
+        "category": "حقوق بشر"
     },
 ]
 

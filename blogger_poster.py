@@ -9,12 +9,6 @@ import os
 import pickle
 from typing import Dict, List, Optional
 
-# Fix Windows console encoding
-if sys.stdout:
-    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-if sys.stderr:
-    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -38,7 +32,7 @@ class BloggerPoster:
     
     def _authenticate(self):
         """Authenticate with Google Blogger API"""
-        token_file = 'token.pickle'
+        token_file = 'token_auth_fixed.pickle'
         
         # Load existing credentials
         if os.path.exists(token_file):
@@ -59,7 +53,7 @@ class BloggerPoster:
                 flow = InstalledAppFlow.from_client_secrets_file(
                     GOOGLE_CREDENTIALS_FILE, SCOPES
                 )
-                self.creds = flow.run_local_server(port=0)
+                self.creds = flow.run_local_server(port=8080, prompt='consent')
             
             # Save credentials
             with open(token_file, 'wb') as token:

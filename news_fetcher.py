@@ -8,10 +8,6 @@ import sys
 import io
 import random
 
-# Fix Windows console encoding
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-
 import feedparser
 import requests
 from bs4 import BeautifulSoup
@@ -42,7 +38,6 @@ class NewsFetcher:
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
             'Accept-Language': 'fa-IR,fa;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Accept-Encoding': 'gzip, deflate',  # align with standard requests
             'Connection': 'keep-alive',
             'Upgrade-Insecure-Requests': '1',
         })
@@ -176,6 +171,7 @@ class NewsFetcher:
                     'link': link,
                     'description': clean_description[:1000],
                     'source': source['name'],
+                    'source_category': source.get('category', 'حقوق بشر'),
                     'language': source['language'],
                     'published': pub_date.isoformat() if pub_date else None,
                     'image_url': image_url,
@@ -212,7 +208,16 @@ class NewsFetcher:
             
             # Find articles
             article_selector = selectors.get('articles', 'article, .post')
-            articles = soup.select(article_selector)[:20]
+            if ',' in article_selector:
+                # Handle comma-separated selectors manually if needed, but select() supports it.
+                # However, complex selectors might need care.
+                pass
+            
+            articles = soup.select(article_selector)
+            # Limit to 20
+            articles = articles[:20]
+            
+            print(f"  [Debug] Selector '{article_selector}' found {len(articles)} items")
             
             if not articles:
                 # Try alternative approach - find links with titles
@@ -241,6 +246,7 @@ class NewsFetcher:
                         'link': full_link,
                         'description': title,
                         'source': source['name'],
+                        'source_category': source.get('category', 'حقوق بشر'),
                         'language': source['language'],
                         'published': datetime.now().isoformat(),
                         'image_url': image_url,
@@ -268,19 +274,28 @@ class NewsFetcher:
                     if news_id in self.seen_news:
                         continue
                     
-                    # Extract description
-                    desc_el = article.select_one(selectors.get('description', 'p'))
-                    description = desc_el.get_text().strip() if desc_el else title
-                    
-                    # Extract image
-                    image_url = self._extract_image_from_soup(article, url)
-                    
-                    news_items.append({
-                        'id': news_id,
-                        'title': title,
+                # Extract description
+                desc_el = article.select_one(selectors.get('description', 'p'))
+                description = desc_el.get_text().strip() if desc_el else title
+                
+                # Extract image
+                image_selector = selectors.get('image', 'img')
+                img_el = article.select_one(image_selector)
+                
+                image_url = None
+                if img_el:
+                    # Check common lazy loading attributes
+                    raw_url = img_el.get('data-src') or img_el.get('data-original') or img_el.get('src')
+                    if raw_url and not raw_url.startswith('data:'):
+                        image_url = urljoin(url, raw_url)
+                
+                news_items.append({
+                    'id': news_id,
+                    'title': title,
                         'link': full_link,
                         'description': description[:1000],
                         'source': source['name'],
+                        'source_category': source.get('category', 'حقوق بشر'),
                         'language': source['language'],
                         'published': datetime.now().isoformat(),
                         'image_url': image_url,
