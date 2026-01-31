@@ -3,31 +3,31 @@ name: Blogger News Bot
 on:
   schedule:
     # هر 5 ساعت اجرا می‌شود (0:00, 5:00, 10:00, 15:00, 20:00)
-    - cron: '0 0,5,10,15,20 * * *'
-  workflow_dispatch:  # امکان اجرای دستی
+    - cron: "0 0,5,10,15,20 * * *"
+  workflow_dispatch: # امکان اجرای دستی
 
 jobs:
   fetch-and-post:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
-      
+          python-version: "3.11"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      
+
       - name: Create credentials file
         run: |
           echo '${{ secrets.GOOGLE_CREDENTIALS }}' > credentials.json
-      
+
       - name: Create .env file
         run: |
           cat > .env << EOF
@@ -40,8 +40,9 @@ jobs:
           MAX_NEWS_PER_CHECK=5
           USE_PROXY=false
           EOF
-      
+
       - name: Run News Bot
         run: python main.py --once
         env:
           PYTHONUNBUFFERED: 1
+          BLOGGER_TOKEN_BASE64: ${{ secrets.BLOGGER_TOKEN_BASE64 }}

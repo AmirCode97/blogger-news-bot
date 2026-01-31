@@ -7,6 +7,7 @@ import sys
 import io
 import os
 import pickle
+import base64
 from typing import Dict, List, Optional
 
 from google.oauth2.credentials import Credentials
@@ -34,8 +35,18 @@ class BloggerPoster:
         """Authenticate with Google Blogger API"""
         token_file = 'token_auth_fixed.pickle'
         
-        # Load existing credentials
-        if os.path.exists(token_file):
+        # Try to load token from environment variable (for GitHub Actions)
+        token_base64 = os.environ.get('BLOGGER_TOKEN_BASE64')
+        if token_base64:
+            try:
+                token_bytes = base64.b64decode(token_base64)
+                self.creds = pickle.loads(token_bytes)
+                print("[OK] Loaded token from environment variable")
+            except Exception as e:
+                print(f"[Warning] Failed to load token from env: {e}")
+        
+        # Load from local file if not loaded from env
+        if not self.creds and os.path.exists(token_file):
             with open(token_file, 'rb') as token:
                 self.creds = pickle.load(token)
         
@@ -43,6 +54,7 @@ class BloggerPoster:
         if not self.creds or not self.creds.valid:
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
+                print("[OK] Token refreshed")
             else:
                 if not os.path.exists(GOOGLE_CREDENTIALS_FILE):
                     raise FileNotFoundError(
@@ -55,7 +67,7 @@ class BloggerPoster:
                 )
                 self.creds = flow.run_local_server(port=8080, prompt='consent')
             
-            # Save credentials
+            # Save credentials locally
             with open(token_file, 'wb') as token:
                 pickle.dump(self.creds, token)
         

@@ -88,7 +88,9 @@ class BloggerNewsBot:
         self._init_telegram()
         
         processed_count = 0
+        published_count = 0
         posted_titles = []  # Track posted news titles
+        failed_titles = []  # Track failed posts
         
         for item in news_items:
             try:
@@ -109,28 +111,24 @@ class BloggerNewsBot:
                 # Get the title for reporting
                 news_title = processed_item.get('processed_title', item['title'])
                 
-                # STEP 1: Send to Telegram for review FIRST (before Blogger)
-                if self.telegram:
-                    # Store the HTML content for later publishing
-                    processed_item['html_content'] = html_content
-                    processed_item['image_url'] = item.get('image_url')
-                    processed_item['labels'] = processed_item.get('tags', default_tags)
-                    self.telegram.send_for_review(processed_item, None)
-                    print(f"📱 Sent to Telegram - Category: {source_category}")
-                    posted_titles.append(f"• {news_title[:60]}...")
+                # AUTO-PUBLISH: Directly publish to Blogger
+                if self.blogger:
+                    post_result = self.blogger.create_post(
+                        title=news_title,
+                        content=html_content,
+                        labels=processed_item.get('tags', default_tags),
+                        is_draft=False  # Publish directly!
+                    )
+                    if post_result:
+                        print(f"✅ Published: {post_result.get('url')}")
+                        posted_titles.append(f"✅ {news_title[:50]}...")
+                        published_count += 1
+                    else:
+                        print(f"❌ Failed to publish: {news_title[:50]}")
+                        failed_titles.append(f"❌ {news_title[:50]}...")
                 else:
-                    # No Telegram - create draft in Blogger directly
-                    print(f"⚠️ Telegram disabled - creating draft ({source_category})...")
-                    if self.blogger:
-                        post_result = self.blogger.create_post(
-                            title=news_title,
-                            content=html_content,
-                            labels=processed_item.get('tags', default_tags),
-                            is_draft=True  # Draft only when no Telegram review
-                        )
-                        if post_result:
-                            print(f"✅ Draft created: {post_result.get('url')}")
-                            posted_titles.append(f"• {news_title[:60]}...")
+                    print(f"⚠️ Blogger not available - skipping publish")
+                    failed_titles.append(f"⚠️ {news_title[:50]}...")
                 
                 # Mark as seen
                 self.fetcher.mark_as_seen(item['id'])
@@ -141,22 +139,29 @@ class BloggerNewsBot:
                 
             except Exception as e:
                 print(f"❌ Error processing item: {e}")
+                failed_titles.append(f"❌ Error: {str(e)[:30]}...")
                 continue
         
-        print(f"\n✅ Processed {processed_count} news items")
+        print(f"\n✅ Processed {processed_count} news items, Published {published_count}")
         
         # Send detailed summary to Telegram
         if self.telegram:
-            news_list = "\n".join(posted_titles) if posted_titles else "هیچ خبری پردازش نشد"
+            success_list = "\n".join(posted_titles) if posted_titles else "هیچ خبری منتشر نشد"
+            fail_list = "\n".join(failed_titles) if failed_titles else ""
+            
             report = (
                 f"📊 <b>گزارش اجرای ربات</b>\n"
                 f"━━━━━━━━━━━━━━━━━━\n"
                 f"📰 اخبار دریافت شده: {len(news_items)}\n"
-                f"✅ پردازش شده: {processed_count}\n"
+                f"✅ منتشر شده در وبلاگ: {published_count}\n"
                 f"⏰ زمان: {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
                 f"━━━━━━━━━━━━━━━━━━\n\n"
-                f"<b>📝 لیست اخبار:</b>\n{news_list}"
+                f"<b>📝 اخبار منتشر شده:</b>\n{success_list}"
             )
+            
+            if fail_list:
+                report += f"\n\n<b>⚠️ خطاها:</b>\n{fail_list}"
+            
             self.telegram.send_notification(report)
     
     def process_telegram_callbacks(self):
