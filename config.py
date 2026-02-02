@@ -21,7 +21,7 @@ TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "")
 
 # ==================== News Settings ====================
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "5"))
-MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "3"))
+MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "25"))  # Total: 10+5+10=25
 
 # ==================== Proxy Settings ====================
 # برای دور زدن محدودیت‌های Cloudflare
@@ -45,18 +45,44 @@ FREE_PROXIES = [
 # ==================== News Sources ====================
 # منابع خبری - شامل ایران اینترنشنال و سایت‌های حقوق بشری
 NEWS_SOURCES = [
-    # ==================== ایران اینترنشنال (بین‌الملل) ====================
+    # ==================== ایران اینترنشنال (بین‌الملل) - 10 خبر ====================
     {
         "name": "ایران اینترنشنال",
-        "url": "https://www.iranintl.com/fa",
-        "rss_url": "https://www.iranintl.com/fa/rss",
-        "type": "rss",
+        "url": "https://www.iranintl.com/iran",  # صفحه اخبار ایران
+        "type": "scrape",
         "language": "fa",
         "enabled": True,
-        "category": "بین‌الملل",  # دسته‌بندی برای وبلاگ
-        "priority": 1  # اولویت بالا
+        "category": "بین‌الملل",
+        "priority": 1,
+        "max_items": 10,
+        "selectors": {
+            # لینک‌های خبر با فرمت /202xxxxxxx
+            "articles": "a[href*='/2026']",
+            "title": "",  # عنوان از خود لینک
+            "link": "",  # لینک از href
+            "description": "",
+            "image": "img"
+        }
     },
-    # ==================== سایت‌های حقوق بشری ====================
+    # ==================== رادیو فردا - 5 خبر ====================
+    {
+        "name": "رادیو فردا",
+        "url": "https://www.radiofarda.com/",
+        "rss_url": "https://www.radiofarda.com/api/",  # Try RSS
+        "type": "scrape",
+        "language": "fa",
+        "enabled": True,
+        "category": "حقوق بشر",
+        "max_items": 5,  # حداکثر ۵ خبر در هر اجرا
+        "selectors": {
+            "articles": ".media-block, article, .lbox",
+            "title": ".media-block__title, h4 a, h3 a, h2 a",
+            "link": "a",
+            "description": "p",
+            "image": "img"
+        }
+    },
+    # ==================== سایت‌های حقوق بشری - مجموعاً 10 خبر ====================
     {
         "name": "کانون دفاع از حقوق بشر در ایران (بشریت)",
         "url": "https://bashariyat.org/",
@@ -64,6 +90,7 @@ NEWS_SOURCES = [
         "language": "fa",
         "enabled": True,
         "category": "حقوق بشر",
+        "max_items": 3,  # حداکثر ۳ خبر
         "selectors": {
             "articles": "article, .post, .entry",
             "title": "h2 a, .entry-title a",
@@ -79,26 +106,12 @@ NEWS_SOURCES = [
         "language": "fa",
         "enabled": True,
         "category": "حقوق بشر",
+        "max_items": 3,  # حداکثر ۳ خبر
         "use_proxy": False,
         "selectors": {
             "articles": "article",
             "title": "h2 a, h3 a",
             "link": "h2 a, h3 a",
-            "description": "p",
-            "image": "img"
-        }
-    },
-    {
-        "name": "رادیو فردا",
-        "url": "https://www.radiofarda.com/",
-        "type": "scrape",
-        "language": "fa",
-        "enabled": True,
-        "category": "حقوق بشر",
-        "selectors": {
-            "articles": ".media-block",
-            "title": ".media-block__title",
-            "link": "a",
             "description": "p",
             "image": "img"
         }
@@ -110,7 +123,8 @@ NEWS_SOURCES = [
         "type": "rss",
         "language": "fa",
         "enabled": True,
-        "category": "حقوق بشر"
+        "category": "حقوق بشر",
+        "max_items": 4  # حداکثر ۴ خبر
     },
 ]
 

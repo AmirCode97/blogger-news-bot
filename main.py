@@ -96,27 +96,71 @@ class BloggerNewsBot:
             try:
                 print(f"\n📄 Processing: {item['title'][:50]}...")
                 
-                # Process with AI
-                if self.ai:
-                    processed_item = self.ai.process_news(item)
-                    html_content = self.ai.generate_blog_html(processed_item)
-                else:
-                    processed_item = item
-                    html_content = f"<p>{item['description']}</p>"
-                
                 # Get category from source (default to حقوق بشر)
                 source_category = item.get('source_category', 'حقوق بشر')
                 default_tags = [source_category, 'ایران', 'اخبار']
                 
-                # Get the title for reporting
-                news_title = processed_item.get('processed_title', item['title'])
+                article_link = item.get('link', '')
+                article_title = item.get('title', '')
+                
+                # تشخیص liveblog با anchor (#)
+                is_liveblog_anchor = '#' in article_link
+                
+                # برای همه اخبار (غیر از liveblog با #) محتوای کامل را بگیر
+                description = ""
+                main_image = item.get('image_url', '')  # عکس از scrape اولیه
+                
+                if is_liveblog_anchor:
+                    # Liveblog با anchor - از description استفاده کن
+                    print(f"  [Liveblog#] Using description")
+                    description = item.get('description', article_title)
+                else:
+                    # خبر معمولی - محتوای کامل را بگیر
+                    print(f"  [Fetching] Getting full article content...")
+                    full_article = self.fetcher.fetch_full_article(article_link, item.get('source', ''))
+                    
+                    if full_article['success'] and full_article['full_content']:
+                        description = full_article['full_content']
+                        # عکس اصلی از مقاله (og:image)
+                        if full_article.get('main_image'):
+                            main_image = full_article['main_image']
+                        print(f"  ✓ Got full content, Image: {'Yes' if main_image else 'No'}")
+                    else:
+                        # Fallback به description
+                        description = item.get('description', article_title)
+                        print(f"  ⚠ Using fallback description")
+                
+                # ساخت HTML تمیز - با عکس اصلی
+                image_html = ""
+                if main_image:
+                    image_html = f'''
+                    <div style="margin-bottom: 25px;">
+                        <img src="{main_image}" alt="{article_title}" style="width: 100%; max-width: 700px; border-radius: 8px; display: block;">
+                    </div>
+                    '''
+                
+                html_content = f'''
+                <style>.post-featured-image, .post-thumbnail {{ display: none !important; }}</style>
+                {image_html}
+                <div style="font-size: 16px; line-height: 2.2; color: #ddd;">
+                    {description}
+                </div>
+                <div style="margin-top: 30px; padding: 15px; background: #222; border-right: 4px solid #c0392b; border-radius: 4px;">
+                    <p style="margin: 0; font-size: 13px; color: #888;">
+                        📰 منبع: <a href="{article_link}" target="_blank" style="color: #c0392b;">{item.get('source', 'منبع خبر')}</a>
+                    </p>
+                </div>
+                '''
+                
+                # Get the title
+                news_title = item['title']
                 
                 # AUTO-PUBLISH: Directly publish to Blogger
                 if self.blogger:
                     post_result = self.blogger.create_post(
                         title=news_title,
                         content=html_content,
-                        labels=processed_item.get('tags', default_tags),
+                        labels=default_tags,
                         is_draft=False  # Publish directly!
                     )
                     if post_result:

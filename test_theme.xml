@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <title><data:blog.pageTitle/></title>
+  <b:skin><![CDATA[
+    body { 
+      font-family: Tahoma, sans-serif; 
+      background: #0d0d1a; 
+      color: #fff; 
+      padding: 30px;
+      direction: rtl;
+      line-height: 1.8;
+    }
+    .header { 
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      border-bottom: 3px solid #e94560;
+    }
+    .header h1 { color: #e94560; margin: 0; font-size: 28px; }
+    .post { 
+      background: #1a1a2e; 
+      padding: 25px; 
+      margin: 20px 0; 
+      border-radius: 15px; 
+      border-right: 4px solid #e94560;
+      transition: transform 0.3s;
+    }
+    .post:hover { transform: translateX(-5px); }
+    .post h2 { margin: 0 0 10px 0; font-size: 20px; }
+    .post h2 a { color: #fff; text-decoration: none; }
+    .post h2 a:hover { color: #e94560; }
+    .snippet { color: #888; font-size: 14px; }
+    .read-more { 
+      display: inline-block;
+      margin-top: 15px;
+      color: #e94560;
+      font-weight: bold;
+    }
+    .empty-msg { 
+      background: #2a2a3e;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      color: #888;
+    }
+  ]]></b:skin>
+</head>
+<body>
+  
+  <div class='header'>
+    <h1><data:blog.title/></h1>
+  </div>
+  
+  <b:section class='main' id='main' maxwidgets='1' showaddelement='no'>
+    <b:widget id='Blog1' locked='true' title='پست‌ها' type='Blog' visible='true'>
+      <b:includable id='main'>
+        <b:loop values='data:posts' var='post'>
+          <article class='post'>
+            <h2><a expr:href='data:post.url'><data:post.title/></a></h2>
+            <p class='snippet'><data:post.snippets.short/></p>
+            <a class='read-more' expr:href='data:post.url'>ادامه مطلب ←</a>
+          </article>
+        </b:loop>
+        <b:if cond='data:posts.empty'>
+          <div class='empty-msg'>پستی برای نمایش وجود ندارد</div>
+        </b:if>
+      </b:includable>
+      <b:includable id='post' var='post'><b:include name='main'/></b:includable>
+      <b:includable id='headerByline'/>
+      <b:includable id='footerBylines'/>
+      <b:includable id='nextprev'/>
+      <b:includable id='postMeta'/>
+      <b:includable id='postMetadata'/>
+      <b:includable id='backlinkDeleteIcon'/>
+      <b:includable id='backlinks'/>
+      <b:includable id='backlinkLabel'/>
+      <b:includable id='feedLinks'/>
+      <b:includable id='feedLinksBody'/>
+      <b:includable id='postCommentsLink'/>
+      <b:includable id='postJumpLink'/>
+      <b:includable id='postPagination'/>
+      <b:includable id='postBody'/>
+      <b:includable id='postBodySnippet'/>
+      <b:includable id='postFooter'/>
+      <b:includable id='postHeader'/>
+      <b:includable id='postTitle'/>
+      <b:includable id='postTimestamp'/>
+      <b:includable id='postLocation'/>
+      <b:includable id='postCommentsAndAd'/>
+      <b:includable id='postMetadataJSON'/>
+      <b:includable id='threadedCommentJs'/>
+      <b:includable id='threadedComments'/>
+      <b:includable id='commentForm'/>
+      <b:includable id='comments'/>
+      <b:includable id='addComments'/>
+      <b:includable id='commentAuthorAvatar'/>
+      <b:includable id='commentDeleteIcon'/>
+      <b:includable id='commentItem'/>
+      <b:includable id='commentList'/>
+      <b:includable id='commentPicker'/>
+      <b:includable id='commentReplyJs'/>
+      <b:includable id='iframe'/>
+      <b:includable id='iframeComments'/>
+      <b:includable id='manageComments'/>
+      <b:includable id='manageCommentsSubmenu'/>
+      <b:includable id='respondToComment'/>
+      <b:includable id='sharingButton'/>
+      <b:includable id='sharingButtonContent'/>
+      <b:includable id='sharingButtons'/>
+      <b:includable id='sharingButtonsMenu'/>
+      <b:includable id='sharingPlatformIcon'/>
+      <b:includable id='snippet'/>
+      <b:includable id='searchMessage'/>
+    </b:widget>
+  </b:section>
+  
+</body>
+</html>

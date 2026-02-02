@@ -565,6 +565,18 @@ body.en .en-text { display: inline; }
 .post-content { color: #ffffff !important; display: block !important; }
 .post-content-area { display: block !important; }
 
+/* Placeholder for posts without images */
+.placeholder-img {
+  width: 100%;
+  height: 200px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  font-size: 48px;
+}
+
 ]]></b:skin>
 
 </head>
@@ -625,12 +637,12 @@ body.en .en-text { display: inline; }
 <main class='main-wrapper'>
   <b:section class='main' id='main' showaddelement='no'>
     <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2'>
-      <b:includable id='main'>
-        <!-- 1. Handle Multiple Items (Homepage, Labels, Search) -->
-        <b:if cond='data:view.isMultipleItems'>
+      <b:includable id='main' var='this'>
+        <!-- Homepage / Archive / Label -->
+        <b:if cond='data:view.isHomepage or data:view.isArchive or data:view.isLabelSearch or data:view.isSearch'>
           <b:if cond='data:view.isLabelSearch'>
             <h1 class='label-page-title'><data:view.search.label/></h1>
-          <b:else/>
+          <b:elseif cond='data:view.isHomepage'/>
             <div class='section-header'>
               <h2 class='section-title'>
                 <span class='fa-text'>آخرین اخبار</span>
@@ -645,15 +657,15 @@ body.en .en-text { display: inline; }
                 <div class='post-thumbnail'>
                   <a expr:href='data:post.url'>
                     <b:if cond='data:post.featuredImage'>
-                      <img expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 600, &quot;4:3&quot;)'/>
+                      <img expr:alt='data:post.title' expr:src='data:post.featuredImage resridge 600'/>
                     <b:else/>
-                      <img alt='News' src='https://via.placeholder.com/600x400/1a1a2e/e94560?text=News'/>
+                      <div class='placeholder-img'>
+                        <i class='fas fa-newspaper'/>
+                      </div>
                     </b:if>
                   </a>
                   <b:if cond='data:post.labels'>
                     <span class='post-category'><data:post.labels.first.name/></span>
-                  <b:else/>
-                    <span class='post-category'>خبر</span>
                   </b:if>
                 </div>
                 <div class='post-body-container'>
@@ -665,20 +677,16 @@ body.en .en-text { display: inline; }
                       <span class='en-text'>Read more</span>
                       <i class='fas fa-arrow-left'/>
                     </a>
-                    <div class='post-stats'>
-                      <span><i class='far fa-comment'/> <data:post.numberOfComments/></span>
-                    </div>
                   </div>
                 </div>
               </article>
             </b:loop>
           </div>
           <b:include name='nextprev'/>
-
-        <!-- 2. Handle Single Items (Post OR Page) -->
+        
+        <!-- Single Post or Page -->
         <b:else/>
           <div class='single-post-wrapper'>
-            <!-- Back to Home Button -->
             <a class='back-btn' expr:href='data:blog.homepageUrl'>
               <i class='fas fa-arrow-right'/> 
               <span class='fa-text'>بازگشت به خانه</span>
@@ -687,10 +695,9 @@ body.en .en-text { display: inline; }
             
             <b:loop values='data:posts' var='post'>
               <article class='single-post'>
-                <!-- Show Featured Image ONLY for Posts, not Pages -->
-                <b:if cond='data:view.isPost and data:post.featuredImage'>
+                <b:if cond='data:post.featuredImage'>
                   <div class='featured-image'>
-                    <img expr:alt='data:post.title' expr:src='resizeImage(data:post.featuredImage, 1200, &quot;16:9&quot;)'/>
+                    <img expr:alt='data:post.title' expr:src='data:post.featuredImage'/>
                   </div>
                 </b:if>
                 
@@ -700,7 +707,6 @@ body.en .en-text { display: inline; }
                     <data:post.body/>
                   </div>
                   
-                  <!-- Post Stats/Share ONLY for Posts -->
                   <b:if cond='data:view.isPost'>
                     <div class='share-buttons'>
                       <span class='share-label'><i class='fas fa-share-alt'/> 
@@ -710,16 +716,6 @@ body.en .en-text { display: inline; }
                       <a class='share-btn telegram' expr:href='&quot;https://t.me/share/url?url=&quot; + data:post.url' target='_blank'><i class='fab fa-telegram-plane'/></a>
                       <a class='share-btn twitter' expr:href='&quot;https://twitter.com/intent/tweet?url=&quot; + data:post.url' target='_blank'><i class='fab fa-twitter'/></a>
                       <a class='share-btn whatsapp' expr:href='&quot;https://api.whatsapp.com/send?text=&quot; + data:post.url' target='_blank'><i class='fab fa-whatsapp'/></a>
-                    </div>
-                    
-                    <div class='comments-section'>
-                      <h3 class='comments-title'><i class='fas fa-comments'/> 
-                        <span class='fa-text'>نظرات (<data:post.numberOfComments/>)</span>
-                        <span class='en-text'>Comments (<data:post.numberOfComments/>)</span>
-                      </h3>
-                      <b:if cond='data:post.allowComments'>
-                        <div id='comments'><data:post.commentFormIframeSrc/></div>
-                      </b:if>
                     </div>
                   </b:if>
                 </div>
