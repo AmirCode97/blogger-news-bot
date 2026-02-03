@@ -629,17 +629,79 @@ class NewsFetcher:
             # نکته: در ایران اینترنشنال معمولا متن‌های طولانی پشت سر هم هستند
             print(f"    [Brute Force] Found {len(high_priority)} high priority and {len(medium_priority)} medium priority blocks")
             
-            # اول high priority ها را اضافه کن
-            for p in high_priority:
-                if p not in paragraphs:
-                    paragraphs.append(p)
+            # ========== فیلتر هوشمند بر اساس عنوان خبر ==========
+            # استخراج عنوان از og:title یا title
+            article_title = ""
+            og_title = soup.find('meta', property='og:title')
+            if og_title and og_title.get('content'):
+                article_title = og_title['content']
+            elif soup.find('title'):
+                article_title = soup.find('title').get_text()
             
-            # بعد medium priority ها (با محدودیت)
-            for p in medium_priority:
+            # استخراج اسامی و کلمات کلیدی **منحصربه‌فرد**
+            # کلمات عمومی مثل "ایران"، "آمریکا"، "گفت" نباید استفاده شوند
+            generic_words = {'ایران', 'آمریکا', 'اسرائیل', 'تهران', 'کرد', 'گفت', 'شد', 'است', 'این', 
+                           'برای', 'درباره', 'پس', 'پیش', 'اینترنشنال', 'خبر', 'اخبار', 'امروز',
+                           'جمهوری', 'اسلامی', 'نظام', 'دولت', 'مردم', 'کشور', 'منطقه', 'نیروهای',
+                           'اعلام', 'گزارش', 'خبرنگار', 'رسانه', 'خواهد', 'موجب', 'تهدید'}
+            
+            title_keywords = set()
+            if article_title:
+                for word in re.split(r'[\s\-،:؛|]+', article_title):
+                    word = word.strip()
+                    # فقط کلمات **خاص** - بیش از ۴ حرف و نه عمومی
+                    if len(word) > 4 and word not in generic_words:
+                        title_keywords.add(word)
+            
+            print(f"    [Smart Filter] Title unique keywords: {title_keywords}")
+            
+            # همچنین کلمات کلیدی از og:description هم اضافه کن (lead paragraph)
+            if lead_text:
+                for word in re.split(r'[\s\-،:؛|]+', lead_text):
+                    word = word.strip()
+                    if len(word) > 4 and word not in generic_words:
+                        title_keywords.add(word)
+            
+            print(f"    [Smart Filter] Total unique keywords (title+lead): {len(title_keywords)}")
+            
+            # لیست سیاه - اگر یک پاراگراف این کلمات را دارد ولی کلمات کلیدی عنوان را ندارد، رد کن
+            other_subjects_indicators = ['بارو گفت', 'ترامپ گفت', 'وای‌نت نوشت', 'رویترز گزارش', 
+                                        'معاریو نوشت', 'اکسیوس گزارش', 'پایگاه خبری', 'شبکه خبری',
+                                        'به گزارش', 'براساس گزارش']
+            
+            def is_truly_related(text, keywords):
+                """بررسی دقیق ارتباط - پاراگراف باید حداقل ۲ کلمه کلیدی خاص عنوان را داشته باشد"""
+                # اگر کلمه کلیدی نداریم، همه را قبول کن
+                if not keywords:
+                    return True
+                    
+                # پاراگراف باید حداقل ۲ کلمه کلیدی خاص از عنوان را داشته باشد
+                match_count = sum(1 for kw in keywords if kw in text)
+                return match_count >= 2
+            
+            # اعمال فیلتر
+            filtered_high = [p for p in high_priority if is_truly_related(p, title_keywords)]
+            filtered_medium = [p for p in medium_priority if is_truly_related(p, title_keywords)]
+            
+            print(f"    [Smart Filter] After filter: {len(filtered_high)} high, {len(filtered_medium)} medium")
+            
+            # محدودیت سخت‌گیرانه: حداکثر ۵ پاراگراف
+            max_paragraphs = 5
+            
+            # اول high priority ها را اضافه کن
+            for p in filtered_high:
                 if p not in paragraphs:
                     paragraphs.append(p)
-                    if len(paragraphs) > 15: # حداکثر ۱۵ پاراگراف
-                        break 
+                    if len(paragraphs) >= max_paragraphs:
+                        break
+            
+            # بعد medium priority ها (اگر هنوز جا هست)
+            if len(paragraphs) < max_paragraphs:
+                for p in filtered_medium:
+                    if p not in paragraphs:
+                        paragraphs.append(p)
+                        if len(paragraphs) >= max_paragraphs:
+                            break 
             
         # ========== روش ۲: استخراج از HTML (سایت‌های معمولی و فال‌بک) ==========
         if len(paragraphs) < 3:
