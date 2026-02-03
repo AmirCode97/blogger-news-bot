@@ -252,52 +252,57 @@ class NewsFetcher:
                         'description': title,
                         'source': source['name'],
                         'source_category': source.get('category', 'حقوق بشر'),
-                        'language': source['language'],
+                        'language': source.get('language', 'fa'),
                         'published': datetime.now().isoformat(),
                         'image_url': image_url,
                         'fetched_at': datetime.now().isoformat()
                     })
             else:
                 for article in articles:
-                    # اگر خود article یک لینک است (a tag)
-                    if article.name == 'a':
-                        title = article.get_text().strip()
-                        title = " ".join(title.split())
-                        href = article.get('href', '')
-                    
-                        if len(title) < 10 or not href:
+                    try:
+                        # اگر خود article یک لینک است (a tag)
+                        if article.name == 'a':
+                            # (کد قبلی)
+                            title = article.get_text().strip()
+                            title = " ".join(title.split())
+                            href = article.get('href', '')
+                        
+                            if len(title) < 10 or not href:
+                                continue
+                        
+                            # رد کردن لینک‌های liveblog
+                            if 'liveblog' in href.lower() or '#' in href:
+                                continue
+                        
+                            full_link = urljoin(url, href)
+                            news_id = self._generate_news_id(title, full_link)
+                        
+                            if news_id in self.seen_news:
+                                continue
+                        
+                            # عکس از parent
+                            parent = article.parent
+                            image_url = self._extract_image_from_soup(parent, url) if parent else None
+                        
+                            news_items.append({
+                                'id': news_id,
+                                'title': title,
+                                'link': full_link,
+                                'description': title,
+                                'source': source['name'],
+                                'source_category': source.get('category', 'حقوق بشر'),
+                                'language': source.get('language', 'fa'),
+                                'published': datetime.now().isoformat(),
+                                'image_url': image_url,
+                                'fetched_at': datetime.now().isoformat()
+                            })
                             continue
                     
-                        # رد کردن لینک‌های liveblog
-                        if 'liveblog' in href.lower() or '#' in href:
-                            continue
-                    
-                        full_link = urljoin(url, href)
-                        news_id = self._generate_news_id(title, full_link)
-                    
-                        if news_id in self.seen_news:
-                            continue
-                    
-                        # عکس از parent
-                        parent = article.parent
-                        image_url = self._extract_image_from_soup(parent, url) if parent else None
-                    
-                        news_items.append({
-                            'id': news_id,
-                            'title': title,
-                            'link': full_link,
-                            'description': title,  # description را بعداً fetch می‌کنیم
-                            'source': source['name'],
-                            'source_category': source.get('category', 'حقوق بشر'),
-                            'language': source['language'],
-                            'published': datetime.now().isoformat(),
-                            'image_url': image_url,
-                            'fetched_at': datetime.now().isoformat()
-                        })
+                        # Extract title از child element
+                        title_selector = selectors.get('title', 'h2 a, h3 a') 
+                    except Exception as e:
+                        print(f"  [Error] Processing article: {e}")
                         continue
-                
-                    # Extract title از child element
-                    title_selector = selectors.get('title', 'h2 a, h3 a')
                     title_el = article.select_one(title_selector) if title_selector else None
                     if not title_el:
                         continue
@@ -339,7 +344,7 @@ class NewsFetcher:
                         'description': description[:1000],
                         'source': source['name'],
                         'source_category': source.get('category', 'حقوق بشر'),
-                        'language': source['language'],
+                        'language': source.get('language', 'fa'),
                         'published': datetime.now().isoformat(),
                         'image_url': image_url,
                         'fetched_at': datetime.now().isoformat()
@@ -628,6 +633,55 @@ class NewsFetcher:
             
             paragraphs = selected_paragraphs
             print(f"    -> Selected {len(paragraphs)} paragraphs for main article") 
+
+        # ========== روش اختصاصی: ناظران حقوق بشر ایران (Iran HRM) ==========
+        elif 'iran-hrm' in article_url:
+            print(f"    [IranHRM] Extracting content...")
+            content_div = soup.select_one('.entry-content')
+            if content_div:
+                # حذف پاراگراف‌های نامربوط (تبلیغات، اشتراک، لینک‌های انتهایی)
+                for p in content_div.find_all('p'):
+                    text = p.get_text(strip=True)
+                    # فیلترهای حذف
+                    skip_phrases = [
+                        'در شبکه‌های اجتماعی دنبال کنید', 'به کانال تلگرام ما بپیوندید',
+                        'Call to Action', 'Donate', 'حمایت کنید', 'اشتراک گذاری'
+                    ]
+                    if any(phrase in text for phrase in skip_phrases):
+                        continue
+                    
+                    if len(text) > 30:
+                        paragraphs.append(text)
+                
+                # محدود به ۱۰ پاراگراف اول (چون گزارش‌ها خیلی طولانی هستند)
+                if len(paragraphs) > 10:
+                    paragraphs = paragraphs[:10]
+                    paragraphs.append("...")
+                
+                print(f"    [IranHRM] Extracted {len(paragraphs)} clean paragraphs")
+
+        # ========== روش اختصاصی: مرکز اسناد حقوق بشر ایران ==========
+        elif 'iranhumanrights.org' in article_url:
+            print(f"    [IranHumanRights] Extracting content...")
+            # تست سلکتورهای مختلف وردپرسی
+            selectors = ['.entry-content', '.post-content', '.article-content']
+            content_div = None
+            for sel in selectors:
+                content_div = soup.select_one(sel)
+                if content_div: break
+            
+            if content_div:
+                for p in content_div.find_all('p'):
+                    text = p.get_text(strip=True)
+                    if len(text) > 30 and 'بیشتر بخوانید' not in text:
+                        paragraphs.append(text)
+                
+                # محدودیت ۱۵ پاراگراف برای جلوگیری از پست‌های خیلی طولانی
+                if len(paragraphs) > 15:
+                    paragraphs = paragraphs[:15]
+                    paragraphs.append("...")
+                
+                print(f"    [IranHumanRights] Extracted {len(paragraphs)} clean paragraphs") 
             
         # ========== روش ۲: استخراج از HTML (سایت‌های معمولی و فال‌بک) ==========
         if len(paragraphs) < 3:

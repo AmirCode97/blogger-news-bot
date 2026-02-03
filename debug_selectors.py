@@ -1,52 +1,27 @@
-
+# Debug selectors specifically
 import requests
 from bs4 import BeautifulSoup
-import sys
-
-# Fix encoding
-sys.stdout.reconfigure(encoding='utf-8')
 
 headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-    'Accept-Language': 'fa-IR,fa;q=0.9,en-US;q=0.8,en;q=0.7',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
 }
 
-def debug_url(url, selectors):
-    print(f"\n--- Debugging {url} ---")
-    try:
-        response = requests.get(url, headers=headers, timeout=15)
-        print(f"Status: {response.status_code}")
+def debug_selectors(url):
+    print(f"\nDebugging: {url}")
+    r = requests.get(url, headers=headers)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    
+    articles = soup.select('article')
+    print(f"Articles found: {len(articles)}")
+    
+    if articles:
+        first_article = articles[0]
+        print("\n--- First Article Structure ---")
+        print(first_article.prettify()[:1500])  # Show first 1500 chars
         
-        soup = BeautifulSoup(response.text, 'html.parser')
-        
-        # Test article selector
-        article_sel = selectors.get('articles')
-        articles = soup.select(article_sel)
-        print(f"Found {len(articles)} items with selector '{article_sel}'")
-        
-        if len(articles) > 0:
-            first = articles[0]
-            # Debug Image
-            img = first.select_one('img')
-            print(f"First item image tag: {img}")
-            if img:
-                print(f"Image Source: {img.get('src') or img.get('data-src')}")
-                
-    except Exception as e:
-        print(f"Error: {e}")
+        # Test finding link
+        link = first_article.select_one('h2 a, h3 a, h4 a')
+        print(f"\nLink check: {link}")
 
-# IranHRS Config
-iranhrs_sel = {
-    "articles": "article",
-    "image": "img"
-}
-
-# Radio Farda Config
-radio_sel = {
-    "articles": ".media-block__content",
-    "image": "img"
-}
-
-debug_url("https://iranhrs.org/", iranhrs_sel)
-debug_url("https://www.radiofarda.com/", radio_sel)
+debug_selectors('https://fa.iran-hrm.com/')
+debug_selectors('https://persian.iranhumanrights.org/')

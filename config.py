@@ -126,6 +126,42 @@ NEWS_SOURCES = [
         "category": "حقوق بشر",
         "max_items": 4  # حداکثر ۴ خبر
     },
+    # ==================== مرکز اسناد حقوق بشر ایران - 5 خبر ====================
+    {
+        "name": "مرکز اسناد حقوق بشر ایران",
+        "url": "https://persian.iranhumanrights.org/",
+        "type": "scrape",
+        "language": "fa",
+        "enabled": True,
+        "category": "حقوق بشر",
+        "priority": 2,
+        "max_items": 5,
+        "selectors": {
+            "articles": "article, .post",
+            "title": "h1 a, h2 a, h3 a, .entry-title a, .post-head-title a",  # اضافه شدن h1
+            "link": "h1 a, h2 a, h3 a, .entry-title a, .post-head-title a",
+            "description": ".entry-content p, .excerpt p",
+            "image": "img"
+        }
+    },
+    # ==================== ناظران حقوق بشر ایران - 5 خبر ====================
+    {
+        "name": "ناظران حقوق بشر ایران",
+        "url": "https://fa.iran-hrm.com/",
+        "type": "scrape",
+        "language": "fa",
+        "enabled": True,
+        "category": "حقوق بشر",
+        "priority": 2,
+        "max_items": 5,
+        "selectors": {
+            "articles": "article",
+            "title": "h2 a, h3 a, h4 a",
+            "link": "h2 a, h3 a, h4 a",
+            "description": ".entry-content p, p",
+            "image": "img"
+        }
+    },
 ]
 
 # ==================== Content Filter Keywords ====================
