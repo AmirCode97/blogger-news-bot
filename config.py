@@ -64,14 +64,14 @@ NEWS_SOURCES = [
             "image": "img"
         }
     },
-    # ==================== رادیو فردا - 5 خبر ====================
+    # ==================== رادیو فردا - غیرفعال ====================
     {
         "name": "رادیو فردا",
         "url": "https://www.radiofarda.com/",
         "rss_url": "https://www.radiofarda.com/api/",  # Try RSS
         "type": "scrape",
         "language": "fa",
-        "enabled": True,
+        "enabled": False,  # غیرفعال شده
         "category": "حقوق بشر",
         "max_items": 5,  # حداکثر ۵ خبر در هر اجرا
         "selectors": {
