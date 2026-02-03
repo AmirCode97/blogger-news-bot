@@ -56,8 +56,8 @@ NEWS_SOURCES = [
         "priority": 1,
         "max_items": 10,
         "selectors": {
-            # لینک‌های خبر با فرمت /202xxxxxxx
-            "articles": "a[href*='/2026']",
+            # لینک‌های خبر - هم نسبی و هم مطلق
+            "articles": "a[href*='2026']",
             "title": "",  # عنوان از خود لینک
             "link": "",  # لینک از href
             "description": "",
