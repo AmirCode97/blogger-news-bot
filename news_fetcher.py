@@ -548,160 +548,86 @@ class NewsFetcher:
                         break
                 if not is_duplicate:
                     paragraphs.insert(0, lead_text) # لید را اول بگذار
-        
-        # ========== روش ۱: استخراج متن خام (Brute Force) ==========
-        # برای سایت‌های مدرن مثل ایران اینترنشنال که محتوا در JSON پخش شده
+        # ========== روش جدید برای ایران اینترنشنال: استخراج ساده از HTML ==========
+        # سایت ایران اینترنشنال محتوای اخبار مرتبط را هم نشان می‌دهد
+        # باید فقط ۲-۳ پاراگراف اول مقاله اصلی را بگیریم
         if 'iranintl' in article_url:
-            print(f"    [Brute Force] Scanning page text ({len(response.text)} chars)...")
+            print(f"    [IranIntl] Extracting article paragraphs from HTML...")
             
-            # Regex ساده‌تر و سریع‌تر
-            # پیدا کردن همه رشته‌های طولانی بین کوتیشن
-            matches = re.findall(r'"([^"]{40,})"', response.text)
+            # پیدا کردن همه پاراگراف‌های فارسی
+            all_ps = soup.find_all('p')
+            persian_paragraphs = []
             
-            print(f"    [Debug] Matches found: {len(matches)}")
-            
-            script_paragraphs = []
-            junk_indicators = [
-                'div class', 'meta name', 'Link rel', 'script src', 'return', 'function', 
-                'var ', 'window.', 'document.', 'items:', 'children:', 'class=', 'style=',
-                'بیشتر بخوانید', 'مطالب مرتبط', 'نظرات شما', 'تبلیغات', 
-                'عضویت در خبرنامه', 'اپلیکیشن', 'googletag'
-            ]
-            
-            # استخراج کلمات کلیدی از لید برای اولویت‌بندی
-            keywords = []
-            if lead_text:
-                keywords = [w for w in re.split(r'\s+', lead_text) if len(w) > 3][:8]
-
-            # لیست‌های جداگانه برای اولویت‌بندی
-            high_priority = []
-            medium_priority = []
-            
-            for m in matches:
-                text = m
-                
-                # تمیز کردن اولیه
-                if '\\u' in text:
-                    try: text = text.encode().decode('unicode_escape')
-                    except: pass
-                
-                text = text.replace('\\n', ' ').replace('\\"', '"').replace('\\', '').strip()
-                text = re.sub(r'\s+', ' ', text) # فاصله های اضافی
-                
-                # حذف تگ‌های HTML باقی‌مانده
-                text = re.sub(r'<[^>]+>', '', text)
-                if not text: continue
-                
-                # حذف کاراکترهای شروع بد
-                if text.startswith('>') or text.startswith('<') or text.startswith('/') or text.startswith(','):
-                    continue
-
-                # شرط فارسی بودن قوی
-                persian_chars = sum(1 for c in text if '\u0600' <= c <= '\u06FF')
-                if persian_chars < 15: # حداقل ۱۵ حرف فارسی
+            for p in all_ps:
+                text = p.get_text(strip=True)
+                if not text:
                     continue
                     
-                # فیلترهای منفی قوی
-                if any(x in text for x in junk_indicators):
+                # بررسی فارسی بودن
+                persian_chars = sum(1 for c in text if '\u0600' <= c <= '\u06FF')
+                if persian_chars < 30:
+                    continue
+                    
+                # حداقل ۵۰ کاراکتر
+                if len(text) < 50:
+                    continue
+                    
+                # فیلتر محتوای نامربوط
+                skip_indicators = ['بیشتر بخوانید', 'مطالب مرتبط', 'تبلیغات', 'عضویت', 'خبرنامه', 
+                                  'اپلیکیشن', 'تماس با ما', 'حقوق محفوظ']
+                if any(x in text for x in skip_indicators):
                     continue
                 
-                # حذف اگر خیلی شبیه لید است (تکراری)
-                if lead_text and (text in lead_text or lead_text in text[:50]):
-                    continue
-
-                # دسته‌بندی
-                # ۱. اولویت بالا: حاوی کلمات کلیدی و طول مناسب
-                is_relevant = False
-                if keywords:
-                    match_count = sum(1 for kw in keywords if kw in text)
-                    if match_count >= 1:
-                        is_relevant = True
-                
-                if is_relevant and len(text) > 50:
-                    if text not in high_priority:
-                        high_priority.append(text)
-                # ۲. اولویت متوسط: طولانی و تمیز (احتمالاً متن بدنه خبر)
-                elif len(text) > 80:
-                    if text not in medium_priority:
-                        medium_priority.append(text)
-
-            # ترکیب لیست‌ها
-            # نکته: در ایران اینترنشنال معمولا متن‌های طولانی پشت سر هم هستند
-            print(f"    [Brute Force] Found {len(high_priority)} high priority and {len(medium_priority)} medium priority blocks")
+                persian_paragraphs.append(text)
             
-            # ========== فیلتر هوشمند بر اساس عنوان خبر ==========
-            # استخراج عنوان از og:title یا title
+            print(f"    [IranIntl] Found {len(persian_paragraphs)} Persian paragraphs")
+            
+            # استخراج عنوان برای شناسایی پایان مقاله اصلی
             article_title = ""
             og_title = soup.find('meta', property='og:title')
             if og_title and og_title.get('content'):
                 article_title = og_title['content']
-            elif soup.find('title'):
-                article_title = soup.find('title').get_text()
             
-            # استخراج اسامی و کلمات کلیدی **منحصربه‌فرد**
-            # کلمات عمومی مثل "ایران"، "آمریکا"، "گفت" نباید استفاده شوند
-            generic_words = {'ایران', 'آمریکا', 'اسرائیل', 'تهران', 'کرد', 'گفت', 'شد', 'است', 'این', 
-                           'برای', 'درباره', 'پس', 'پیش', 'اینترنشنال', 'خبر', 'اخبار', 'امروز',
-                           'جمهوری', 'اسلامی', 'نظام', 'دولت', 'مردم', 'کشور', 'منطقه', 'نیروهای',
-                           'اعلام', 'گزارش', 'خبرنگار', 'رسانه', 'خواهد', 'موجب', 'تهدید'}
+            # استخراج نام اصلی از عنوان (مثلاً "رادان")
+            # کلمات کوتاه (کمتر از ۴ حرف) و عمومی را نادیده بگیر
+            generic_words = {'ایران', 'آمریکا', 'اسرائیل', 'تهران', 'فرانسه', 'روسیه', 'اروپا',
+                           'جمهوری', 'اسلامی', 'گفت', 'شد', 'است', 'این', 'کرد', 'خواهد', 'خواهند'}
             
-            title_keywords = set()
+            main_keywords = set()
             if article_title:
                 for word in re.split(r'[\s\-،:؛|]+', article_title):
                     word = word.strip()
-                    # فقط کلمات **خاص** - بیش از ۴ حرف و نه عمومی
-                    if len(word) > 4 and word not in generic_words:
-                        title_keywords.add(word)
+                    if len(word) > 3 and word not in generic_words:
+                        main_keywords.add(word)
             
-            print(f"    [Smart Filter] Title unique keywords: {title_keywords}")
+            print(f"    [IranIntl] Main article keywords: {main_keywords}")
             
-            # همچنین کلمات کلیدی از og:description هم اضافه کن (lead paragraph)
-            if lead_text:
-                for word in re.split(r'[\s\-،:؛|]+', lead_text):
-                    word = word.strip()
-                    if len(word) > 4 and word not in generic_words:
-                        title_keywords.add(word)
+            # فقط پاراگراف‌های مقاله اصلی را بگیر
+            # روش ساده: فقط لید + ادامه مستقیم (حداکثر ۲ پاراگراف)
             
-            print(f"    [Smart Filter] Total unique keywords (title+lead): {len(title_keywords)}")
+            selected_paragraphs = []
             
-            # لیست سیاه - اگر یک پاراگراف این کلمات را دارد ولی کلمات کلیدی عنوان را ندارد، رد کن
-            other_subjects_indicators = ['بارو گفت', 'ترامپ گفت', 'وای‌نت نوشت', 'رویترز گزارش', 
-                                        'معاریو نوشت', 'اکسیوس گزارش', 'پایگاه خبری', 'شبکه خبری',
-                                        'به گزارش', 'براساس گزارش']
+            # پاراگراف اول: لید
+            if persian_paragraphs:
+                selected_paragraphs.append(persian_paragraphs[0])
             
-            def is_truly_related(text, keywords):
-                """بررسی دقیق ارتباط - پاراگراف باید حداقل ۲ کلمه کلیدی خاص عنوان را داشته باشد"""
-                # اگر کلمه کلیدی نداریم، همه را قبول کن
-                if not keywords:
-                    return True
+            # پاراگراف دوم: اگر با "او افزود" شروع شود و درباره همان موضوع باشد
+            if len(persian_paragraphs) > 1:
+                second = persian_paragraphs[1]
+                # بررسی اینکه آیا ادامه مقاله است
+                if second.startswith('او افزود') or second.startswith('وی گفت') or second.startswith('وی افزود'):
+                    # فقط اگر درباره همان موضوع باشد (کلمه کلیدی داشته باشد یا بدون نام جدید)
+                    has_main_keyword = any(kw in second for kw in main_keywords)
+                    # لیست نام‌های دیگر که نشان‌دهنده خبر جدید است
+                    other_names = ['بارو', 'ترامپ', 'وای‌نت', 'معاریو', 'واشینگتن‌پست', 
+                                  'رویترز', 'اکسیوس', 'نتانیاهو', 'بایدن', 'پوتین']
+                    has_other_name = any(name in second for name in other_names)
                     
-                # پاراگراف باید حداقل ۲ کلمه کلیدی خاص از عنوان را داشته باشد
-                match_count = sum(1 for kw in keywords if kw in text)
-                return match_count >= 2
+                    if has_main_keyword or not has_other_name:
+                        selected_paragraphs.append(second)
             
-            # اعمال فیلتر
-            filtered_high = [p for p in high_priority if is_truly_related(p, title_keywords)]
-            filtered_medium = [p for p in medium_priority if is_truly_related(p, title_keywords)]
-            
-            print(f"    [Smart Filter] After filter: {len(filtered_high)} high, {len(filtered_medium)} medium")
-            
-            # محدودیت سخت‌گیرانه: حداکثر ۵ پاراگراف
-            max_paragraphs = 5
-            
-            # اول high priority ها را اضافه کن
-            for p in filtered_high:
-                if p not in paragraphs:
-                    paragraphs.append(p)
-                    if len(paragraphs) >= max_paragraphs:
-                        break
-            
-            # بعد medium priority ها (اگر هنوز جا هست)
-            if len(paragraphs) < max_paragraphs:
-                for p in filtered_medium:
-                    if p not in paragraphs:
-                        paragraphs.append(p)
-                        if len(paragraphs) >= max_paragraphs:
-                            break 
+            paragraphs = selected_paragraphs
+            print(f"    -> Selected {len(paragraphs)} paragraphs for main article") 
             
         # ========== روش ۲: استخراج از HTML (سایت‌های معمولی و فال‌بک) ==========
         if len(paragraphs) < 3:
