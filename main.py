@@ -167,6 +167,8 @@ class BloggerNewsBot:
                         print(f"✅ Published: {post_result.get('url')}")
                         posted_titles.append(f"✅ {news_title[:50]}...")
                         published_count += 1
+                        # Mark as seen ONLY if successful
+                        self.fetcher.mark_as_seen(item['title'], item['id'])
                     else:
                         print(f"❌ Failed to publish: {news_title[:50]}")
                         failed_titles.append(f"❌ {news_title[:50]}...")
@@ -174,8 +176,6 @@ class BloggerNewsBot:
                     print(f"⚠️ Blogger not available - skipping publish")
                     failed_titles.append(f"⚠️ {news_title[:50]}...")
                 
-                # Mark as seen
-                self.fetcher.mark_as_seen(item['id'])
                 processed_count += 1
                 
                 # Small delay between items
