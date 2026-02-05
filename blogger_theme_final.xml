@@ -3,634 +3,565 @@
 <html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:templateUrl='custom-news.xml' b:templateVersion='1.3' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
 <head>
   <meta content='width=device-width, initial-scale=1' name='viewport'/>
-  <title><data:view.title.escaped/></title>
+  <title><data:view.title.escaped/> | <data:blog.title/></title>
+  
   <b:include data='blog' name='all-head-content'/>
 
+  <!-- Fonts & Icons -->
   <link href='https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css' rel='stylesheet' type='text/css'/>
-  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css' rel='stylesheet'/>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'/>
 
   <b:skin><![CDATA[
+    /* --- POLITICS & HUMAN RIGHTS THEME VARIABLES --- */
     :root {
-      --primary-color: #c0392b;
-      --secondary-color: #1a1a1a;
-      --accent-color: #e74c3c;
-      --text-color: #ccc;
-      --bg-color: #2c2c2c;
-      --white: #ffffff;
-      --card-bg: #333333;
-      --border-radius: 4px;
-      --shadow: 0 4px 6px rgba(0,0,0,0.3);
+      --primary: #c0392b; /* Alert Red */
+      --primary-dark: #a93226;
+      --bg-dark: #0a0a0a; /* Deep Black */
+      --bg-card: #141414;
+      --text-main: #ecf0f1;
+      --text-muted: #95a5a6;
+      --border: #2c3e50;
+      --header-bg: #050505;
     }
 
+    /* --- RESET & BASE --- */
+    * { box-sizing: border-box; outline: none; }
     body {
+      margin: 0; padding: 0;
       font-family: 'Vazir', sans-serif;
-      background-color: var(--bg-color);
-      background-image: radial-gradient(#222 1px, transparent 1px);
-      background-size: 20px 20px;
-      color: var(--text-color);
-      margin: 0;
-      padding: 0;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
       direction: rtl;
-      line-height: 1.6;
-      top: 0 !important;
+      font-size: 14px;
+      line-height: 1.7;
     }
-
-    .goog-te-banner-frame { display: none !important; }
     a { text-decoration: none; color: inherit; transition: 0.3s; }
-    a:hover { color: var(--primary-color); }
+    a:hover { color: var(--primary); }
+    img { max-width: 100%; height: auto; display: block; }
     ul { list-style: none; padding: 0; margin: 0; }
 
-    .top-bar {
-      background: #000;
-      color: #999;
+    /* --- TOP ALERT BAR (BREAKING NEWS) --- */
+    .alert-bar {
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
       padding: 8px 0;
-      font-size: 0.85em;
-      border-bottom: 1px solid #333;
+      display: flex;
+      align-items: center;
     }
-    .container {
+    .alert-inner {
       max-width: 1200px;
       margin: 0 auto;
       padding: 0 15px;
-    }
-    .top-flex { 
-      display: flex; 
-      justify-content: space-between;
-      align-items: center; 
-    }
-    
-    #google_translate_element { display: inline-block; }
-    .goog-te-gadget-simple {
-      background-color: #333 !important;
-      border: 1px solid #555 !important;
-      padding: 4px 8px !important;
-      border-radius: 4px !important;
-      font-size: 12px !important;
-    }
-    .goog-te-gadget-simple .goog-te-menu-value { color: #ccc !important; }
-    .goog-te-gadget-simple .goog-te-menu-value span { border-left: none !important; color: #fff !important; }
-    .goog-te-gadget-icon { display: none !important; }
-    
-    header {
-      background: #1a1a1a;
-      box-shadow: var(--shadow);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      border-top: 5px solid var(--primary-color);
-      border-bottom: 1px solid #333;
-    }
-    .header-inner {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 90px;
+      width: 100%;
     }
-    
-    .logo img {
-      max-height: 70px;
-      width: auto;
-      display: block;
-    }
-    
-    .main-menu { display: flex; gap: 25px; }
-    .main-menu li { position: relative; }
-    .main-menu a { font-weight: 700; font-size: 16px; padding: 10px; display: block; color: #eee; }
-    .main-menu a:hover { color: var(--primary-color); text-shadow: 0 0 5px rgba(192, 57, 43, 0.5); }
-    .menu-toggle { display: none; font-size: 24px; cursor: pointer; color: #fff; }
-
-    .news-ticker-wrap {
+    .alert-title {
       background: #000;
-      color: #fff;
-      display: flex;
-      height: 40px;
-      overflow: hidden;
-      align-items: center;
-      border-bottom: 1px solid #333;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-weight: 900;
+      margin-left: 15px;
+      white-space: nowrap;
+      text-transform: uppercase;
     }
-    .ticker-title {
-      background: var(--primary-color);
+    .alert-marquee { flex: 1; font-weight: bold; }
+
+    /* --- HEADER --- */
+    .site-header {
+      background: var(--header-bg);
+      padding: 25px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
       padding: 0 15px;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      font-weight: bold;
-      font-size: 13px;
-      white-space: nowrap;
-    }
-    .ticker-content {
-      flex-grow: 1;
-      overflow: hidden;
-      white-space: nowrap;
-      padding-right: 10px;
-    }
-    .ticker-item {
-      display: inline-block;
-      padding-left: 30px;
-      animation: ticker 20s linear infinite;
-    }
-    @keyframes ticker {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-
-    .main-wrapper {
-      display: flex;
-      gap: 30px;
-      margin-top: 30px;
-      margin-bottom: 50px;
-    }
-    .content-area { flex: 3; }
-    .sidebar-area { flex: 1; }
-
-    .blog-posts {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr); 
-      gap: 25px;
-      align-items: start;
-    }
-    .post-outer {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      transition: transform 0.3s;
-      border: 1px solid #444;
-      display: flex;
-      flex-direction: column;
-      height: auto;
-    }
-    .post-outer:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.5); border-color: var(--primary-color); }
-    
-    /* کارت‌های بدون عکس - کوچکتر */
-    .post-outer.no-image {
-      grid-column: span 1;
-      background: linear-gradient(135deg, #2a2a2a, #333);
-      border-right: 4px solid var(--primary-color);
-    }
-    .post-outer.no-image .post-info {
-      padding: 15px;
-    }
-    .post-outer.no-image .post-title {
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-    .post-outer.no-image .post-snippet {
-      font-size: 12px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    
-    .post-thumbnail {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      display: block;
-      border-bottom: 3px solid var(--primary-color);
-    }
-    .post-info { padding: 20px; }
-    .post-title { font-size: 18px; font-weight: 800; margin-bottom: 10px; line-height: 1.4; }
-    .post-title a { color: #fff; }
-    .post-title a:hover { color: var(--primary-color); }
-    .post-snippet { font-size: 13px; color: #aaa; margin-bottom: 15px; text-align: justify; }
-    .post-meta {
-      font-size: 12px;
-      color: #777;
-      border-top: 1px solid #444;
-      padding-top: 10px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .read-more-btn {
-      background: #444;
-      color: #fff;
-      padding: 6px 15px;
-      border-radius: 2px;
+    .logo-text h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin: 0;
+    }
+    .logo-text span { color: var(--primary); }
+    .header-date { color: var(--text-muted); font-size: 12px; }
+    
+    /* Language Switcher */
+    .lang-switcher {
+      display: flex;
+      gap: 10px;
+    }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #333;
+      padding: 6px 12px;
+      border-radius: 20px;
       font-size: 11px;
-      font-weight: bold;
+      color: #aaa;
+      transition: 0.3s;
     }
-    .read-more-btn:hover { background: var(--primary-color); }
-
-    /* صفحه تکی خبر - نمایش کامل */
-    .single-post-page {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 30px;
-      border: 1px solid #444;
-    }
-    .single-post-page .post-featured-image {
-      width: 100%;
-      max-height: 600px;
-      object-fit: contain;
-      border-radius: var(--border-radius);
-      margin-bottom: 25px;
-      border: 3px solid var(--primary-color);
-      background: #222;
-    }
-    .single-post-page h1 {
-      font-size: 28px;
-      font-weight: 900;
+    .lang-btn:hover {
+      background: var(--primary);
       color: #fff;
-      margin-bottom: 20px;
-      line-height: 1.5;
-      border-bottom: 2px solid var(--primary-color);
-      padding-bottom: 15px;
+      border-color: var(--primary);
     }
-    .single-post-page .post-body {
-      font-size: 16px;
-      line-height: 2.2;
-      color: #ddd;
-    }
-    .single-post-page .post-body p {
-      margin-bottom: 20px;
-    }
-    .single-post-page .post-body img {
-      max-width: 100%;
-      height: auto;
-      border-radius: var(--border-radius);
-      margin: 20px auto;
-      display: block;
-    }
-    .single-post-page .post-body video,
-    .single-post-page .post-body iframe {
-      max-width: 100%;
-      margin: 20px auto;
-      display: block;
-    }
-    .back-to-home {
-      display: inline-block;
-      background: var(--primary-color);
-      color: #fff;
-      padding: 10px 25px;
-      border-radius: var(--border-radius);
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
-    .back-to-home:hover {
-      background: #a83225;
-      color: #fff;
-    }
-
-    /* صفحات ثابت (درباره ما) */
-    .static-page {
-      background: var(--card-bg);
-      border-radius: var(--border-radius);
-      padding: 30px;
-      border: 1px solid #444;
-    }
-    .static-page h1 {
-      font-size: 28px;
-      font-weight: 900;
-      color: #fff;
-      margin-bottom: 20px;
-      border-bottom: 2px solid var(--primary-color);
-      padding-bottom: 15px;
-    }
-    .static-page .page-body {
-      font-size: 16px;
-      line-height: 2;
-      color: #ddd;
-    }
-
-    .widget { margin-bottom: 30px; background: var(--card-bg); padding: 20px; border-radius: var(--border-radius); box-shadow: var(--shadow); border: 1px solid #444; }
-    .widget h2 { 
-      font-size: 16px; 
-      font-weight: 900; 
-      color: #fff; 
-      border-bottom: 2px solid var(--primary-color); 
-      padding-bottom: 10px; 
-      margin-bottom: 20px; 
-    }
-    
-    .PopularPosts .item-content { 
-      display: flex; 
-      align-items: center; 
-      margin-bottom: 15px; 
-      border-bottom: 1px dotted #555; 
-      padding-bottom: 10px; 
-    }
-    .PopularPosts .item-content:hover {
-      background: rgba(192, 57, 43, 0.1);
-      border-radius: var(--border-radius);
-    }
-    .PopularPosts img { 
-      width: 70px; 
-      height: 70px; 
-      border-radius: 2px; 
-      margin-left: 10px; 
-      object-fit: cover; 
-    }
-    .PopularPosts .item-title { 
-      font-size: 13px; 
-      font-weight: bold; 
-      line-height: 1.4; 
-      color: #ddd; 
-      display: block;
-    }
-    .PopularPosts .item-title:hover { color: var(--primary-color); }
-    
-    .Label ul { display: flex; flex-wrap: wrap; gap: 5px; }
-    .Label li a { 
-      background: #222; 
-      color: #ccc;
-      padding: 5px 10px; 
-      font-size: 12px; 
-      border-radius: 2px; 
-      display: block; 
-      border: 1px solid #444;
-    }
-    .Label li a:hover { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
-    .Label .label-count { display: none; }
-
-    .search-input {
-      background-color: #222 !important;
-      color: #fff !important;
-      border-color: #444 !important;
-    }
-
-    .stats-widget {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 15px;
-      text-align: center;
-    }
-    .stat-item {
-      background: #222;
-      padding: 20px 10px;
-      border-radius: var(--border-radius);
-      border: 1px solid #444;
-    }
-    .stat-item i {
-      font-size: 24px;
-      color: var(--primary-color);
-      margin-bottom: 10px;
-      display: block;
-    }
-    .stat-item .stat-number {
-      font-size: 24px;
-      font-weight: 900;
-      color: #fff;
-      display: block;
-    }
-    .stat-item .stat-label {
-      font-size: 12px;
-      color: #888;
-    }
-
-    footer { background: #111; color: #fff; padding: 40px 0; text-align: center; margin-top: auto; border-top: 5px solid var(--primary-color); }
-    footer p { opacity: 0.7; font-size: 0.9em; }
-    .footer-links { margin-bottom: 20px; }
-    .footer-links a { color: #ccc; margin: 0 15px; font-size: 14px; }
-    .footer-links a:hover { color: var(--primary-color); }
-
-    .blog-pager { text-align: center; margin-top: 30px; }
-    .blog-pager a {
-      background: #444;
-      color: white;
-      padding: 10px 20px;
+    .lang-btn img {
+      width: 18px;
+      height: 12px;
       border-radius: 2px;
-      font-weight: bold;
-      display: inline-block;
-      margin: 0 5px;
     }
-    .blog-pager a:hover { background: var(--primary-color); }
 
-    @media (max-width: 900px) {
-      .blog-posts { grid-template-columns: 1fr; }
-      .main-wrapper { flex-direction: column; }
-      .main-menu { display: none; } 
-      .menu-toggle { display: block; }
-      .header-inner { padding: 0 15px; }
-      .top-flex { flex-direction: column; gap: 10px; }
-      .single-post-page h1 { font-size: 22px; }
+    /* --- NAVIGATION --- */
+    .main-nav {
+      background: #0f0f0f;
+      border-bottom: 2px solid var(--border);
+      position: sticky; top: 0; z-index: 999;
     }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 15px;
+      display: flex; height: 50px; align-items: center;
+    }
+    .nav-links { display: flex; gap: 25px; height: 100%; }
+    .nav-links a {
+      display: flex; align-items: center; height: 100%;
+      font-weight: 700; font-size: 13px; color: #ccc;
+      border-top: 3px solid transparent;
+    }
+    .nav-links a:hover { color: #fff; border-top-color: var(--primary); }
+    .nav-search { margin-right: auto; }
+    .nav-search input {
+      background: #222; border: 1px solid #333; color: #fff;
+      padding: 6px 15px; border-radius: 20px 0 0 20px; font-family: inherit; font-size: 12px;
+      width: 150px;
+    }
+    .search-btn {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 0 20px 20px 0;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .search-btn:hover { background: var(--primary-dark); }
+
+    /* --- MAIN LAYOUT --- */
+    .main-container {
+      max-width: 1200px; margin: 40px auto; padding: 0 15px;
+      display: grid; grid-template-columns: 800px 1fr; gap: 40px;
+    }
+
+    /* --- FEATURED SECTION (First Post) --- */
+    .hero-post {
+      position: relative;
+      margin-bottom: 40px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .hero-thumb {
+      width: 100%; height: 450px; object-fit: cover;
+      filter: brightness(0.7);
+      transition: 0.5s;
+    }
+    .hero-post:hover .hero-thumb { filter: brightness(0.9) scale(1.05); }
+    .hero-content {
+      position: absolute; bottom: 0; right: 0; left: 0;
+      padding: 40px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    }
+    .hero-cat {
+      background: var(--primary); color: #fff;
+      padding: 4px 10px; font-size: 11px; font-weight: bold;
+      border-radius: 2px; text-transform: uppercase;
+      margin-bottom: 10px; display: inline-block;
+    }
+    .hero-title {
+      font-size: 36px; font-weight: 900; color: #fff;
+      margin: 10px 0; line-height: 1.3; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .hero-meta { color: #ccc; font-size: 12px; }
+
+    /* --- HOMEPAGE LAYOUT --- */
+    .homepage-loop {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .hero-post, .news-grid-title {
+      width: 100%;
+    }
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid #222;
+      border-radius: 6px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: 0.3s;
+      width: calc(50% - 10px); /* 2 Column Grid */
+    }
+    
+    /* FIX: Hide duplicate first post in grid if it appears */
+    /* If the loop logic fails and prints the first post as a card, this hides it */
+    /* .homepage-loop .post-card:first-of-type { display: none; } */
+    /* Only enable if duplication persists. For now, we trust the XML logic. */
+    
+    .post-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .card-thumb { height: 180px; overflow: hidden; position: relative; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .post-card:hover .card-thumb img { transform: scale(1.1); }
+    .card-body { padding: 20px; }
+    .card-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; line-height: 1.5; height: 48px; overflow: hidden; }
+    .card-excerpt { font-size: 13px; color: var(--text-muted); height: 60px; overflow: hidden; margin-bottom: 15px; }
+
+    /* --- SIDEBAR WIDGETS --- */
+    .widget-box {
+      background: var(--bg-card);
+      border: 1px solid #222;
+      border-radius: 6px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+    .widget-header {
+      font-size: 14px; font-weight: 900;
+      color: #fff; text-transform: uppercase;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 10px; margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    /* Statistics Widget */
+    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; }
+    .stat-row:last-child { border: none; }
+    .stat-label { font-size: 13px; color: #aaa; }
+    .stat-val { font-weight: bold; color: #fff; }
+    .stat-graph { height: 4px; background: #222; width: 100%; margin-top: 5px; border-radius: 2px; overflow: hidden; }
+    .stat-bar { height: 100%; background: var(--primary); }
+
+    /* Quote Widget */
+    .quote-box { text-align: center; }
+    .quote-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; border: 2px solid var(--primary); }
+    .quote-text { font-style: italic; font-size: 14px; color: #ccc; margin-bottom: 15px; line-height: 1.6; }
+    .quote-author { font-weight: bold; color: #fff; font-size: 12px; }
+
+    /* Footer */
+    .main-footer {
+      background: #050505; border-top: 1px solid #222;
+      padding: 60px 0 30px; margin-top: 60px;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .footer-col h4 { color: #fff; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; }
+    .footer-col ul li { margin-bottom: 10px; border-bottom: 1px dotted #222; padding-bottom: 5px; }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1000px) {
+      .main-container { display: flex; flex-direction: column; }
+      .hero-title { font-size: 24px; }
+      .news-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; text-align: center; }
+    }
+    
+    /* Hide Default Pager */
+    .blog-pager { display: none; }
   ]]></b:skin>
 </head>
 
 <body>
 
-  <div class='top-bar'>
-    <div class='container top-flex'>
-      <div class='date-time'>
-        به پایگاه خبری اخبار ایران خوش آمدید | <script>document.write(new Date().toLocaleDateString('fa-IR'));</script>
-      </div>
-      <div class='language-selector'>
-        <div id="google_translate_element"></div>
-        <script type="text/javascript">
-          function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-              pageLanguage: 'fa', 
-              includedLanguages: 'en,de,fa', 
-              layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-              autoDisplay: false
-            }, 'google_translate_element');
-          }
-        </script>
-        <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+  <!-- 1. ALERT BAR (Live from Iran International) -->
+  <div class='alert-bar'>
+    <div class='alert-inner'>
+      <div class='alert-title'>فوری</div>
+      <div class='alert-marquee'>
+        <marquee direction='right' scrollamount='6' id='live-ticker'>
+          در حال دریافت اخبار...
+        </marquee>
       </div>
     </div>
   </div>
+  
+  <script>
+    // === ADVANCED DEDUPLICATION and TICKER SYSTEM ===
+    document.addEventListener('DOMContentLoaded', function() {
+       
+       // 1. Advanced Duplicate Removal (Hero vs Grid)
+       // This function scans ALL grid items and removes any that match the Hero post.
+       function removeDuplicates() {
+           var heroLink = document.querySelector('.hero-post a');
+           if (!heroLink) return;
+           
+           var heroUrl = heroLink.href;
+           var gridCards = document.querySelectorAll('.post-card');
+           
+           gridCards.forEach(function(card) {
+               var cardLink = card.querySelector('a');
+               if (cardLink &amp;&amp; cardLink.href === heroUrl) {
+                   card.remove(); // Completely remove the duplicate element from DOM
+                   console.log('Duplicate post removed:', heroUrl);
+               }
+           });
+       }
+       
+       // Run immediately
+       removeDuplicates();
+       
+       // 2. Live News Ticker (Iran Intl)
+       // Uses CORS Proxy + Cache Busting for fresh news
+       var rssUrl = 'https://www.iranintl.com/fa/rss';
+       var timestamp = new Date().getTime();
+       var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(rssUrl) + '&amp;_t=' + timestamp;
+       
+       fetch(proxyUrl)
+        .then(function(res) { 
+            if (!res.ok) throw new Error("Network response was not ok");
+            return res.text(); 
+        })
+        .then(function(str) {
+            var parser = new DOMParser();
+            var xml = parser.parseFromString(str, "text/xml");
+            var items = xml.getElementsByTagName("item");
+            var headlines = [];
+            
+            // Extract top 10 headlines
+            for(var i=0; i &lt; Math.min(items.length, 10); i++) {
+                var t = items[i].getElementsByTagName("title")[0];
+                if(t) headlines.push(t.textContent);
+            }
+            
+            // Display
+            if(headlines.length > 0) {
+               var ticker = document.getElementById('live-ticker');
+               if(ticker) ticker.innerHTML = headlines.join(' \u2022 '); // Bullet separator
+            } else {
+               throw new Error("No news items found");
+            }
+        })
+        .catch(function(e) {
+            console.error('Ticker Error:', e);
+            var ticker = document.getElementById('live-ticker');
+            if(ticker) ticker.innerHTML = "پوشش لحظه‌ای مهم‌ترین اخبار ایران و جهان";
+        });
+    });
+  </script>
 
-  <header>
-    <div class='container header-inner'>
-      <div class='logo'>
-        <a expr:href='data:blog.homepageUrl'>
-          <img alt='Logo' src='https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhm8Y4FqA8KmH5VwCCr-zjVmTw4W9_L9XC4N1tcZHywO6tu65ousQNYAguz4roX1KL4lJkP7kMv2DHtw574e5swEx2_o_QFlMPqAt-JzMVnFPzNEViWmMbFKdiG2tBuglidVLNZXiIX4m8mOhEqCLWpZschTQmrqKTRKaNgRBBzftZV75ULSOuucakRPqJd/s320/logo.png' title='صفحه اصلی'/>
+  <!-- 2. HEADER -->
+  <header class='site-header'>
+    <div class='header-content'>
+      <!-- Language Switcher (Left) -->
+      <div class='lang-switcher'>
+        <a href='javascript:void(0)' class='lang-btn' onclick='translateTo("en")' title='English'>
+          <img src='https://flagcdn.com/w40/gb.png' alt='EN'/> EN
+        </a>
+        <a href='javascript:void(0)' class='lang-btn' onclick='translateTo("de")' title='Deutsch'>
+          <img src='https://flagcdn.com/w40/de.png' alt='DE'/> DE
+        </a>
+        <a href='javascript:void(0)' class='lang-btn' onclick='translateTo("fa")' title='فارسی' style='background:var(--primary);color:#fff'>
+          <img src='https://flagcdn.com/w40/ir.png' alt='FA'/> FA
         </a>
       </div>
-      <nav>
-        <ul class='main-menu'>
-          <li><a href='/'>صفحه اصلی</a></li>
-          <li><a href='/search/label/بین‌الملل'>بین‌الملل</a></li>
-          <li><a href='/search/label/حقوق%20بشر'>حقوق بشر</a></li>
-          <li><a href='/p/about.html'>درباره ما</a></li>
-        </ul>
-        <div class='menu-toggle'>
-          <i class='fas fa-bars'></i>
-        </div>
-      </nav>
+      <!-- Persian Date (Center/Right) -->
+      <div class='header-date' id='header-date'>
+        <script>document.write(new Date().toLocaleDateString('fa-IR', {weekday:'long', day:'numeric', month:'long', year:'numeric'}));</script>
+      </div>
     </div>
   </header>
-
-
-
-  <div class='container main-wrapper'>
+  
+  <!-- Google Translate Widget -->
+  <div id='google_translate_element' style='position:absolute;top:-9999px'></div>
+  <script src='//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'></script>
+  <script>
+    // Clear Google Translate cookies on page load - Always start with Persian
+    (function() {
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.blogspot.com;';
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname + ';';
+    })();
     
-    <div class='content-area'>
-      <b:section id='main' showaddelement='yes'>
-        <b:widget id='Blog1' locked='true' title='پستهای وبلاگ' type='Blog'>
-          <b:widget-settings>
-            <b:widget-setting name='showDateHeader'>false</b:widget-setting>
-            <b:widget-setting name='style.textcolor'>#ffffff</b:widget-setting>
-            <b:widget-setting name='showShareButtons'>true</b:widget-setting>
-            <b:widget-setting name='showAuthor'>true</b:widget-setting>
-            <b:widget-setting name='showTimestamp'>true</b:widget-setting>
-          </b:widget-settings>
-          
-          <b:includable id='main' var='this'>
-            <!-- صفحه تکی - نمایش کامل خبر -->
-            <b:if cond='data:view.isPost'>
-              <div class='single-post-page'>
-                <a class='back-to-home' expr:href='data:blog.homepageUrl'>
-                  <i class='fas fa-arrow-right'></i> بازگشت به صفحه اصلی
-                </a>
-                <b:loop values='data:posts' var='post'>
-                  <h1><data:post.title/></h1>
-                  <div class='post-body'>
-                    <data:post.body/>
-                  </div>
-                </b:loop>
-              </div>
-            
-            <!-- صفحه ثابت (درباره ما) -->
-            <b:elseif cond='data:view.isPage'/>
-              <div class='static-page'>
-                <a class='back-to-home' expr:href='data:blog.homepageUrl'>
-                  <i class='fas fa-arrow-right'></i> بازگشت به صفحه اصلی
-                </a>
-                <b:loop values='data:posts' var='post'>
-                  <h1><data:post.title/></h1>
-                  <div class='page-body'>
-                    <data:post.body/>
-                  </div>
-                </b:loop>
-              </div>
-            
-            <!-- صفحه لیست اخبار -->
-            <b:else/>
-              <div class='blog-posts'>
-                <b:loop values='data:posts' var='post'>
-                  <!-- کلاس متفاوت برای کارت‌های بدون عکس -->
-                  <b:if cond='data:post.featuredImage'>
-                    <div class='post-outer'>
-                      <a expr:href='data:post.url'>
-                        <img class='post-thumbnail' expr:src='resizeImage(data:post.featuredImage, 400, &quot;16:9&quot;)'/>
-                      </a>
-                      <div class='post-info'>
-                        <h2 class='post-title'>
-                          <a expr:href='data:post.url'><data:post.title/></a>
-                        </h2>
-                        <div class='post-snippet'>
-                          <data:post.snippet/>
-                        </div>
-                        <div class='post-meta'>
-                          <span><i class='far fa-clock'></i> <data:post.timestamp/></span>
-                          <a class='read-more-btn' expr:href='data:post.url'><i class='fas fa-arrow-left'></i> ادامه خبر</a>
-                        </div>
-                      </div>
-                    </div>
-                  <b:else/>
-                    <!-- کارت بدون عکس - کوچکتر -->
-                    <div class='post-outer no-image'>
-                      <div class='post-info'>
-                        <h2 class='post-title'>
-                          <a expr:href='data:post.url'><data:post.title/></a>
-                        </h2>
-                        <div class='post-snippet'>
-                          <data:post.snippet/>
-                        </div>
-                        <div class='post-meta'>
-                          <span><i class='far fa-clock'></i> <data:post.timestamp/></span>
-                          <a class='read-more-btn' expr:href='data:post.url'><i class='fas fa-arrow-left'></i> ادامه</a>
-                        </div>
-                      </div>
-                    </div>
-                  </b:if>
-                </b:loop>
-              </div>
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'fa',
+        includedLanguages: 'en,de',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+    
+    function translateTo(lang) {
+      if (lang === 'fa') {
+        // Reset to original - clear cookies and reload
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.blogspot.com;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname + ';';
+        location.reload();
+        return;
+      }
+      
+      var select = document.querySelector('.goog-te-combo');
+      if (select) {
+        select.value = lang;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        // Fallback: Try again after widget loads
+        setTimeout(function() {
+          var s = document.querySelector('.goog-te-combo');
+          if (s) { s.value = lang; s.dispatchEvent(new Event('change')); }
+        }, 1000);
+      }
+    }
+  </script>
+  
+  <!-- Hide Google Translate Bar -->
+  <style>
+    .goog-te-banner-frame, .skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+  </style>
 
-              <div class='blog-pager'>
-                <b:if cond='data:newerPageUrl'>
-                  <a expr:href='data:newerPageUrl'><i class='fas fa-arrow-right'></i> صفحه قبلی</a>
-                </b:if>
-                <b:if cond='data:olderPageUrl'>
-                  <a expr:href='data:olderPageUrl'>صفحه بعدی <i class='fas fa-arrow-left'></i></a>
-                </b:if>
-              </div>
+  <!-- 3. NAV -->
+  <nav class='main-nav'>
+    <div class='nav-inner'>
+      <div class='nav-links'>
+        <a href='/'>خانه</a>
+        <a href='/search/label/حقوق%20بشر'>حقوق بشر</a>
+
+        <a href='/search/label/بین‌الملل'>بین‌الملل</a>
+        <a href='/search/label/گزارش%20ویژه'>گزارش ویژه</a>
+      </div>
+      <div class='nav-search'>
+        <form action='/search' method='get' style='display:flex;gap:5px;'>
+          <input name='q' placeholder='جستجو...' type='text' id='search-input'/>
+          <button type='submit' class='search-btn' title='جستجو'>
+            <i class='fas fa-search'></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 4. MAIN CONTENT AREA -->
+  <div class='main-container'>
+    
+    <!-- LEFT COLUMN: CONTENT -->
+    <div class='main-col'>
+      <b:section id='main-posts' showaddelement='yes'>
+        <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
+          <b:includable id='main' var='this'>
+            
+            <!-- Logic to separate Hero Post vs Grid Posts -->
+            <!-- Note: Requires looped index manually or specific handling -->
+            
+            <b:if cond='data:view.isHomepage'>
+               <!-- Custom Loop for Homepage -->
+               <div class='homepage-loop news-grid-container'>
+                 <b:loop index='i' values='data:posts' var='post'>
+                   
+                   <b:if cond='data:i == 0'>
+                     <!-- 1. HERO POST (First Item) -->
+                     <article class='hero-post start-grid-item'>
+                       <a expr:href='data:post.url'>
+                         <b:if cond='data:post.featuredImage'>
+                           <img class='hero-thumb' expr:src='data:post.featuredImage'/>
+                         <b:else/>
+                           <div class='hero-thumb' style='background:#111;display:flex;align-items:center;justify-content:center;'>No Image</div>
+                         </b:if>
+                         <div class='hero-content'>
+                           <span class='hero-cat'>خبر ویژه</span>
+                           <h2 class='hero-title'><data:post.title/></h2>
+                           <div class='hero-meta'><data:post.dateHeader/></div>
+                         </div>
+                       </a>
+                     </article>
+                     
+                     <div class='news-grid-title' style='width:100%;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #333;font-size:18px;font-weight:bold;color:#fff;'>
+                       <span style='border-bottom:2px solid var(--primary);padding-bottom:10px;'>آخرین گزارش‌ها</span>
+                     </div>
+                   
+                   <b:else/>
+                     <!-- 2. GRID POSTS (Other Items) -->
+                     <article class='post-card'>
+                       <div class='card-thumb'>
+                         <a expr:href='data:post.url'>
+                           <b:if cond='data:post.featuredImage'>
+                             <img expr:src='resizeImage(data:post.featuredImage, 720, &quot;16:9&quot;)'/>
+                           <b:else/>
+                             <div style='width:100%;height:100%;background:#222'></div>
+                           </b:if>
+                         </a>
+                       </div>
+                       <div class='card-body'>
+                         <h3 class='card-title'><a expr:href='data:post.url'><data:post.title/></a></h3>
+                         <div class='card-excerpt'><data:post.snippet/></div>
+                         <a expr:href='data:post.url' style='font-size:11px;font-weight:bold;color:var(--primary)'>مطالعه کامل &gt;</a>
+                       </div>
+                     </article>
+                   </b:if>
+                   
+                 </b:loop>
+                 </div> <!-- End Container -->
+                 
+                 <!-- Pagination -->
+                 <div class='blog-pager' id='blog-pager'>
+                    <b:if cond='data:newerPageUrl'><a expr:href='data:newerPageUrl' id='blog-pager-newer-link'>Next</a></b:if>
+                    <b:if cond='data:olderPageUrl'><a expr:href='data:olderPageUrl' id='blog-pager-older-link'>Previous</a></b:if>
+                 </div>
+
+            <b:else/>
+               <!-- Single Post View code (Simplified) -->
+               <b:loop values='data:posts' var='post'>
+                 <div class='widget-box' style='padding:40px'>
+                   <h1 style='font-size:32px;margin-bottom:20px'><data:post.title/></h1>
+                   <div style='line-height:2.2;font-size:16px;color:#ddd'><data:post.body/></div>
+                 </div>
+               </b:loop>
             </b:if>
           </b:includable>
         </b:widget>
       </b:section>
     </div>
 
-    <aside class='sidebar-area'>
+    <!-- RIGHT COLUMN: SIDEBAR -->
+    <aside class='sidebar-col'>
       <b:section id='sidebar' showaddelement='yes'>
         
-        <b:widget id='HTML2' title='آمار سایت' type='HTML'>
+        <!-- WIDGET 1: QUOTE -->
+        <b:widget id='HTML1' locked='false' title='نقل قول روز' type='HTML'>
           <b:includable id='main'>
-            <h2><i class='fas fa-chart-bar'></i> <data:title/></h2>
-            <div class='stats-widget'>
-              <div class='stat-item'>
-                <i class='fas fa-newspaper'></i>
-                <span class='stat-number'>۱۵۰+</span>
-                <span class='stat-label'>اخبار منتشر شده</span>
-              </div>
-              <div class='stat-item'>
-                <i class='fas fa-eye'></i>
-                <span class='stat-number'>۵K+</span>
-                <span class='stat-label'>بازدید</span>
-              </div>
-              <div class='stat-item'>
-                <i class='fas fa-users'></i>
-                <span class='stat-number'>۱K+</span>
-                <span class='stat-label'>مخاطب</span>
-              </div>
-              <div class='stat-item'>
-                <i class='fas fa-globe'></i>
-                <span class='stat-number'>۲۴/۷</span>
-                <span class='stat-label'>به‌روزرسانی</span>
-              </div>
+            <div class='widget-box quote-box'>
+              <div class='widget-header'>سخن روز</div>
+              <img class='quote-img' src='https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Nelson_Mandela_1994.jpg/440px-Nelson_Mandela_1994.jpg'/>
+              <div class='quote-text'>"انکار حقوق بشر مردم، به چالش کشیدن انسانیت آنهاست."</div>
+              <div class='quote-author'>- نلسون ماندلا</div>
             </div>
           </b:includable>
         </b:widget>
 
-        <b:widget id='BlogSearch1' title='جستجو' type='BlogSearch'>
+        <!-- WIDGET 2: STATISTICS -->
+        <b:widget id='HTML2' locked='false' title='آمار گزارش‌ها' type='HTML'>
           <b:includable id='main'>
-            <h2><i class='fas fa-search'></i> جستجو</h2>
-            <div class='widget-content'>
-              <form expr:action='data:blog.searchUrl'>
-                <input class='search-input' name='q' placeholder='جستجو در اخبار...' style='width: 100%; padding: 12px; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; font-family: Vazir;' type='text'/>
-              </form>
-            </div>
-          </b:includable>
-        </b:widget>
+            <div class='widget-box'>
+              <div class='widget-header'>بانک اطلاعاتی</div>
+              
+              <div class='stat-row'>
+                <span class='stat-label'>حقوق بشر</span>
+                <span class='stat-val'>1,240</span>
+              </div>
+              <div class='stat-graph'><div class='stat-bar' style='width:90%'></div></div>
+              
+              <div class='stat-row' style='margin-top:15px'>
+                <span class='stat-label'>زندانیان سیاسی</span>
+                <span class='stat-val'>850</span>
+              </div>
+              <div class='stat-graph'><div class='stat-bar' style='width:65%'></div></div>
 
-        <b:widget id='PopularPosts1' title='پربازدیدترین‌ها' type='PopularPosts'>
-          <b:widget-settings>
-            <b:widget-setting name='numItemsToShow'>5</b:widget-setting>
-            <b:widget-setting name='showThumbnails'>true</b:widget-setting>
-            <b:widget-setting name='showSnippets'>false</b:widget-setting>
-          </b:widget-settings>
-          <b:includable id='main'>
-            <h2><i class='fas fa-fire'></i> <data:title/></h2>
-            <div class='widget-content'>
-              <b:loop values='data:posts' var='post'>
-                <a class='item-content' expr:href='data:post.url'>
-                  <b:if cond='data:post.thumbnail'>
-                    <img expr:alt='data:post.title' expr:src='data:post.thumbnail'/>
-                  </b:if>
-                  <span class='item-title'><data:post.title/></span>
-                </a>
-              </b:loop>
-            </div>
-          </b:includable>
-        </b:widget>
-
-        <b:widget id='Label1' title='موضوعات' type='Label'>
-          <b:widget-settings>
-            <b:widget-setting name='display'>LIST</b:widget-setting>
-            <b:widget-setting name='showFreqNumbers'>false</b:widget-setting>
-          </b:widget-settings>
-          <b:includable id='main'>
-            <h2><i class='fas fa-tags'></i> <data:title/></h2>
-            <div class='widget-content'>
-              <ul>
-                <b:loop values='data:labels' var='label'>
-                  <li><a expr:href='data:label.url'><data:label.name/></a></li>
-                </b:loop>
-              </ul>
+              <div class='stat-row' style='margin-top:15px'>
+                <span class='stat-label'>اعدام‌ها</span>
+                <span class='stat-val'>320</span>
+              </div>
+              <div class='stat-graph'><div class='stat-bar' style='width:30%'></div></div>
             </div>
           </b:includable>
         </b:widget>
@@ -640,18 +571,51 @@
 
   </div>
 
-  <footer>
-    <div class='container'>
-      <div class='footer-links'>
-        <a href='/'>صفحه اصلی</a>
-        <a href='/p/about.html'>درباره ما</a>
-        <a href='/search/label/بین‌الملل'>بین‌الملل</a>
-        <a href='/search/label/حقوق%20بشر'>حقوق بشر</a>
+  <!-- 5. FOOTER -->
+  <footer class='main-footer'>
+    <div class='footer-inner'>
+      <div class='footer-col'>
+        <h4>دسترسی سریع</h4>
+        <ul>
+          <li><a href='/p/blog-page.html'>درباره ما</a></li>
+          <li><a href='/'>آرشیو گزارش‌ها</a></li>
+        </ul>
       </div>
-      <p>تمامی حقوق برای اخبار ایران محفوظ است © 2024</p>
-
+    </div>
+    <div style='text-align:center; margin-top:40px; color:#555; font-size:11px; border-top:1px solid #111; padding-top:20px'>
+      © 2026 All Rights Reserved.
     </div>
   </footer>
+
+  <!-- Infinite Scroll Script -->
+  <script type='text/javascript'>
+    // Standard Infinite Scroll Logic
+    (function() {
+      var loading = false;
+      // Note: Selector updated for new layout structure
+      var container = document.querySelector('.homepage-loop'); 
+      var nextLink = document.getElementById('blog-pager-older-link');
+      var nextPageUrl = nextLink ? nextLink.href : null;
+
+      if(container &amp;&amp; nextLink) {
+        window.addEventListener('scroll', function() {
+          if(loading || !nextPageUrl) return;
+          if((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+            loading = true;
+            fetch(nextPageUrl).then(r => r.text()).then(html => {
+               var doc = new DOMParser().parseFromString(html, 'text/html');
+               var newPosts = doc.querySelectorAll('.post-card');
+               newPosts.forEach(p => container.appendChild(p));
+               
+               var newNext = doc.getElementById('blog-pager-older-link');
+               if(newNext) nextPageUrl = newNext.href; else nextPageUrl = null;
+               loading = false;
+            });
+          }
+        });
+      }
+    })();
+  </script>
 
 </body>
 </html>

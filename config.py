@@ -156,8 +156,8 @@ NEWS_SOURCES = [
         "max_items": 5,
         "selectors": {
             "articles": "article",
-            "title": "h2 a, h3 a, h4 a",
-            "link": "h2 a, h3 a, h4 a",
+            "title": ".jeg_post_title a, h3.jeg_post_title a, h2 a, h3 a, h4 a",
+            "link": ".jeg_post_title a, h3.jeg_post_title a, h2 a, h3 a, h4 a",
             "description": ".entry-content p, p",
             "image": "img"
         }

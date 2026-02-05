@@ -28,9 +28,50 @@ class NewsFetcher:
     
     def __init__(self):
         self.cache_file = "news_cache.json"
-        self.seen_news = self._load_cache()
+        self._load_cache() # Sets self.seen_ids and self.seen_titles
+        self.seen_news = self.seen_ids # Alias for backward compatibility
         self.current_proxy = None
         self._setup_session()
+
+    # ... (rest of methods)
+
+    def _save_cache(self):
+        """Save seen news IDs and Titles to cache"""
+        data = {
+            'seen_ids': list(self.seen_ids),
+            'seen_titles': list(self.seen_titles)
+        }
+        try:
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False)
+        except Exception as e:
+            print(f"Error saving cache: {e}")
+
+    def _generate_news_id(self, title: str, link: str) -> str:
+        """Generate unique hash for news item"""
+        # نرمال‌سازی عنوان برای جلوگیری از تکرار با تغییرات جزئی
+        clean_title = re.sub(r'[^\w\s]', '', title).strip()
+        unique_string = f"{clean_title}_{link}"
+        return hashlib.md5(unique_string.encode()).hexdigest()
+        
+    def is_duplicate(self, title: str, news_id: str) -> bool:
+        """Check if news is duplicate by ID or Title"""
+        if news_id in self.seen_ids:
+            return True
+            
+        # چک کردن عنوان (دقیق)
+        if title in self.seen_titles:
+            return True
+            
+        # چک کردن عنوان (شباهت - اختیاری، فعلا دقیق)
+        # برای سرعت بیشتر بهتر است دقیق باشد
+        return False
+        
+    def mark_as_seen(self, title: str, news_id: str):
+        """Add news to seen list"""
+        self.seen_ids.add(news_id)
+        self.seen_titles.add(title)
+        self._save_cache()
     
     def _setup_session(self):
         """Setup requests session with optional proxy"""
@@ -85,26 +126,21 @@ class NewsFetcher:
             print(f"  [Error] Request failed: {str(e)[:50]}...")
             return None
     
-    def _load_cache(self) -> set:
-        """Load previously seen news IDs"""
+    
+    def _load_cache(self) -> dict:
+        """Load previously seen news IDs and Titles"""
+        self.seen_ids = set()
+        self.seen_titles = set()
+        
         if os.path.exists(self.cache_file):
             try:
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
-                    return set(data.get('seen_ids', []))
+                    self.seen_ids = set(data.get('seen_ids', []))
+                    self.seen_titles = set(data.get('seen_titles', []))
             except:
-                return set()
-        return set()
-    
-    def _save_cache(self):
-        """Save seen news IDs to cache"""
-        with open(self.cache_file, 'w', encoding='utf-8') as f:
-            json.dump({'seen_ids': list(self.seen_news)}, f)
-    
-    def _generate_news_id(self, title: str, link: str) -> str:
-        """Generate unique ID for news item"""
-        content = f"{title}{link}"
-        return hashlib.md5(content.encode()).hexdigest()
+                pass
+        return self.seen_ids
     
     def _is_relevant(self, title: str, description: str, source_keywords: List[str] = None) -> bool:
         """Check if news is relevant based on keywords"""
@@ -238,7 +274,7 @@ class NewsFetcher:
                     full_link = urljoin(url, href)
                     news_id = self._generate_news_id(title, full_link)
                 
-                    if news_id in self.seen_news:
+                    if self.is_duplicate(title, news_id):
                         continue
                 
                     # Try to find image near the link
@@ -319,7 +355,7 @@ class NewsFetcher:
                 
                     # Check if already seen
                     news_id = self._generate_news_id(title, full_link)
-                    if news_id in self.seen_news:
+                    if self.is_duplicate(title, news_id):
                         continue
                 
                     # Extract description
@@ -736,16 +772,107 @@ class NewsFetcher:
                     if len(paragraphs) >= 15:
                         break
         
-        # ========== ساخت HTML محتوا ==========
+        # ========== SEO: Internal Linking Logic ==========
+        SEO_KEYWORDS = {
+            'ایران': '/search/label/ایران',
+            'حقوق بشر': '/search/label/حقوق%20بشر',
+            'آمریکا': '/search/label/بین‌الملل',
+            'اسرائیل': '/search/label/بین‌الملل',
+            'اروپا': '/search/label/بین‌الملل',
+            'خاورمیانه': '/search/label/بین‌الملل',
+            'زندان': '/search/label/حقوق%20بشر',
+            'اعدام': '/search/label/حقوق%20بشر',
+            'زنان': '/search/label/حقوق%20بشر',
+            'سیاسی': '/search/label/سیاست',
+            'خامنه‌ای': '/search/label/سیاست',
+            'رئیسی': '/search/label/سیاست',
+            'پزشکیان': '/search/label/سیاست',
+            'سپاه': '/search/label/سیاست',
+            'هسته‌ای': '/search/label/بین‌الملل',
+            'تحریم': '/search/label/بین‌الملل',
+            'مجلس': '/search/label/سیاست',
+            'دولت': '/search/label/سیاست',
+            'اقتصاد': '/search/label/اقتصاد',
+            'تورم': '/search/label/اقتصاد',
+            'دلار': '/search/label/اقتصاد',
+            'نفت': '/search/label/اقتصاد',
+            'بورس': '/search/label/اقتصاد',
+            'خودرو': '/search/label/اقتصاد',
+            'مسکن': '/search/label/اقتصاد',
+            'طلا': '/search/label/اقتصاد',
+            'ارز': '/search/label/اقتصاد',
+            'بانک': '/search/label/اقتصاد',
+            'تجارت': '/search/label/اقتصاد',
+            'صادرات': '/search/label/اقتصاد',
+            'واردات': '/search/label/اقتصاد',
+            'ورزش': '/search/label/ورزش',
+            'فوتبال': '/search/label/ورزش',
+            'استقلال': '/search/label/ورزش',
+            'پرسپولیس': '/search/label/ورزش',
+            'کشتی': '/search/label/ورزش',
+            'والیبال': '/search/label/ورزش',
+            'بسکتبال': '/search/label/ورزش',
+            'سینما': '/search/label/فرهنگ%20و%20هنر',
+            'تئاتر': '/search/label/فرهنگ%20و%20هنر',
+            'موسیقی': '/search/label/فرهنگ%20و%20هنر',
+            'کتاب': '/search/label/فرهنگ%20و%20هنر',
+            'هنر': '/search/label/فرهنگ%20و%20هنر',
+            'فناوری': '/search/label/فناوری',
+            'اینترنت': '/search/label/فناوری',
+            'موبایل': '/search/label/فناوری',
+            'کامپیوتر': '/search/label/فناوری',
+            'هوش مصنوعی': '/search/label/فناوری',
+            'سلامت': '/search/label/سلامت',
+            'پزشکی': '/search/label/سلامت',
+            'کرونا': '/search/label/سلامت',
+            'واکسن': '/search/label/سلامت',
+            'بیماری': '/search/label/سلامت',
+            'درمان': '/search/label/سلامت',
+            'دارو': '/search/label/سلامت',
+            'محیط زیست': '/search/label/محیط%20زیست',
+            'آلودگی': '/search/label/محیط%20زیست',
+            'آب': '/search/label/محیط%20زیست',
+            'هوا': '/search/label/محیط%20زیست',
+            'جنگل': '/search/label/محیط%20زیست',
+            'حیوانات': '/search/label/محیط%20زیست',
+            'جامعه': '/search/label/جامعه',
+            'خانواده': '/search/label/جامعه',
+            'کودکان': '/search/label/جامعه',
+            'طلاق': '/search/label/جامعه',
+            'ازدواج': '/search/label/جامعه',
+            'فرهنگ': '/search/label/فرهنگ'
+        }
+        
+        used_keywords = set()
         clean_html = ""
+        
+        # Sort keywords by length (descending) to match longest phrases first
+        sorted_keywords = sorted(SEO_KEYWORDS.keys(), key=len, reverse=True)
+
         for p in paragraphs:
-            clean_html += f"<p style='margin-bottom: 15px; line-height: 2; text-align: justify;'>{p}</p>\n"
+            # SEO Linking Logic
+            processed_text = p
+            for kw in sorted_keywords:
+                if kw not in used_keywords and kw in processed_text:
+                    # Link constraint: Only link if keyword is surrounded by spaces or punctuation
+                    # and not already part of a link (simple check)
+                    
+                    # Simple replacement for first occurrence
+                    link = f'<a href="{SEO_KEYWORDS[kw]}" title="اخبار {kw}" style="color:#ea2027;font-weight:bold;text-decoration:none">{kw}</a>'
+                    processed_text = processed_text.replace(kw, link, 1)
+                    used_keywords.add(kw)
+                    
+                    # Limit: Max 5 links per article to avoid spammy look
+                    if len(used_keywords) >= 5:
+                        break
+            
+            clean_html += f"<p style='margin-bottom: 15px; line-height: 2; text-align: justify;'>{processed_text}</p>\n"
         
         if clean_html:
             result['full_content'] = clean_html
-            # result['main_image'] هست، نیازی به تغییر نیست
+            # result['main_image'] unmodified
             result['success'] = True
-            print(f"    -> Got {len(paragraphs)} paragraphs (main article only)")
+            print(f"    -> Got {len(paragraphs)} paragraphs (with {len(used_keywords)} SEO links)")
         else:
             print(f"    -> No clean content found")
             
