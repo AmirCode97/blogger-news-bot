@@ -66,7 +66,7 @@ NEWS_SOURCES = [
     # ==================== ایران اینترنشنال - گزارش ویژه (تحلیلی) ====================
     {
         "name": "ایران اینترنشنال - گزارش ویژه",
-        "url": "https://www.iranintl.com/investigatives", # صفحه گزارش‌های تحقیقی
+        "url": "https://www.iranintl.com/special-report", # لینک اصلاح شده
         "type": "scrape",
         "language": "fa",
         "enabled": True,
