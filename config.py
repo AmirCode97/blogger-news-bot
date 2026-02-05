@@ -63,6 +63,25 @@ NEWS_SOURCES = [
             "image": "img"
         }
     },
+    # ==================== ایران اینترنشنال - گزارش ویژه (تحلیلی) ====================
+    {
+        "name": "ایران اینترنشنال - گزارش ویژه",
+        "url": "https://www.iranintl.com/investigatives", # صفحه گزارش‌های تحقیقی
+        "type": "scrape",
+        "language": "fa",
+        "enabled": True,
+        "category": "گزارش ویژه", # لیبل مخصوص
+        "priority": 1,
+        "max_items": 3, # تعداد کمتر چون تحلیل عمیق است
+        "selectors": {
+            # سلکتور عمومی‌تر برای پیدا کردن مقالات در این صفحه
+            "articles": "article, .media-block, .ui-story-card, div[role='article']",
+            "title": "h2 a, h3 a, .title a, a",
+            "link": "h2 a, h3 a, .title a, a",
+            "description": "p",
+            "image": "img"
+        }
+    },
     # ==================== رادیو فردا - غیرفعال ====================
     {
         "name": "رادیو فردا",
