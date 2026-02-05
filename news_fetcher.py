@@ -424,10 +424,7 @@ class NewsFetcher:
         print(f"\n[OK] Found {len(all_news)} new news items total")
         return all_news
 
-    def mark_as_seen(self, news_id: str):
-        """Mark news item as processed"""
-        self.seen_news.add(news_id)
-        self._save_cache()
+
 
     def fetch_full_article(self, article_url: str, source_name: str = "") -> Dict:
         """

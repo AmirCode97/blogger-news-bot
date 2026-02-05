@@ -21,7 +21,7 @@ TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "")
 
 # ==================== News Settings ====================
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "5"))
-MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "25"))  # Total: 10+5+10=25
+MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "20"))  # Total: 10+5+5=20
 
 # ==================== Proxy Settings ====================
 # برای دور زدن محدودیت‌های Cloudflare
@@ -48,7 +48,7 @@ NEWS_SOURCES = [
     # ==================== ایران اینترنشنال (بین‌الملل) - 10 خبر ====================
     {
         "name": "ایران اینترنشنال",
-        "url": "https://www.iranintl.com/iran",  # صفحه اخبار ایران
+        "url": "https://www.iranintl.com/iran",
         "type": "scrape",
         "language": "fa",
         "enabled": True,
@@ -56,10 +56,9 @@ NEWS_SOURCES = [
         "priority": 1,
         "max_items": 10,
         "selectors": {
-            # لینک‌های خبر - هم نسبی و هم مطلق
             "articles": "a[href*='2026']",
-            "title": "",  # عنوان از خود لینک
-            "link": "",  # لینک از href
+            "title": "",
+            "link": "",
             "description": "",
             "image": "img"
         }
@@ -68,46 +67,30 @@ NEWS_SOURCES = [
     {
         "name": "رادیو فردا",
         "url": "https://www.radiofarda.com/",
-        "rss_url": "https://www.radiofarda.com/api/",  # Try RSS
+        "enabled": False,
         "type": "scrape",
         "language": "fa",
-        "enabled": False,  # غیرفعال شده
         "category": "حقوق بشر",
-        "max_items": 5,  # حداکثر ۵ خبر در هر اجرا
-        "selectors": {
-            "articles": ".media-block, article, .lbox",
-            "title": ".media-block__title, h4 a, h3 a, h2 a",
-            "link": "a",
-            "description": "p",
-            "image": "img"
-        }
+        "max_items": 5,
+        "selectors": {}
     },
-    # ==================== سایت‌های حقوق بشری - مجموعاً 10 خبر ====================
+    # ==================== سایت‌های حقوق بشری (غیرفعال شده‌اند) ====================
     {
         "name": "کانون دفاع از حقوق بشر در ایران (بشریت)",
         "url": "https://bashariyat.org/",
+        "enabled": False,  # غیرفعال طبق درخواست
         "type": "scrape",
-        "language": "fa",
-        "enabled": True,
-        "category": "حقوق بشر",
-        "max_items": 3,  # حداکثر ۳ خبر
-        "selectors": {
-            "articles": "article, .post, .entry",
-            "title": "h2 a, .entry-title a",
-            "link": "h2 a, .entry-title a",
-            "description": ".entry-content, .post-content, p",
-            "image": "img"
-        }
+        "max_items": 3,
     },
     {
         "name": "کانون حقوق بشر ایران",
         "url": "https://iranhrs.org/",
         "type": "scrape",
         "language": "fa",
-        "enabled": True,
+        "enabled": True,  # فعال - 5 خبر
         "category": "حقوق بشر",
-        "max_items": 3,  # حداکثر ۳ خبر
-        "use_proxy": False,
+        "max_items": 5,
+        "use_proxy": True, # استفاده از پروکسی برای اطمینان
         "selectors": {
             "articles": "article",
             "title": "h2 a, h3 a",
@@ -119,30 +102,17 @@ NEWS_SOURCES = [
     {
         "name": "مجموعه فعالان حقوق بشر در ایران (HRA)",
         "url": "https://www.hra-iran.org/fa/",
-        "rss_url": "https://www.hra-iran.org/fa/feed/",
+        "enabled": False,  # غیرفعال طبق درخواست
         "type": "rss",
-        "language": "fa",
-        "enabled": True,
-        "category": "حقوق بشر",
-        "max_items": 4  # حداکثر ۴ خبر
+        "max_items": 4
     },
-    # ==================== مرکز اسناد حقوق بشر ایران - 5 خبر ====================
+    # ==================== مرکز اسناد حقوق بشر ایران - غیرفعال ====================
     {
         "name": "مرکز اسناد حقوق بشر ایران",
         "url": "https://persian.iranhumanrights.org/",
+        "enabled": False,  # غیرفعال طبق درخواست
         "type": "scrape",
-        "language": "fa",
-        "enabled": True,
-        "category": "حقوق بشر",
-        "priority": 2,
         "max_items": 5,
-        "selectors": {
-            "articles": "article, .post",
-            "title": "h1 a, h2 a, h3 a, .entry-title a, .post-head-title a",  # اضافه شدن h1
-            "link": "h1 a, h2 a, h3 a, .entry-title a, .post-head-title a",
-            "description": ".entry-content p, .excerpt p",
-            "image": "img"
-        }
     },
     # ==================== ناظران حقوق بشر ایران - 5 خبر ====================
     {
@@ -150,7 +120,7 @@ NEWS_SOURCES = [
         "url": "https://fa.iran-hrm.com/",
         "type": "scrape",
         "language": "fa",
-        "enabled": True,
+        "enabled": True, # فعال
         "category": "حقوق بشر",
         "priority": 2,
         "max_items": 5,
