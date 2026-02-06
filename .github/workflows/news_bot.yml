@@ -1,9 +1,9 @@
 name: Blogger News Bot
 
 on:
-  #  schedule:
-  #    # هر 5 ساعت اجرا می‌شود (0:00, 5:00, 10:00, 15:00, 20:00)
-  #    - cron: "0 0,5,10,15,20 * * *"
+  schedule:
+    # هر 5 ساعت اجرا می‌شود
+    - cron: "0 */5 * * *"
   workflow_dispatch: # امکان اجرای دستی
 
 jobs:
@@ -37,12 +37,28 @@ jobs:
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_ADMIN_CHAT_ID=${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
           CHECK_INTERVAL_HOURS=5
-          MAX_NEWS_PER_CHECK=5
-          USE_PROXY=false
+          MAX_NEWS_PER_CHECK=20
+          USE_PROXY=true
           EOF
+
+      - name: Restore news cache
+        continue-on-error: true
+        uses: actions/cache@v4
+        with:
+          path: news_cache.json
+          key: news-cache-${{ github.run_id }}
+          restore-keys: |
+            news-cache-
 
       - name: Run News Bot
         run: python main.py --once
         env:
           PYTHONUNBUFFERED: 1
           BLOGGER_TOKEN_BASE64: ${{ secrets.BLOGGER_TOKEN_BASE64 }}
+
+      - name: Save news cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: news_cache.json
+          key: news-cache-${{ github.run_id }}
