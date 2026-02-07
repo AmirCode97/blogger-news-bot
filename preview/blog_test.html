@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport" />
+    <title>IRAN POL NEWS | Test Preview</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet"
+        type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+
+    <style>
+        /* --- COPIED FROM YOUR BLOG TEMPLATE --- */
+        :root {
+            --primary: #c0392b;
+            /* Alert Red */
+            --primary-dark: #a93226;
+            --bg-dark: #0a0a0a;
+            /* Deep Black */
+            --bg-card: #141414;
+            --text-main: #ecf0f1;
+            --text-muted: #95a5a6;
+            --border: #2c3e50;
+            --header-bg: #050505;
+        }
+
+        * {
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Vazir', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            direction: rtl;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: 0.3s;
+        }
+
+        /* --- HEADER (AS PER YOUR BLOG) --- */
+        .site-header {
+            background: var(--header-bg);
+            padding: 25px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* --- THE LOGO YOU REQUESTED --- */
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo-main {
+            font-size: 24px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #fff;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .logo-main span {
+            color: var(--primary);
+        }
+
+        .logo-sub {
+            font-size: 9px;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 700;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .lang-switcher {
+            display: flex;
+            gap: 10px;
+        }
+
+        .lang-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid #333;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #aaa;
+        }
+
+        .header-date {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        /* --- ALERT BAR --- */
+        .alert-bar {
+            background: var(--primary);
+            color: #fff;
+            font-size: 12px;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            width: 100%;
+        }
+
+        .alert-title {
+            background: #000;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-weight: 900;
+            margin-left: 15px;
+        }
+
+        .main-nav {
+            background: #0f0f0f;
+            border-bottom: 2px solid var(--border);
+            height: 50px;
+        }
+
+        .nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            height: 100%;
+            align-items: center;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            font-weight: 700;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 15px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 40px;
+        }
+
+        .hero-post {
+            position: relative;
+            margin-bottom: 40px;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 400px;
+            background: #111;
+        }
+
+        .hero-content {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            left: 0;
+            padding: 40px;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+        }
+
+        .hero-title {
+            font-size: 32px;
+            font-weight: 900;
+            color: #fff;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="alert-bar">
+        <div class="alert-inner">
+            <div class="alert-title">فوری</div>
+            <div style="margin-right: 15px;">در حال دریافت اخبار...</div>
+        </div>
+    </div>
+
+    <header class="site-header">
+        <div class="header-content">
+            <div class="lang-switcher">
+                <div class="lang-btn"><img src="https://flagcdn.com/w40/gb.png" width="18"> EN</div>
+                <div class="lang-btn"><img src="https://flagcdn.com/w40/de.png" width="18"> DE</div>
+                <div class="lang-btn" style="background:var(--primary);color:#fff"><img
+                        src="https://flagcdn.com/w40/ir.png" width="18"> FA</div>
+            </div>
+
+            <!-- THE LOGO IN THE CENTER -->
+            <div class="logo-container">
+                <div class="logo-main">IRAN POL <span style="color:var(--primary)">NEWS</span></div>
+                <div class="logo-sub">Investigative Journalism</div>
+            </div>
+
+            <div class="header-date">جمعه، ۱۷ بهمن ۱۴۰۴</div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <div class="nav-links">
+                <a href="#">خانه</a>
+                <a href="#">حقوق بشر</a>
+                <a href="#">بین‌الملل</a>
+                <a href="#">گزارش ویژه</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="content">
+            <div class="hero-post">
+                <div class="hero-content">
+                    <h2 class="hero-title">تست پیش‌نمایش لوگو در قالب اصلی وبلاگ</h2>
+                </div>
+            </div>
+            <p style="color: #666; text-align: center;">این یک پیش‌نمایش آفلاین است تا موقعیت لوگو را در قالب فعلی خود
+                ببینید.</p>
+        </div>
+        <div class="sidebar">
+            <div style="background: var(--bg-card); padding: 20px; border-radius: 6px; border: 1px solid #222;">
+                <h4 style="border-bottom: 2px solid var(--primary); padding-bottom: 10px;">سایدبار تست</h4>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>

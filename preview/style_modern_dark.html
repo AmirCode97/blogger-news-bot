@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRAN POL NEWS | Investigative Dark</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet"
+        type="text/css" />
+    <style>
+        :root {
+            --bg: #05070a;
+            --surface: #0d1117;
+            --accent: #ce0000;
+            --text-high: #ffffff;
+            --text-mid: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text-high);
+            font-family: 'Vazir', sans-serif;
+            overflow-x: hidden;
+        }
+
+        header {
+            height: 80px;
+            background: rgba(5, 7, 10, 0.8);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            text-align: center;
+        }
+
+        .logo-main {
+            font-size: 28px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            line-height: 1;
+        }
+
+        .logo-main span {
+            color: var(--accent);
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-weight: 700;
+            margin-top: 5px;
+            display: block;
+            opacity: 0.8;
+        }
+
+        .hero {
+            height: 500px;
+            position: relative;
+            margin: 20px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: url('https://eutoday.net/wp-content/uploads/2026/01/ChatGPT-Image-Jan-29-2026-at-11_09_24-PM.jpg') center/cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            bottom: 0;
+            padding: 60px;
+            width: 100%;
+            background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
+        }
+
+        .hero-tag {
+            background: var(--accent);
+            color: white;
+            padding: 4px 12px;
+            font-size: 12px;
+            font-weight: 900;
+            border-radius: 4px;
+            display: inline-block;
+            margin-bottom: 15px;
+        }
+
+        .hero-title {
+            font-size: 42px;
+            font-weight: 900;
+            margin: 0;
+            max-width: 800px;
+            line-height: 1.2;
+            text-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+        }
+
+        .card-img {
+            height: 180px;
+            background: #111;
+            overflow: hidden;
+        }
+
+        .card-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: 0.5s;
+        }
+
+        .card:hover .card-img img {
+            transform: scale(1.1);
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.5;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-container">
+            <div class="logo-main">IRAN POL <span>NEWS</span></div>
+            <span class="logo-sub">Investigative Journalism</span>
+        </div>
+    </header>
+    <div class="hero">
+        <div class="hero-overlay">
+            <span class="hero-tag">گزارش ویژه</span>
+            <h1 class="hero-title">سپاه پاسداران و پایان صبر استراتژیک اروپا؛ تحلیل اختصاصی</h1>
+        </div>
+    </div>
+    <div class="grid">
+        <div class="card">
+            <div class="card-img"><img src="https://img.freepik.com/free-photo/police-operation-city_23-2148780137.jpg">
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">تداوم بازداشت‌های گسترده در اهواز پس از دی‌ماه ۱۴۰۴</h3>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-img"><img src="https://img.freepik.com/free-photo/protest-fire-city_23-2148906368.jpg">
+            </div>
+            <div class="card-body">
+                <h3 class="card-title">بلوار هفت‌تیر مشهد؛ زیر آتش سرکوب فنی</h3>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-img"><img
+                    src="https://img.freepik.com/free-photo/hospital-monitor-with-heart-rate_23-2148902096.jpg"></div>
+            <div class="card-body">
+                <h3 class="card-title">وضعیت بحرانی حسین کرملاچعب در ICU</h3>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

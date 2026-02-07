@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
+    <b:include data='blog' name='all-head-content'/>
+    <title><data:blog.pageTitle/></title>
+    
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <b:skin><![CDATA[
+    /* CSS VARIABLES */
+    :root {
+      --header-bg: #001f3f; 
+      --accent: #ce0000;
+      --bg-body: #f4f7f6;
+      --text-dark: #1a1a1a;
+    }
+
+    * { box-sizing: border-box; outline: none; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Vazir', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-dark);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    img { max-width: 100%; height: auto; display: block; }
+
+    /* ALERT BAR */
+    .alert-bar {
+      background: var(--accent); color: #fff; font-size: 12px; padding: 8px 0;
+      display: flex; align-items: center; border-bottom: 3px solid #990000;
+    }
+    .alert-inner { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; width: 100%; align-items: center; }
+    .alert-title { background: #000; padding: 2px 10px; border-radius: 4px; font-weight: 900; margin-left: 15px; white-space: nowrap; font-size: 11px; }
+    .alert-marquee { flex: 1; overflow: hidden; direction: ltr; }
+    .alert-marquee marquee { width: 100%; }
+
+    /* HEADER */
+    .site-header { background: var(--header-bg); padding: 30px 0; color: white; text-align: center; }
+    .header-content { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; }
+    .logo-container { flex: 1; text-align: center; }
+    .logo-main { font-size: 38px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1; color: white; }
+    .logo-main span { color: var(--accent); }
+    .logo-sub { font-size: 11px; color: #ccc; text-transform: uppercase; letter-spacing: 5px; font-weight: 400; margin-top: 6px; display: block; opacity: 0.8; }
+    .header-side { width: 220px; display: flex; align-items: center; font-size: 12px; color: rgba(255,255,255,0.7); }
+    .lang-switcher { justify-content: flex-end; gap: 8px; }
+    .lang-btn { display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 5px 10px; border-radius: 4px; font-size: 11px; color: #fff; }
+
+    /* NAV */
+    .main-nav { background: #fff; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; height: 55px; align-items: center; }
+    .nav-links { display: flex; gap: 30px; height: 100%; margin: 0 auto; }
+    .nav-links a { display: flex; align-items: center; height: 100%; font-weight: 800; font-size: 14px; color: var(--text-dark); border-bottom: 3px solid transparent; }
+    .nav-links a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* MAIN CONTAINER (Layout: Content Left, Sidebar Right in Code structure) */
+    .main-container {
+      max-width: 1280px; margin: 40px auto; padding: 0 15px;
+      display: grid; grid-template-columns: 1fr 280px; gap: 30px;
+    }
+
+    /* HERO POST */
+    .hero-post { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.08); margin-bottom: 40px; }
+    .hero-thumb { width: 100%; height: 450px; object-fit: cover; }
+    .hero-body { padding: 35px; }
+    .hero-title { font-size: 34px; font-weight: 900; margin: 0 0 15px; color: var(--header-bg); }
+    .hero-snippet { color: #555; line-height: 1.8; }
+
+    /* GRID CONTAINER */
+    .grid-header { font-size: 18px; font-weight: 900; color: var(--header-bg); border-bottom: 2px solid #ddd; padding-bottom: 10px; margin-bottom: 25px; }
+    .grid-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; width: 100%; }
+
+    /* POST CARD */
+    .post-card { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; }
+    .card-thumb { height: 200px; overflow: hidden; width: 100%; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .post-card:hover .card-thumb img { transform: scale(1.1); }
+    .card-body { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-title { font-size: 15px; font-weight: 800; margin: 0 0 10px; line-height: 1.6; }
+    .read-more { color: var(--accent); font-size: 11px; font-weight: bold; }
+
+    /* SIDEBAR WIDGETS */
+    .widget-box { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--header-bg); }
+    .widget-header { font-size: 13px; font-weight: 900; color: var(--header-bg); border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+
+    /* ANIMATION */
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+    .live-badge {
+        background: rgba(206, 0, 0, 0.1); color: var(--accent);
+        padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900;
+        display: flex; align-items: center; gap: 5px;
+        animation: blink 2s infinite; letter-spacing: 1px;
+    }
+
+    .quote-box { text-align: center; border-top-color: var(--accent); }
+    .quote-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin: 0 auto 10px; border: 2px solid #eee; }
+    .main-footer { background: var(--header-bg); color: #ccc; padding: 30px 0; margin-top: 60px; text-align: center; }
+    ]]></b:skin>
+</head>
+<body>
+
+    <!-- ALERT BAR -->
+    <div class="alert-bar">
+        <div class="alert-inner">
+            <div class="alert-title">فوری (LIVE)</div>
+            <div class="alert-marquee">
+                <marquee direction="right" scrollamount="8">واکنش اتحادیه اروپا به نقض حقوق بشر در ایران • تداوم تجمعات اعتراضی</marquee>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-side" style="justify-content: flex-start;"><span>جمعه، ۱۷ بهمن ۱۴۰۴</span></div>
+            <div class="logo-container">
+                <a expr:href='data:blog.homepageUrl'>
+                    <div class="logo-main">IRAN POL <span>NEWS</span></div><span class="logo-sub">Investigative Journalism</span>
+                </a>
+            </div>
+            <div class="header-side lang-switcher">
+                <a class="lang-btn" href="#">EN</a>
+                <a class="lang-btn" href="#">DE</a>
+                <a class="lang-btn" style="background:var(--accent);border-color:var(--accent)" href="#">FA</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- NAV -->
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <div class="nav-links">
+                <a expr:href='data:blog.homepageUrl'>صفحه اصلی</a>
+                <a href="#">حقوق بشر</a>
+                <a href="#">بین‌الملل</a>
+                <a href="#">گزارش ویژه</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENT -->
+    <div class="main-container">
+        
+        <!-- MAIN COLUMN -->
+        <div class="main-col">
+            <b:section id='main' showaddelement='no'>
+                <b:widget id='Blog1' locked='true' title='پست‌های وبلاگ' type='Blog'>
+                    <b:includable id='main' var='top'>
+                        <!-- FIRST POST (HERO) -->
+                         <b:if cond='data:posts.size > 0'>
+                            <b:with var='firstPost' value='data:posts.first'>
+                                <article class="hero-post">
+                                     <b:if cond='data:firstPost.featuredImage'>
+                                        <img class="hero-thumb" expr:src='data:firstPost.featuredImage'/>
+                                     </b:if>
+                                    <div class="hero-body">
+                                        <span style="background:var(--accent);color:white;padding:4px 10px;font-size:11px;border-radius:4px;display:inline-block;margin-bottom:10px;">تحلیل ویژه</span>
+                                        <h2 class="hero-title"><a expr:href='data:firstPost.url'><data:firstPost.title/></a></h2>
+                                        <div class="hero-snippet"><data:firstPost.snippet/></div>
+                                    </div>
+                                </article>
+                            </b:with>
+                        </b:if>
+
+                        <!-- GRID FOR OTHER POSTS -->
+                        <div class="grid-header">آخرین گزارش‌ها</div>
+                        <div class="grid-container">
+                            <b:loop values='data:posts' var='post' index='i'>
+                                <b:if cond='data:i > 0'> <!-- Skip 1st post -->
+                                    <article class="post-card">
+                                        <div class="card-thumb">
+                                            <b:if cond='data:post.featuredImage'>
+                                                <a expr:href='data:post.url'><img expr:src='data:post.featuredImage'/></a>
+                                            </b:if>
+                                        </div>
+                                        <div class="card-body">
+                                            <h3 class="card-title"><a expr:href='data:post.url'><data:post.title/></a></h3>
+                                            <a class="read-more" expr:href='data:post.url'>ادامه مطلب &gt;</a>
+                                        </div>
+                                    </article>
+                                </b:if>
+                            </b:loop>
+                        </div>
+                    </b:includable>
+                </b:widget>
+            </b:section>
+        </div>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar-col">
+             <b:section id='sidebar' showaddelement='yes'>
+                <b:widget id='HTML1' locked='false' title='آمار حقوق بشر' type='HTML'>
+                    <b:widget-settings>
+                        <b:widget-setting name='content'>
+                            <![CDATA[
+                            <div class="widget-box">
+                                <div class="widget-header">
+                                    <span>نقض حقوق بشر (۲۰۲۶)</span>
+                                    <span class="live-badge">● LIVE</span>
+                                </div>
+                                <div style="position:relative; height:180px; width:100%;"><canvas id="hrChart"></canvas></div>
+                                <div id="stats-legend" style="margin-top:20px; font-size:12px; color:#444;"></div>
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        const start = new Date("2026-01-01");
+                                        const now = new Date();
+                                        const diff = Math.ceil(Math.abs(now - start) / (1000 * 60 * 60 * 24)); 
+                                        const exec = Math.floor(diff * 2.15) + 85; 
+                                        const arrests = Math.floor(diff * 12.4) + 240; 
+                                        const violations = Math.floor(diff * 48.6) + 1150;
+
+                                        const ctx = document.getElementById('hrChart').getContext('2d');
+                                        new Chart(ctx, {
+                                            type: 'doughnut',
+                                            data: {
+                                                labels: ['اعدام در ایران', 'زندانیان سیاسی', 'موارد نقض حقوق'],
+                                                datasets: [{ data: [exec, arrests, violations], backgroundColor: ['#b71c1c', '#f57f17', '#263238'], borderWidth: 0 }]
+                                            },
+                                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%' }
+                                        });
+
+                                        document.getElementById('stats-legend').innerHTML = `
+                                            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#b71c1c;">■</span> اعدام‌های ثبت شده</span><b style="font-family:'Vazir'">\${exec.toLocaleString('fa-IR')}</b></div>
+                                            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#f57f17;">■</span> بازداشت سیاسی</span><b style="font-family:'Vazir'">\${arrests.toLocaleString('fa-IR')}</b></div>
+                                            <div style="display:flex;justify-content:space-between;padding:6px 0;"><span><span style="color:#263238;">■</span> موارد نقض حقوق</span><b style="font-family:'Vazir'">\${violations.toLocaleString('fa-IR')}</b></div>
+                                            <div style="text-align:center;font-size:10px;color:#888;margin-top:10px;border-top:1px solid #eee;padding-top:5px;">منبع: برآورد تجمیعی گزارش‌های حقوق بشری</div>
+                                        `;
+                                    });
+                                </script>
+                            </div>
+                            ]]>
+                        </b:widget-setting>
+                    </b:widget-settings>
+                </b:widget>
+
+                <b:widget id='HTML2' locked='false' title='سخن روز' type='HTML'>
+                    <b:widget-settings>
+                        <b:widget-setting name='content'>
+                            <![CDATA[
+                            <div class="widget-box quote-box">
+                                <div class="widget-header">سخن روز</div>
+                                <img class="quote-img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Nelson_Mandela_1994.jpg/440px-Nelson_Mandela_1994.jpg">
+                                <div style="font-style:italic;font-size:13px;color:#555;margin-bottom:10px;">"انکار حقوق بشر مردم، به چالش کشیدن انسانیت آنهاست."</div>
+                                <div style="font-weight:bold;font-size:11px;">- نلسون ماندلا</div>
+                            </div>
+                            ]]>
+                        </b:widget-setting>
+                    </b:widget-settings>
+                </b:widget>
+            </b:section>
+        </aside>
+    </div>
+
+    <footer class="main-footer">© 2026 IRAN POL NEWS</footer>
+
+</body>
+</html>

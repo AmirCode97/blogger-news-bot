@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRAN POL NEWS | International Agency Style</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet"
+        type="text/css" />
+    <style>
+        :root {
+            --header-bg: #001f3f;
+            /* Deep Navy */
+            --accent: #e60000;
+            /* Sharp Red */
+            --text-dark: #1a1a1a;
+            --text-light: #ffffff;
+            --bg-body: #f4f7f6;
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg-body);
+            color: var(--text-dark);
+            font-family: 'Vazir', sans-serif;
+        }
+
+        header {
+            background: var(--header-bg);
+            padding: 30px 0;
+            border-bottom: 4px solid var(--accent);
+            color: white;
+            text-align: center;
+        }
+
+        .logo-main {
+            font-size: 32px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .logo-main span {
+            color: var(--accent);
+        }
+
+        .logo-sub {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            font-weight: 400;
+            color: #aaa;
+            margin-top: 8px;
+            display: block;
+        }
+
+        nav {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 12px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        nav a {
+            color: var(--text-dark);
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            padding-bottom: 5px;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+        }
+
+        .main-article {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .article-img {
+            width: 100%;
+            height: 450px;
+            object-fit: cover;
+        }
+
+        .article-body {
+            padding: 40px;
+        }
+
+        .category {
+            color: var(--accent);
+            font-weight: 900;
+            font-size: 12px;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .article-title {
+            font-size: 34px;
+            font-weight: 900;
+            margin: 0 0 20px 0;
+            line-height: 1.2;
+        }
+
+        .article-p {
+            font-size: 17px;
+            color: #444;
+            line-height: 1.9;
+        }
+
+        .sidebar-item {
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
+            border-right: 4px solid var(--header-bg);
+        }
+
+        .sidebar-title {
+            font-size: 15px;
+            font-weight: 900;
+            margin-bottom: 20px;
+            color: var(--header-bg);
+            text-transform: uppercase;
+        }
+
+        .news-item {
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+        }
+
+        .news-item:last-child {
+            border: none;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="logo-main">IRAN POL <span>NEWS</span></div>
+        <div class="logo-sub">Investigative Journalism</div>
+    </header>
+    <nav>
+        <div class="inner">
+            <a href="#">حقوق بشر</a>
+            <a href="#">امنیت ملی</a>
+            <a href="#">بین‌الملل</a>
+            <a href="#">تحلیل ویژه</a>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="main-article">
+            <img class="article-img"
+                src="https://eutoday.net/wp-content/uploads/2026/01/ChatGPT-Image-Jan-29-2026-at-11_09_24-PM.jpg">
+            <div class="article-body">
+                <span class="category">تحلیل راهبردی</span>
+                <h1 class="article-title">ایران و اروپا؛ عبور از خط قرمز صبر استراتژیک</h1>
+                <p class="article-p">گزارش‌های رسیده از بروکسل حاکی از آن است که تغییرات بنیادین در سیاست خارجی اتحادیه
+                    اروپا قبال تهران در حال شکل‌گیری است. این تغییرات شامل بازنگری در پروتکل‌های امنیتی و افزایش فشارهای
+                    اقتصادی بر نهادهای موازی است...</p>
+            </div>
+        </div>
+        <div class="sidebar">
+            <div class="sidebar-item">
+                <div class="sidebar-title">بریکینگ نیوز</div>
+                <div class="news-item"><b>تجمع مادران دادخواه در مقابل زندان اوین</b><br><small>۱۰ دقیقه پیش</small>
+                </div>
+                <div class="news-item"><b>تحریم‌های جدید آلمان علیه مرکز اسلامی هامبورگ</b><br><small>۱ ساعت پیش</small>
+                </div>
+                <div class="news-item"><b>آخرین وضعیت فعالان مدنی دربند در اهواز</b><br><small>۳ ساعت پیش</small></div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
