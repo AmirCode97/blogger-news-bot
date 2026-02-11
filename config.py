@@ -48,39 +48,27 @@ NEWS_SOURCES = [
     # ==================== ایران اینترنشنال (بین‌الملل) - 10 خبر ====================
     {
         "name": "ایران اینترنشنال",
-        "url": "https://www.iranintl.com/iran",
-        "type": "scrape",
+        "url": "https://www.iranintl.com/",
+        "rss_url": "https://www.iranintl.com/feed",
+        "type": "rss",
         "language": "fa",
         "enabled": True,
         "category": "بین‌الملل",
         "priority": 1,
         "max_items": 10,
-        "selectors": {
-            "articles": "a[href*='2026']",
-            "title": "",
-            "link": "",
-            "description": "",
-            "image": "img"
-        }
     },
     # ==================== ایران اینترنشنال - گزارش ویژه (تحلیلی) ====================
+    # غیرفعال - خبرها از RSS فید اصلی می‌آیند
     {
         "name": "ایران اینترنشنال - گزارش ویژه",
-        "url": "https://www.iranintl.com/special-report", # لینک اصلاح شده
+        "url": "https://www.iranintl.com/special-report",
         "type": "scrape",
         "language": "fa",
-        "enabled": True,
-        "category": "گزارش ویژه", # لیبل مخصوص
+        "enabled": False,  # غیرفعال - RSS فید اصلی تمامی اخبار را شامل می‌شود
+        "category": "گزارش ویژه",
         "priority": 1,
-        "max_items": 3, # تعداد کمتر چون تحلیل عمیق است
-        "selectors": {
-            # سلکتور عمومی‌تر برای پیدا کردن مقالات در این صفحه
-            "articles": "article, .media-block, .ui-story-card, div[role='article']",
-            "title": "h2 a, h3 a, .title a, a",
-            "link": "h2 a, h3 a, .title a, a",
-            "description": "p",
-            "image": "img"
-        }
+        "max_items": 3,
+        "selectors": {}
     },
     # ==================== رادیو فردا - غیرفعال ====================
     {
