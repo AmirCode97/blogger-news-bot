@@ -21,7 +21,7 @@ TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "")
 
 # ==================== News Settings ====================
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "5"))
-MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "20"))  # Total: 10+5+5=20
+MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))  # Total: 10+5+5+5+5=30
 
 # ==================== Proxy Settings ====================
 # برای دور زدن محدودیت‌های Cloudflare
@@ -151,6 +151,30 @@ NEWS_SOURCES = [
             "image": "img"
         }
     },
+    # ==================== سازمان حقوق بشر ایران (IranHR) - RSS Atom ====================
+    {
+        "name": "سازمان حقوق بشر ایران",
+        "url": "https://iranhr.net/fa/rss/",
+        "rss_url": "https://iranhr.net/fa/rss/",
+        "type": "rss",
+        "language": "fa",
+        "enabled": True,
+        "category": "حقوق بشر",
+        "priority": 1,
+        "max_items": 5,
+    },
+    # ==================== حقوق بشر در ایران (HumanRightsInIR) - WordPress RSS ====================
+    {
+        "name": "حقوق بشر در ایران",
+        "url": "https://humanrightsinir.org/",
+        "rss_url": "https://humanrightsinir.org/feed/",
+        "type": "rss",
+        "language": "fa",
+        "enabled": True,
+        "category": "حقوق بشر",
+        "priority": 2,
+        "max_items": 5,
+    },
 ]
 
 # ==================== Content Filter Keywords ====================
@@ -170,18 +194,29 @@ FILTER_KEYWORDS = [
 
 # ==================== AI Prompt Templates ====================
 AI_SYSTEM_PROMPT = """
-تو یک دستیار خبری هستی که اخبار را برای یک وبلاگ فارسی پردازش می‌کنی.
-وظایف تو:
-1. خلاصه کردن خبر به فارسی روان
-2. حفظ دقت و بی‌طرفی
-3. اضافه کردن تحلیل کوتاه در صورت نیاز
-4. فرمت مناسب برای وبلاگ
+تو یک خبرنگار حرفه‌ای هستی که اخبار ایران را پوشش می‌دهی.
 
-فرمت خروجی:
-- عنوان جذاب
-- خلاصه خبر (۲-۳ پاراگراف)
-- تحلیل کوتاه (اختیاری)
-- برچسب‌ها/تگ‌ها
+وظایف تو:
+1. اگر متن خبر ارائه شده، آن را به فارسی روان، انگلیسی و آلمانی خلاصه کن.
+2. اگر فقط عنوان داده شده (یا متن بسیار کوتاه است)، بر اساس عنوان یک خبر کامل و حرفه‌ای بنویس.
+3. محتوا باید دقیق، بی‌طرف و مناسب برای وبلاگ خبری باشد.
+4. هر بخش باید حداقل ۲-۳ پاراگراف داشته باشد.
+
+مهم: هر خبر باید محتوای منحصربه‌فرد داشته باشد. از تکرار محتوای مشابه برای اخبار مختلف خودداری کن.
+
+فرمت خروجی باید دقیقاً به این شکل باشد:
+
+===PERSIAN===
+[متن کامل خبر به فارسی - حداقل ۳ پاراگراف با جزئیات]
+
+===ENGLISH===
+[Full news in English - minimum 2 detailed paragraphs]
+
+===GERMAN===
+[Ausführliche Nachrichten auf Deutsch - mindestens 2 Absätze]
+
+===TAGS===
+[تگ‌های مرتبط]
 """
 
 AI_TRANSLATE_PROMPT = """
