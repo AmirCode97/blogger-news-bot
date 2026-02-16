@@ -1,9 +1,50 @@
 
 import os
 import sys
+import re
 import time
 import schedule
-from datetime import datetime, timedelta
+from datetime import datetime
+
+def deduplicate_text(text):
+    """Detect and remove duplicated text content.
+    If the text contains the same content repeated twice, keep only the first occurrence."""
+    if not text or len(text) < 100:
+        return text
+    
+    # Normalize whitespace for comparison
+    clean = re.sub(r'\s+', ' ', text).strip()
+    
+    # Get first 80 chars as fingerprint
+    chunk = clean[:80]
+    if not chunk:
+        return text
+    
+    # Check if chunk appears more than once
+    first_pos = clean.find(chunk)
+    second_pos = clean.find(chunk, first_pos + len(chunk))
+    
+    if second_pos < 0:
+        return text  # No duplication
+    
+    # Found duplication - find where it starts in the original text
+    # Use the first 60 chars of the text to find the repeat point
+    original_chunk = text.strip()[:60]
+    
+    if not original_chunk:
+        return text
+    
+    first = text.find(original_chunk)
+    second = text.find(original_chunk, first + len(original_chunk))
+    
+    if second > 0:
+        # Keep only text up to the second occurrence
+        result = text[:second].strip()
+        print(f"  [Dedup] Removed duplicated text ({len(text)} -> {len(result)} chars)")
+        return result
+    
+    return text
+
 from typing import List, Dict
 
 from config import (
@@ -153,6 +194,9 @@ class BloggerNewsBot:
                 if not description or len(description) < 50:
                     print(f"  [SKIP] No content extracted for this article")
                     continue
+                
+                # DEDUPLICATION CHECK: Remove any repeated text content
+                description = deduplicate_text(description)
                 
                 print(f"  [Content] {len(description)} characters")
                 
