@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+<meta content='width=device-width, initial-scale=1' name='viewport'/>
+<b:include data='blog' name='all-head-content'/>
+<title><data:blog.pageTitle/></title>
+
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+<b:skin><![CDATA[
+
+/* === MODER DARK THEME (Inspired by Image 1) === */
+:root {
+    --bg-dark: #121212;
+    --card-bg: #1e1e1e;
+    --text-main: #e0e0e0;
+    --text-dim: #a0a0a0;
+    --accent: #ce0000;
+}
+
+body {
+    margin: 0; padding: 0;
+    font-family: 'Vazir', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
+    line-height: 1.8;
+}
+
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+img { max-width: 100%; height: auto; border: 0; }
+* { box-sizing: border-box; outline: none; }
+
+/* HEADER */
+.site-header { background: #000; padding: 25px 0; border-bottom: 3px solid var(--accent); position:sticky; top:0; z-index:100; }
+.header-content { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; }
+.logo-main { font-size: 30px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px; }
+.logo-main span { color: var(--accent); }
+
+/* MAIN CONTAINER (2 columns) */
+.main-wrapper {
+    max-width: 1200px; margin: 40px auto; padding: 0 15px;
+    display: grid; grid-template-columns: 1fr 300px; gap: 40px;
+}
+
+/* === BLOG POSTS LIST === */
+.blog-posts { display: flex; flex-direction: column; gap: 50px; }
+
+/* Individual Post Card */
+.post-outer { border-bottom: 1px solid #333; padding-bottom: 50px; }
+.post-outer:last-child { border: none; }
+
+/* TITLES */
+h3.post-title { font-size: 28px !important; font-weight: 900 !important; margin: 0 0 20px 0 !important; line-height: 1.4 !important; }
+h3.post-title a { color: #fff !important; }
+h3.post-title a:hover { color: var(--accent) !important; }
+
+/* POST BODY (Content Area) */
+.post-body { font-size: 16px; color: var(--text-main); }
+
+/* FORCE IMAGES TO SHOW */
+.post-body img {
+    display: block !important;
+    width: 100% !important;
+    max-width: 900px !important;
+    height: auto !important;
+    margin: 25px auto !important;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    border: 1px solid #333;
+}
+
+/* Hide Meta and Other Stuff we don't need */
+/* READ MORE BUTTON */
+.jump-link { display: block !important; margin-top: 25px; text-align: left; }
+.jump-link a { 
+    background: var(--accent); 
+    color: #fff !important; 
+    padding: 10px 25px; 
+    border-radius: 6px; 
+    font-weight: 900; 
+    font-size: 14px; 
+    box-shadow: 0 4px 15px rgba(206,0,0,0.4);
+    display: inline-block;
+}
+.jump-link a:hover { background: #fff !important; color: var(--accent) !important; box-shadow: 0 6px 20px rgba(0,0,0,0.5); }
+
+/* SIDEBAR */
+.sidebar-box { background: var(--card-bg); border-radius: 12px; padding: 25px; margin-bottom: 30px; border: 1px solid #333; }
+.widget-title { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 20px; border-right: 4px solid var(--accent); padding-right: 15px; }
+
+/* FOOTER */
+.site-footer { padding: 40px 0; border-top: 1px solid #333; text-align: center; color: var(--text-dim); }
+
+/* RTL Fix for Blogger */
+body { direction: rtl; }
+
+@media (max-width: 900px) {
+    .main-wrapper { grid-template-columns: 1fr; }
+    h3.post-title { font-size: 22px !important; }
+}
+
+]]></b:skin>
+
+<b:include data='blog' name='google-analytics'/>
+</head>
+
+<body>
+
+<header class="site-header">
+    <div class="header-content">
+        <div class="logo-main">IRAN POL <span>NEWS</span></div>
+        <nav style="display:flex; gap:20px; font-size:14px; font-weight:bold;">
+            <a expr:href='data:blog.homepageUrl'>صفحه اصلی</a>
+            <a expr:href='data:blog.homepageUrl + "search/label/حقوق بشر"'>حقوق بشر</a>
+            <a expr:href='data:blog.homepageUrl + "search/label/بین‌الملل"'>بین‌الملل</a>
+        </nav>
+    </div>
+</header>
+
+<div class="main-wrapper">
+    
+    <!-- MAIN COLUMN -->
+    <main class="content-col">
+        <b:section class='main' id='main' name='Main' showaddelement='yes'>
+            <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'/>
+        </b:section>
+    </main>
+
+    <!-- SIDEBAR COLUMN -->
+    <aside class="sidebar-col">
+        <div class="sidebar-box">
+            <h2 class="widget-title">درباره ما</h2>
+            <p style="font-size:13px; color:var(--text-dim);">خبرگزاری تخصصی ایران پول با تمرکز بر افشای نقض حقوق بشر و تحلیل‌های سیاسی.</p>
+        </div>
+
+        <!-- Live Stats Widget -->
+        <div class="sidebar-box">
+            <h2 class="widget-title">نقض حقوق بشر <span style="font-size:10px; color:var(--accent); float:left;">● LIVE</span></h2>
+            <div style="position:relative; height:180px; width:100%;"><canvas id="hrChart"></canvas></div>
+            <div id="stats-legend" style="margin-top:20px; font-size:12px; color:var(--text-dim);"></div>
+            <script>
+                document.addEventListener("DOMContentLoaded", function () {
+                    const ctx = document.getElementById('hrChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['اعدام', 'زندانی', 'نقض'],
+                            datasets: [{ data: [120, 240, 1150], backgroundColor: ['#ce0000', '#f57f17', '#333'], borderWidth: 0 }]
+                        },
+                        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
+                    });
+                    document.getElementById('stats-legend').innerHTML = `
+                    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #333;padding:8px 0;"><span><span style="color:#ce0000;">■</span> اعدام‌های ثبت شده</span><b>120</b></div>
+                    <div style="display:flex;justify-content:space-between;border-bottom:1px solid #333;padding:8px 0;"><span><span style="color:#f57f17;">■</span> بازداشت سیاسی</span><b>240</b></div>
+                    `;
+                });
+            </script>
+        </div>
+        
+        <b:section class='sidebar' id='sidebar' showaddelement='yes'>
+            <!-- Dynamic widgets go here -->
+        </b:section>
+    </aside>
+
+</div>
+
+<footer class="site-footer">
+    <p>© 2026 IRAN POL NEWS - تمامی حقوق محفوظ است</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>

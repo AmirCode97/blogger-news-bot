@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:version='2' class='v2' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
+    <b:include data='blog' name='all-head-content'/>
+    <title><data:blog.pageTitle/></title>
+    
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <b:skin><![CDATA[
+    /* === VARIABLES === */
+    :root {
+        --header-bg: #001f3f;
+        --accent: #ce0000;
+        --bg-body: #f4f7f6;
+        --text-dark: #1a1a1a;
+    }
+
+    /* === RESET & BASE === */
+    * { box-sizing: border-box; outline: none; }
+    body {
+        margin: 0; padding: 0;
+        font-family: 'Vazir', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-dark);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    
+    /* === AGGRESSIVE IMAGE RESET === */
+    /* Force images to behave! */
+    .post-body img, .post-body .separator a img, .post-body .separator img {
+        display: block !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        object-fit: cover !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+    
+    /* Disable Blogger's weird wrappers */
+    .separator { display: block !important; float: none !important; margin: 0 !important; text-align: center !important; }
+
+    /* === HEADER & NAV === */
+    .site-header { background: var(--header-bg); padding: 30px 0; color: white; text-align: center; }
+    .header-content { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; }
+    .logo-main { font-size: 38px; font-weight: 900; letter-spacing: 1px; color: white; }
+    .logo-main span { color: var(--accent); }
+    
+    .main-nav { background: #fff; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .nav-inner { max-width: 1280px; margin: 0 auto; display: flex; height: 55px; align-items: center; justify-content: center; }
+    .nav-links a { margin: 0 15px; font-weight: 800; font-size: 14px; height: 55px; display: flex; align-items: center; border-bottom: 3px solid transparent; }
+    .nav-links a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* === LAYOUT === */
+    .main-container {
+        max-width: 1280px; margin: 40px auto; padding: 0 15px;
+        display: grid; grid-template-columns: 1fr 300px; gap: 30px;
+    }
+    
+    /* === BLOGGER WIDGET STYLES (THE FIX) === */
+    
+    /* 1. HIDE JUNK */
+    .post-header, .post-footer, .blog-pager, .status-msg-wrap, .post-author, .post-timestamp, .post-labels, .jump-link { display: none !important; }
+    
+    /* 2. GRID layout for posts container */
+    .blog-posts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+    
+    /* 3. HERO POST (First Item) */
+    .post-outer:first-child {
+        grid-column: 1 / -1; /* Span full width */
+        margin-bottom: 30px;
+    }
+    
+    .post-outer:first-child .post {
+        display: grid !important; 
+        grid-template-columns: 1.5fr 1fr; /* Image Left, Content Right */
+        background: white; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.1);
+        min-height: 400px;
+    }
+    
+    /* HERO IMAGE FIX */
+    .post-outer:first-child .post-body {
+        margin: 0 !important; padding: 0 !important;
+        display: contents !important; /* Let children flow into grid */
+    }
+    
+    /* We try to target the image wrapper specifically */
+    .post-outer:first-child .separator:first-child,
+    .post-outer:first-child .post-body > div:first-child,
+    .post-outer:first-child .post-body > a:first-child {
+        grid-column: 1; /* Image column */
+        height: 100%;
+    }
+    .post-outer:first-child .post-body img {
+        height: 100% !important; min-height: 400px !important; width: 100% !important;
+    }
+    
+    /* HERO TEXT FIX */
+    /* Select text content. This is tricky in Blogger. We target title and try to push text to col 2 */
+    .post-outer:first-child h3.post-title {
+        grid-column: 2;
+        padding: 40px 40px 10px 40px !important;
+        margin: 0 !important;
+        align-self: end;
+        font-size: 28px !important;
+        line-height: 1.4 !important;
+        font-weight: 900 !important;
+    }
+    .post-outer:first-child h3.post-title a { color: var(--header-bg) !important; }
+    
+    /* Text Snippet (Invisible usually, but if visible put in col 2) */
+    .post-outer:first-child .post-snippet {
+        grid-column: 2;
+        padding: 0 40px 40px 40px !important;
+        color: #555;
+    }
+
+    /* 4. GRID ITEMS (Normal Posts) */
+    .post-outer:not(:first-child) .post {
+        display: flex !important; flex-direction: column !important;
+        background: white; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee;
+        height: 100%;
+    }
+    
+    /* GRID IMAGE FIX */
+    .post-outer:not(:first-child) .separator:first-child,
+    .post-outer:not(:first-child) .post-body > div:first-child {
+        order: 1; /* Image first */
+        height: 180px; overflow: hidden;
+        margin: 0 !important;
+    }
+    .post-outer:not(:first-child) .post-body img {
+        height: 180px !important; width: 100% !important; border-radius: 0 !important;
+    }
+
+    /* GRID TEXT FIX */
+    .post-outer:not(:first-child) h3.post-title {
+        order: 2; /* Title second */
+        font-size: 16px !important;
+        font-weight: 800 !important;
+        line-height: 1.6 !important;
+        padding: 15px !important;
+        margin: 0 !important;
+        height: auto !important;
+    }
+    .post-outer:not(:first-child) h3.post-title a { color: #333 !important; }
+    
+    /* Hide snippets in grid to clean up */
+    .post-outer:not(:first-child) .post-body {
+        padding: 0 !important; margin: 0 !important;
+    }
+    .post-outer:not(:first-child) .post-snippet, 
+    .post-outer:not(:first-child) .post-body *:not(.separator):not(img) {
+        /* Hide everything in post body that isn't the image */
+        display: none !important; 
+    }
+    /* Re-show image wrapper if we accidentally hid it */
+    .post-outer:not(:first-child) .separator { display: block !important; }
+
+    /* GRID/LIST FALLBACK */
+    /* If tricky structure, ensure nice list */
+    .post-body { font-size: 14px; line-height: 1.6; }
+
+    /* SIDEBAR */
+    .widget-box { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--header-bg); }
+    .widget-header { font-size: 13px; font-weight: 900; color: var(--header-bg); border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 15px; }
+
+    /* FOOTER */
+    .main-footer { background: var(--header-bg); color: #ccc; padding: 30px 0; margin-top: 50px; text-align: center; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+        .post-outer:first-child .post { grid-template-columns: 1fr; }
+        .post-outer:first-child h3.post-title { grid-column: 1; padding: 20px !important; }
+        .post-outer:first-child .separator:first-child { height: 250px; }
+        .post-outer:first-child .post-body img { height: 250px !important; min-height: auto !important; }
+        
+        .blog-posts { grid-template-columns: 1fr; }
+        .main-container { grid-template-columns: 1fr; }
+    }
+    ]]></b:skin>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-side" style="justify-content: flex-start;"><span>جمعه، ۱۷ بهمن ۱۴۰۴</span></div>
+            <div class="logo-container">
+                <a expr:href='data:blog.homepageUrl'>
+                    <div class="logo-main">IRAN POL <span>NEWS</span></div>
+                </a>
+            </div>
+            <div class="header-side">FA | EN</div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <div class="nav-links">
+                <a expr:href='data:blog.homepageUrl'>صفحه اصلی</a>
+                <a href="#">حقوق بشر</a>
+                <a href="#">بین‌الملل</a>
+                <a href="#">گزارش ویژه</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        
+        <b:section class='main' id='main' showaddelement='yes'>
+             <b:widget id='Blog1' locked='false' title='Blog Posts' type='Blog' />
+        </b:section>
+
+        <aside class="sidebar-col">
+            
+             <!-- STATS WIDGET -->
+            <div class="widget-box">
+                <div class="widget-header">
+                    <span>نقض حقوق بشر (۲۰۲۶)</span>
+                    <span style="background:rgba(206,0,0,0.1);color:#ce0000;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:900;float:left;">● LIVE</span>
+                </div>
+                <div style="position:relative; height:180px; width:100%;"><canvas id="hrChart"></canvas></div>
+                <div id="stats-legend" style="margin-top:20px; font-size:12px; color:#444;"></div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const ctx = document.getElementById('hrChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['اعدام', 'زندانی', 'نقض'],
+                                datasets: [{ data: [120, 240, 1150], backgroundColor: ['#b71c1c', '#f57f17', '#263238'], borderWidth: 0 }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%' }
+                        });
+                        document.getElementById('stats-legend').innerHTML = `
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#b71c1c;">■</span> اعدام‌های ثبت شده</span><b>120</b></div>
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#f57f17;">■</span> بازداشت سیاسی</span><b>240</b></div>
+                        `;
+                    });
+                </script>
+            </div>
+
+            <!-- QUOTE WIDGET -->
+            <div class="widget-box quote-box" style="text-align:center;">
+                <div class="widget-header">سخن روز</div>
+                <img style="width:60px;height:60px;border-radius:50%;margin:0 auto 10px;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Nelson_Mandela_1994.jpg/440px-Nelson_Mandela_1994.jpg"/>
+                <div style="font-style:italic;font-size:13px;color:#555;margin-bottom:10px;">"انکار حقوق بشر مردم، به چالش کشیدن انسانیت آنهاست."</div>
+                <div style="font-weight:bold;font-size:11px;">- نلسون ماندلا</div>
+            </div>
+
+            <b:section class='sidebar' id='sidebar' showaddelement='yes'></b:section>
+
+        </aside>
+    </div>
+
+    <footer class="main-footer">© 2026 IRAN POL NEWS</footer>
+
+</body>
+</html>

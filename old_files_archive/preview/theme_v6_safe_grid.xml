@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
+    <b:include data='blog' name='all-head-content'/>
+    <title><data:blog.pageTitle/></title>
+    
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+    <b:skin><![CDATA[
+    /* === CSS VARIABLES === */
+    :root {
+      --header-bg: #001f3f; 
+      --accent: #ce0000;
+      --bg-body: #f4f7f6;
+      --text-dark: #1a1a1a;
+      --gap: 25px;
+    }
+    
+    /* === RESET & BASE === */
+    * { box-sizing: border-box; outline: none; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Vazir', sans-serif;
+      background-color: var(--bg-body);
+      color: var(--text-dark);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    img { max-width: 100%; height: auto; display: block; border: 0; }
+    
+    /* === HEADER === */
+    .site-header { background: var(--header-bg); padding: 30px 0; color: white; text-align: center; }
+    .header-content { max-width: 1280px; margin: 0 auto; display: flex; justify-content: center; align-items: center; }
+    .logo-main { font-size: 38px; font-weight: 900; letter-spacing: 1px; color: white; text-transform: uppercase; }
+    .logo-main span { color: var(--accent); }
+    
+    /* === NAV === */
+    .main-nav { background: #fff; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .nav-inner { max-width: 1280px; margin: 0 auto; display: flex; height: 55px; align-items: center; justify-content: center; }
+    .nav-links a { margin: 0 15px; font-weight: 800; font-size: 14px; color: var(--text-dark); height: 55px; display: flex; align-items: center; border-bottom: 3px solid transparent; }
+    .nav-links a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* === MAIN LAYOUT === */
+    .main-container {
+      max-width: 1280px; margin: 40px auto; padding: 0 15px;
+      display: grid; grid-template-columns: 1fr 300px; gap: 30px;
+    }
+
+    /* === SMART GRID SYSTEM (THE MAGIC) === */
+    /* Transform Blogger's default .blog-posts into a Grid */
+    .blog-posts {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 2 Columns Grid */
+        gap: var(--gap);
+    }
+
+    /* Target the Post Container */
+    .post-outer {
+        display: block; /* Default */
+    }
+
+    /* === HERO POST (First Item) === */
+    /* Make the first post span full width */
+    div.post-outer:first-child {
+        grid-column: 1 / -1;
+    }
+
+    /* Style the Hero Post Card */
+    div.post-outer:first-child .post {
+        display: grid;
+        grid-template-columns: 1.5fr 1fr; /* Image (Left/Right) | Text */
+        background: white; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+        min-height: 400px;
+        margin-bottom: 20px;
+    }
+    
+    /* Hero Image Handler */
+    /* Since Blogger might wrap images, we target widely */
+    div.post-outer:first-child .post-body img,
+    div.post-outer:first-child a[imageanchor] { 
+        display: none !important; /* Hide default image in body to use cleaner structure if possible, but for default template we style what we have */
+    }
+    
+    /* Let's try a simpler approach for Default Template compatibility: */
+    /* Just styling the container */
+    
+    .post {
+        background: white; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 0;
+        height: 100%;
+        display: flex; flex-direction: column;
+    }
+
+    /* Hero Text */
+    div.post-outer:first-child .post-title {
+        font-size: 28px; font-weight: 900; margin-bottom: 15px;
+    }
+    div.post-outer:first-child .post-body {
+        font-size: 16px; padding: 30px;
+    }
+
+    /* === GRID ITEMS (Normal Posts) === */
+    .post-outer:not(:first-child) .post {
+        display: flex; flex-direction: column;
+    }
+    .post-outer:not(:first-child) .post-title {
+        font-size: 16px; font-weight: 800; padding: 15px 15px 5px; margin: 0;
+    }
+    .post-outer:not(:first-child) .post-body {
+        padding: 0 15px 15px; font-size: 13px; color: #555;
+        flex-grow: 1;
+    }
+    
+    /* Image Handling in Default Template */
+    .post-body img {
+        width: 100%; height: auto; border-radius: 4px; margin-bottom: 10px;
+    }
+    
+    /* Meta Data */
+    .post-header, .post-footer {
+        padding: 10px 15px; font-size: 11px; color: #999; border-top: 1px solid #eee;
+    }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 900px) {
+        div.post-outer:first-child .post { grid-template-columns: 1fr; }
+        .main-container { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+        .blog-posts { grid-template-columns: 1fr; } /* Stack on mobile */
+    }
+    ]]></b:skin>
+</head>
+<body>
+
+    <header class="site-header">
+        <div class="header-content">
+            <div class="logo-main">IRAN POL <span>NEWS</span></div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <div class="nav-links">
+                <a expr:href='data:blog.homepageUrl'>Home</a>
+                <a href="#">News</a>
+                <a href="#">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        
+        <!-- MAIN COLUMN -->
+        <b:section class='main' id='main' showaddelement='yes'>
+             <!-- WE USE THE DEFAULT BLOG WIDGET CODE HERE TO ENSURE INSTALLATION SUCCESS -->
+             <b:widget id='Blog1' locked='false' title='Blog Posts' type='Blog' />
+        </b:section>
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar-col">
+             <b:section class='sidebar' id='sidebar' showaddelement='yes'>
+             </b:section>
+        </aside>
+    </div>
+    
+    <footer style="background:#001f3f;color:white;text-align:center;padding:30px;margin-top:50px;">
+        © 2026 IRAN POL NEWS
+    </footer>
+
+</body>
+</html>

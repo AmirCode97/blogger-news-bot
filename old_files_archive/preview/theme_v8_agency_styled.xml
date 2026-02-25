@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:version='2' class='v2' expr:dir='data:blog.languageDirection' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+    <meta content='width=device-width, initial-scale=1' name='viewport'/>
+    <b:include data='blog' name='all-head-content'/>
+    <title><data:blog.pageTitle/></title>
+    
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet" type="text/css"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <b:skin><![CDATA[
+    /* SOURCE: final_preview_agency.html CSS */
+    :root {
+        --header-bg: #001f3f;
+        --accent: #ce0000;
+        --bg-body: #f4f7f6;
+        --text-dark: #1a1a1a;
+    }
+    * { box-sizing: border-box; outline: none; }
+    body {
+        margin: 0; padding: 0;
+        font-family: 'Vazir', sans-serif;
+        background-color: var(--bg-body);
+        color: var(--text-dark);
+        font-size: 14px;
+        line-height: 1.7;
+    }
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    img { max-width: 100%; height: auto; display: block; border: 0; }
+
+    /* ALERT BAR */
+    .alert-bar {
+        background: var(--accent); color: #fff; font-size: 12px; padding: 8px 0;
+        display: flex; align-items: center; border-bottom: 3px solid #990000;
+    }
+    .alert-inner { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; width: 100%; align-items: center; }
+    .alert-title { background: #000; padding: 2px 10px; border-radius: 4px; font-weight: 900; margin-left: 15px; white-space: nowrap; font-size: 11px; }
+    .alert-marquee { flex: 1; overflow: hidden; direction: ltr; }
+    .alert-marquee marquee { width: 100%; }
+
+    /* HEADER */
+    .site-header { background: var(--header-bg); padding: 30px 0; color: white; text-align: center; }
+    .header-content { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; }
+    .logo-container { flex: 1; text-align: center; }
+    .logo-main { font-size: 38px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; line-height: 1; color: white; }
+    .logo-main span { color: var(--accent); }
+    .logo-sub { font-size: 11px; color: #ccc; text-transform: uppercase; letter-spacing: 5px; font-weight: 400; margin-top: 6px; display: block; opacity: 0.8; }
+    .header-side { width: 220px; display: flex; align-items: center; font-size: 12px; color: rgba(255, 255, 255, 0.7); }
+    .lang-switcher { justify-content: flex-end; gap: 8px; }
+    .lang-btn { display: flex; align-items: center; gap: 5px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); padding: 5px 10px; border-radius: 4px; font-size: 11px; color: #fff; }
+
+    /* NAV */
+    .main-nav { background: #fff; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
+    .nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; height: 55px; align-items: center; }
+    .nav-links { display: flex; gap: 30px; height: 100%; margin: 0 auto; }
+    .nav-links a { display: flex; align-items: center; height: 100%; font-weight: 800; font-size: 14px; color: var(--text-dark); border-bottom: 3px solid transparent; }
+    .nav-links a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* LAYOUT UTILS */
+    .main-container {
+        max-width: 1280px; margin: 40px auto; padding: 0 15px;
+        display: grid; grid-template-columns: 1fr 280px; gap: 30px;
+    }
+
+    /* === BLOGGER WIDGET OVERRIDES (CRITICAL!) === */
+    
+    /* 1. Hide duplicate/bad elements from Blogger Default */
+    .post-header, .post-footer, .blog-pager, .status-msg-wrap { display: none !important; }
+    
+    /* 2. Transform .blog-posts into Grid */
+    .blog-posts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); /* 3 Columns like Agency */
+        gap: 20px;
+    }
+
+    /* 3. HERO POST (First Item) */
+    .post-outer:first-child {
+        grid-column: 1 / -1; /* Span full width */
+        margin-bottom: 40px;
+    }
+    
+    .post-outer:first-child .post {
+        display: flex; /* Horizontal Layout */
+        background: white; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        min-height: 450px;
+    }
+    
+    /* Hero Image (We assume Blogger wraps img in a div or link) */
+    .post-outer:first-child .post-body img {
+        width: 100% !important; height: 100% !important; object-fit: cover;
+    }
+    /* We need to cheat a bit: force the image container to perform like the Agency Hero Thumb */
+    /* This depends on Blogger's HTML structure. Usually: .post-body -> (text) + (img) */
+    
+    .post-outer:first-child .post-body {
+        padding: 35px; width: 100%; display: flex; flex-direction: column; justify-content: center;
+    }
+    .post-outer:first-child h3.post-title a {
+        font-size: 34px; font-weight: 900; color: var(--header-bg); line-height: 1.4; display: block; margin-bottom: 15px;
+    }
+
+    /* 4. GRID ITEMS (Normal Posts) */
+    .post-outer:not(:first-child) .post {
+        background: white; border-radius: 8px; overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); border: 1px solid #eee;
+        display: flex; flex-direction: column; height: 100%;
+    }
+    .post-outer:not(:first-child) h3.post-title {
+        font-size: 15px; font-weight: 800; margin: 0; padding: 15px; line-height: 1.6;
+    }
+    .post-outer:not(:first-child) .post-body {
+        padding: 0 15px 15px; flex-grow: 1; font-size: 13px; color: #666;
+    }
+    .post-outer:not(:first-child) .post-body img {
+        height: 200px; width: 100%; object-fit: cover; margin: -15px -15px 15px -15px; /* Negative margin to pull image to edges */
+        display: block;
+    }
+
+    /* SIDEBAR */
+    .widget-box { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); margin-bottom: 25px; border-top: 4px solid var(--header-bg); }
+    .widget-header { font-size: 13px; font-weight: 900; color: var(--header-bg); border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+    .live-badge { background: rgba(206, 0, 0, 0.1); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; animation: blink 2s infinite; }
+    @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+    /* FOOTER */
+    .main-footer { background: var(--header-bg); color: #ccc; padding: 30px 0; margin-top: 60px; text-align: center; }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+        .post-outer:first-child .post { flex-direction: column; }
+        .blog-posts { grid-template-columns: 1fr; }
+        .main-container { grid-template-columns: 1fr; }
+    }
+    ]]></b:skin>
+</head>
+<body>
+
+    <!-- ALERT -->
+    <div class="alert-bar">
+        <div class="alert-inner">
+            <div class="alert-title">فوری (LIVE)</div>
+            <div class="alert-marquee">
+                <marquee direction="right" scrollamount="8">واکنش اتحادیه اروپا به نقض حقوق بشر در ایران • تداوم تجمعات اعتراضی کارگران هفت‌تپه</marquee>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER HTML (Hardcoded for perfect look) -->
+    <header class="site-header">
+        <div class="header-content">
+            <div class="header-side" style="justify-content: flex-start;"><span id="header-date">جمعه، ۱۷ بهمن ۱۴۰۴</span></div>
+            <div class="logo-container">
+                <a expr:href='data:blog.homepageUrl'>
+                    <div class="logo-main">IRAN POL <span>NEWS</span></div>
+                    <span class="logo-sub">Investigative Journalism</span>
+                </a>
+            </div>
+            <div class="header-side lang-switcher">
+                <a class="lang-btn" href="#">EN</a>
+                <a class="lang-btn" href="#">DE</a>
+                <a class="lang-btn" style="background:var(--accent);border-color:var(--accent)" href="#">FA</a>
+            </div>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <div class="nav-inner">
+            <div class="nav-links">
+                <a expr:href='data:blog.homepageUrl'>صفحه اصلی</a>
+                <a href="#">حقوق بشر</a>
+                <a href="#">بین‌الملل</a>
+                <a href="#">گزارش ویژه</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        
+        <!-- MAIN CONTENT -->
+        <b:section class='main' id='main' showaddelement='yes'>
+             <!-- WE USE THE DEFAULT BLOG WIDGET BUT STYLE IT WITH CSS -->
+             <b:widget id='Blog1' locked='false' title='Blog Posts' type='Blog' />
+        </b:section>
+
+        <!-- SIDEBAR (Hardcoded for perfect Agency look) -->
+        <aside class="sidebar-col">
+            
+            <!-- STATS WIDGET -->
+            <div class="widget-box">
+                <div class="widget-header">
+                    <span>نقض حقوق بشر (۲۰۲۶)</span>
+                    <span class="live-badge">● LIVE</span>
+                </div>
+                <div style="position:relative; height:180px; width:100%;"><canvas id="hrChart"></canvas></div>
+                <div id="stats-legend" style="margin-top:20px; font-size:12px; color:#444;"></div>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        const ctx = document.getElementById('hrChart').getContext('2d');
+                        new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: ['اعدام', 'زندانی', 'نقض'],
+                                datasets: [{ data: [120, 240, 1150], backgroundColor: ['#b71c1c', '#f57f17', '#263238'], borderWidth: 0 }]
+                            },
+                            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%' }
+                        });
+                        document.getElementById('stats-legend').innerHTML = `
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#b71c1c;">■</span> اعدام‌های ثبت شده</span><b>120</b></div>
+                        <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#f57f17;">■</span> بازداشت سیاسی</span><b>240</b></div>
+                        `;
+                    });
+                </script>
+            </div>
+
+            <!-- QUOTE WIDGET -->
+            <div class="widget-box quote-box">
+                <div class="widget-header">سخن روز</div>
+                <img style="width:60px;height:60px;border-radius:50%;margin:0 auto 10px;" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Nelson_Mandela_1994.jpg/440px-Nelson_Mandela_1994.jpg"/>
+                <div style="font-style:italic;font-size:13px;color:#555;margin-bottom:10px;">"انکار حقوق بشر مردم، به چالش کشیدن انسانیت آنهاست."</div>
+                <div style="font-weight:bold;font-size:11px;">- نلسون ماندلا</div>
+            </div>
+
+            <!-- BLOGGER SIDEBAR WIDGETS -->
+             <b:section class='sidebar' id='sidebar' showaddelement='yes'>
+             </b:section>
+
+        </aside>
+    </div>
+
+    <footer class="main-footer">© 2026 IRAN POL NEWS</footer>
+
+</body>
+</html>

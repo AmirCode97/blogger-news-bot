@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:version='2' class='v2' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+<meta content='width=device-width, initial-scale=1' name='viewport'/>
+<b:include data='blog' name='all-head-content'/>
+<title><data:blog.pageTitle/></title>
+
+<link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css" rel="stylesheet" type="text/css"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<b:skin><![CDATA[
+
+/* === RESTORED AGENCY THEME (SAFE MODE) === */
+:root {
+    --header-bg: #001f3f;
+    --accent: #ce0000;
+    --bg-body: #f4f7f6;
+    --text-dark: #333;
+}
+
+body {
+    margin: 0; padding: 0;
+    font-family: 'Vazir', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-dark);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+a { text-decoration: none; color: inherit; transition: 0.3s; }
+img { max-width: 100%; height: auto; display: block; border: 0; }
+* { box-sizing: border-box; outline: none; }
+
+/* ALERT BAR */
+.alert-bar { background: var(--accent); color: #fff; padding: 8px 0; font-size: 12px; display: flex; align-items: center; border-bottom: 3px solid #990000; }
+.alert-inner { max-width: 1280px; margin: 0 auto; padding: 0 15px; width: 100%; display: flex; align-items: center; }
+.alert-title { background: #000; padding: 2px 10px; border-radius: 4px; font-weight: 900; margin-left: 15px; white-space: nowrap; font-size: 11px; }
+.alert-marquee { flex: 1; overflow: hidden; }
+
+/* HEADER */
+.site-header { background: var(--header-bg); padding: 30px 0; color: white; text-align: center; }
+.header-content { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center; }
+.logo-main { font-size: 38px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: white; }
+.logo-main span { color: var(--accent); }
+.logo-sub { font-size: 11px; color: #ccc; letter-spacing: 5px; display: block; margin-top: 5px; }
+
+/* NAV */
+.main-nav { background: #fff; border-bottom: 2px solid var(--accent); position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+.nav-inner { max-width: 1280px; margin: 0 auto; padding: 0 15px; display: flex; height: 55px; align-items: center; }
+.nav-links { display: flex; gap: 30px; height: 100%; margin: 0 auto; }
+.nav-links a { display: flex; align-items: center; height: 100%; font-weight: 800; font-size: 14px; border-bottom: 3px solid transparent; }
+.nav-links a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* MAIN LAYOUT */
+.main-container {
+    max-width: 1280px; margin: 40px auto; padding: 0 15px;
+    display: grid; grid-template-columns: 1fr 280px; gap: 30px;
+}
+
+/* === BLOG POSTS === */
+.blog-posts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+/* Hide Meta Junk */
+.post-header, .post-footer, .post-author, .post-labels, .jump-link { display: none !important; }
+
+/* SAFE HERO STYLE (Stacked) */
+.post-outer:first-child {
+    grid-column: 1 / -1;
+    margin-bottom: 40px;
+}
+
+.post-outer:first-child .post {
+    display: flex; flex-direction: column; /* CHANGED TO SAFE VERTICAL STACK */
+    background: white; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.08);
+}
+
+.post-outer:first-child .post-body {
+    padding: 30px;
+    width: 100%;
+}
+
+.post-outer:first-child .post-body img {
+    /* Large Hero Image */
+    width: 100% !important; 
+    height: auto !important; 
+    max-height: 500px !important;
+    object-fit: cover !important;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.post-outer:first-child h3.post-title a {
+    font-size: 32px !important; font-weight: 900 !important; color: var(--header-bg) !important;
+    line-height: 1.4 !important;
+}
+
+/* GRID ITEMS (Others) */
+.post-outer:not(:first-child) .post {
+    background: white; border-radius: 8px; overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05); border: 1px solid #eee;
+    display: flex; flex-direction: column; height: 100%;
+}
+
+.post-outer:not(:first-child) .post-body { padding: 0; }
+
+.post-outer:not(:first-child) .post-body img {
+    width: 100% !important; height: 200px !important; object-fit: cover !important;
+}
+
+.post-outer:not(:first-child) h3.post-title {
+    font-size: 15px !important; font-weight: 800 !important; padding: 15px !important; margin: 0 !important;
+}
+
+/* SIDEBAR WIDGETS */
+.widget-box { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; border-top: 4px solid var(--header-bg); }
+.widget-header { font-size: 13px; font-weight: 900; color: var(--header-bg); border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+.live-badge { background: rgba(206,0,0,0.1); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; animation: blink 2s infinite; }
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+
+/* FOOTER */
+.main-footer { background: var(--header-bg); color: #ccc; padding: 30px 0; margin-top: 60px; text-align: center; }
+
+/* RESPONSIVE */
+@media (max-width: 900px) {
+    .main-container { grid-template-columns: 1fr; }
+    .blog-posts { grid-template-columns: 1fr; }
+}
+
+]]></b:skin>
+
+<b:include data='blog' name='google-analytics'/>
+</head>
+
+<body>
+
+<!-- ALERT -->
+<div class="alert-bar">
+    <div class="alert-inner">
+        <div class="alert-title">فوری (LIVE)</div>
+        <div class="alert-marquee"><marquee direction="right" scrollamount="8">واکنش اتحادیه اروپا به نقض حقوق بشر در ایران</marquee></div>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+    <div class="header-content">
+        <div class="logo-container">
+            <div class="logo-main">IRAN POL <span>NEWS</span></div>
+            <span class="logo-sub">Investigative Journalism</span>
+        </div>
+    </div>
+</header>
+
+<!-- NAV -->
+<nav class="main-nav">
+    <div class="nav-inner">
+        <div class="nav-links">
+            <a expr:href='data:blog.homepageUrl'>صفحه اصلی</a>
+            <a href="#">حقوق بشر</a>
+            <a href="#">بین‌الملل</a>
+            <a href="#">گزارش ویژه</a>
+        </div>
+    </div>
+</nav>
+
+<div class="main-container">
+    
+    <!-- LEFT: CONTENT -->
+    <div class="content-col">
+        <b:section class='main' id='main' name='Main' showaddelement='yes'>
+            <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'/>
+        </b:section>
+    </div>
+
+    <!-- RIGHT: SIDEBAR -->
+    <aside class="sidebar-col">
+        
+        <!-- Live Stats Widget -->
+        <div class="widget-box">
+            <div class="widget-header">
+                <span>نقض حقوق بشر</span>
+                <span class="live-badge">● LIVE</span>
+            </div>
+            <div style="position:relative; height:180px; width:100%;"><canvas id="hrChart"></canvas></div>
+            <div id="stats-legend" style="margin-top:20px; font-size:12px; color:#444;"></div>
+        </div>
+
+        <!-- Sidebar Section -->
+        <b:section class='sidebar' id='sidebar' showaddelement='yes'>
+        </b:section>
+    </aside>
+
+</div>
+
+<footer class="main-footer">© 2026 IRAN POL NEWS</footer>
+
+<script>
+    // Safe Chart Init
+    window.onload = function() {
+        if(document.getElementById('hrChart')) {
+            const ctx = document.getElementById('hrChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['اعدام', 'زندانی', 'نقض'],
+                    datasets: [{ data: [120, 240, 1150], backgroundColor: ['#b71c1c', '#f57f17', '#263238'], borderWidth: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '65%' }
+            });
+            document.getElementById('stats-legend').innerHTML = `
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#b71c1c;">■</span> اعدام</span><b>120</b></div>
+            <div style="display:flex;justify-content:space-between;border-bottom:1px dashed #ddd;padding:6px 0;"><span><span style="color:#f57f17;">■</span> سیاسی</span><b>240</b></div>
+            `;
+        }
+    };
+</script>
+
+</body>
+</html>
