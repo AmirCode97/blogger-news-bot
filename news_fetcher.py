@@ -276,10 +276,11 @@ class NewsFetcher:
                 # Try entry-content first
                 content_div = soup.find('div', class_='entry-content') or soup.find('article')
                 if content_div:
-                    for p in content_div.find_all(['p', 'div']):
+                    for p in content_div.find_all(['p', 'h2', 'h3']):
                         text = p.get_text().strip()
                         if len(text) > 50 and 'cookie' not in text.lower():
-                            paragraphs.append(text)
+                            if text not in paragraphs:  # Prevent inner-outer duplication
+                                paragraphs.append(text)
                 
                 # Image
                 og_img = soup.find('meta', property='og:image')

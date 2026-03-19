@@ -9,41 +9,32 @@ from datetime import datetime
 def deduplicate_text(text):
     """Detect and remove duplicated text content.
     If the text contains the same content repeated twice, keep only the first occurrence."""
-    if not text or len(text) < 100:
+    if not text or len(text) < 50:
         return text
     
-    # Normalize whitespace for comparison
-    clean = re.sub(r'\s+', ' ', text).strip()
+    paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+    unique_paragraphs = []
+    seen = set()
     
-    # Get first 80 chars as fingerprint
-    chunk = clean[:80]
-    if not chunk:
-        return text
-    
-    # Check if chunk appears more than once
-    first_pos = clean.find(chunk)
-    second_pos = clean.find(chunk, first_pos + len(chunk))
-    
-    if second_pos < 0:
-        return text  # No duplication
-    
-    # Found duplication - find where it starts in the original text
-    # Use the first 60 chars of the text to find the repeat point
-    original_chunk = text.strip()[:60]
-    
-    if not original_chunk:
-        return text
-    
-    first = text.find(original_chunk)
-    second = text.find(original_chunk, first + len(original_chunk))
-    
-    if second > 0:
-        # Keep only text up to the second occurrence
-        result = text[:second].strip()
-        print(f"  [Dedup] Removed duplicated text ({len(text)} -> {len(result)} chars)")
-        return result
-    
-    return text
+    for p in paragraphs:
+        # Simplify paragraph for comparison
+        clean_p = re.sub(r'[^\w\s]', '', p).strip()
+        words = clean_p.split()
+        
+        # We need at least 5 words to consider it a deduplicable sentence
+        if len(words) < 5:
+            unique_paragraphs.append(p)
+            continue
+            
+        fingerprint = " ".join(words[:40]) # check up to 40 words
+        
+        if fingerprint not in seen:
+            seen.add(fingerprint)
+            unique_paragraphs.append(p)
+        else:
+            print(f"  [Dedup] Removed duplicated paragraph: len={len(p)}")
+
+    return "\n\n".join(unique_paragraphs)
 
 from typing import List, Dict
 
