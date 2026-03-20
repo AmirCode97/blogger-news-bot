@@ -247,10 +247,25 @@ class BloggerNewsBot:
                 # 3. PUBLISH
                 if self.blogger:
                     # Smart label logic: Iran International → گزارش ویژه, Others → حقوق بشر
+                    post_labels = []
                     if 'ایران اینترنشنال' in source_name:
-                        post_labels = ['گزارش ویژه', 'بین‌الملل']
+                        post_labels.extend(['گزارش ویژه', 'بین‌الملل'])
                     else:
-                        post_labels = ['حقوق بشر', 'Iran']
+                        post_labels.extend(['حقوق بشر', 'Iran'])
+                        
+                    # 1. وضعیت زندانیان (Prisoners Situation)
+                    search_text = (article_title + " " + description).lower()
+                    prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه']
+                    if any(kw in search_text for kw in prisoner_keywords):
+                        post_labels.extend(['وضعیت زندانیان', 'آرشیو'])
+                        
+                    # 2. واکنش‌های بین‌المللی (International Reactions)
+                    int_keywords = ['سازمان ملل', 'عفو بین‌الملل', 'پارلمان اروپا', 'تحریم', 'بیانیه', 'جاوید رحمان', 'کمیته حقیقت‌ياب', 'شورای حقوق بشر']
+                    if any(kw in search_text for kw in int_keywords):
+                        post_labels.extend(['واکنشهای بین‌المللی', 'آرشیو'])
+                        
+                    # Ensure uniqueness
+                    post_labels = list(set(post_labels))
                     
                     post_result = self.blogger.create_post(
                         title=article_title,
@@ -281,6 +296,16 @@ class BloggerNewsBot:
                 print(f"[ERROR] Processing item: {e}")
 
         print(f"\nFinished. Published {published_count} items.")
+        
+        # Finally, update the live statistics
+        try:
+            from stats_updater import fetch_and_calculate_stats, update_stats_post
+            print("\n[INFO] Running Live Stats Engine...")
+            stats_data = fetch_and_calculate_stats()
+            if stats_data and self.blogger:
+                update_stats_post(self.blogger, stats_data)
+        except Exception as e:
+            print(f"[Error] Failed to update stats: {e}")
 
     def run_once(self):
         self.fetch_and_process_news()
