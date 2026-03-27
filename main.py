@@ -236,11 +236,10 @@ class BloggerNewsBot:
                 ''' if german_content else ''}
                 
                 <!-- Premium Source Box -->
-                <div style="margin-top:40px;padding:25px;background:#fff;border-right:5px solid #ce0000;border-radius:8px;text-align:right;direction:rtl;box-shadow:0 5px 15px rgba(0,0,0,0.05);">
-                    <p style="margin:0;font-size:14px;color:#555;font-family:Tahoma,sans-serif;">
-                        <span style="margin-left:15px;">منبع اصلی مقاله:</span> 
-                        <a href="{article_link}" target="_blank" style="background:#ce0000;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:13px;box-shadow:0 4px 12px rgba(206,0,0,0.3);">مشاهده در {source_name}</a>
-                    </p>
+                <div style="text-align: right; direction: rtl;">
+                    <div style="background:#1a1a1a; padding:12px 25px; border-radius:8px; border-right:3px solid #c0392b; font-weight:bold; color:#ddd; display:inline-block; margin:30px 0 10px 0; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
+                        <span style="color:#c0392b; margin-left:8px;">خبرگزاری:</span> iranpolnews
+                    </div>
                 </div>
                 """
 
