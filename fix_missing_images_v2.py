@@ -445,6 +445,13 @@ class SmartImageFixer:
         elif source == 'iranintl':
             image_url = self._find_iranintl_article_image(title, content)
         
+        # Validate image URL - reject placeholders, SVGs, logos etc.
+        if image_url:
+            img_lower = image_url.lower()
+            if any(bad in img_lower for bad in ['placeholder', '.svg', 'logo', 'icon', 'avatar', '1x1', 'spacer', 'pixel']):
+                safe_print(f"  [Skip] Invalid image (placeholder/svg/logo): {image_url[:60]}")
+                image_url = None
+        
         if not image_url:
             return False
         
