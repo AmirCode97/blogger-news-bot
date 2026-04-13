@@ -235,10 +235,10 @@ class BloggerNewsBot:
                 </div>
                 ''' if german_content else ''}
                 
-                <!-- Premium Source Box -->
+                <!-- Premium Source Box (with hidden original link for traceability) -->
                 <div style="text-align: right; direction: rtl;">
-                    <div style="background:#1a1a1a; padding:12px 25px; border-radius:8px; border-right:3px solid #c0392b; font-weight:bold; color:#ddd; display:inline-block; margin:30px 0 10px 0; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
-                        <span style="color:#c0392b; margin-left:8px;">خبرگزاری:</span> iranpolnews
+                    <div style="background:#1a1a1a; padding:12px 25px; border-radius:8px; border-right:3px solid #c0392b; font-weight:bold; color:#ddd; display:inline-block; margin:30px 0 10px 0; font-size: 13px; box-shadow: 0 4px 10px rgba(0,0,0,0.4);" data-source-url="{article_link}" data-source-name="{source_name}">
+                        <span style="color:#c0392b; margin-left:8px;">خبرگزاری:</span> iranpolnews | <span style="font-weight:normal;color:#888;">منبع: {source_name}</span>
                     </div>
                 </div>
                 """
