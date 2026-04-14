@@ -565,8 +565,8 @@ class NewsFetcher:
                         return meta ? meta.getAttribute('content') : null;
                     }
                 ''')
-                if og_image and not any(bad in og_image.lower() for bad in ['logo', 'placeholder', '.svg', 'icon', 'spacer']):\r
-                    result['image'] = og_image\r
+                if og_image and not any(bad in og_image.lower() for bad in ['logo', 'placeholder', '.svg', 'icon', 'spacer']):
+                    result['image'] = og_image
                     safe_print(f"  [PW] og:image found: {og_image[:80]}")
                 
                 # Try to find article image from rendered DOM
@@ -594,8 +594,8 @@ class NewsFetcher:
                             return null;
                         }
                     ''')
-                    if article_image and not any(bad in article_image.lower() for bad in ['placeholder', '.svg', 'logo', 'spacer']):\r
-                        result['image'] = article_image\r
+                    if article_image and not any(bad in article_image.lower() for bad in ['placeholder', '.svg', 'logo', 'spacer']):
+                        result['image'] = article_image
                         safe_print(f"  [PW] Article image found: {article_image[:80]}")
                 
                 # Extract article content
