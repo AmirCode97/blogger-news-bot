@@ -1,0 +1,1082 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:templateUrl='custom-news.xml' b:templateVersion='1.3' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <title><data:view.title.escaped/> | <data:blog.title/></title>
+  
+  <b:include data='blog' name='all-head-content'/>
+
+  <!-- Fonts & Icons -->
+  <link href='https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css' rel='stylesheet' type='text/css'/>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'/>
+
+  <b:skin><![CDATA[
+    /* ============================================= */
+    /* IRAN POLITICAL NEWS - PREMIUM DARK THEME v2   */
+    /* ============================================= */
+    
+    :root {
+      --primary: #c0392b;
+      --primary-dark: #a93226;
+      --primary-glow: rgba(192, 57, 43, 0.15);
+      --accent: #e74c3c;
+      --bg-dark: #0d0d0d;
+      --bg-card: #151515;
+      --bg-card-hover: #1a1a1a;
+      --text-main: #ecf0f1;
+      --text-muted: #8e99a4;
+      --border: #1e2a35;
+      --border-light: #2a3a4a;
+      --header-bg: #060606;
+      --glass: rgba(255,255,255,0.03);
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+      --shadow-md: 0 8px 25px rgba(0,0,0,0.4);
+      --shadow-lg: 0 15px 40px rgba(0,0,0,0.5);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* --- RESET & BASE --- */
+    * { box-sizing: border-box; outline: none; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Vazir', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      direction: rtl;
+      font-size: 14px;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { text-decoration: none; color: inherit; transition: var(--transition); }
+    a:hover { color: var(--primary); }
+    img { max-width: 100%; height: auto; display: block; }
+    ul { list-style: none; padding: 0; margin: 0; }
+
+    /* --- TOP ALERT BAR (BREAKING NEWS) --- */
+    .alert-bar {
+      background: linear-gradient(135deg, var(--primary) 0%, #8e1a0e 100%);
+      color: #fff;
+      font-size: 12px;
+      padding: 10px 0;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(192, 57, 43, 0.3);
+    }
+    .alert-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      display: flex;
+      width: 100%;
+    }
+    .alert-title {
+      background: rgba(0,0,0,0.4);
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-weight: 900;
+      margin-left: 15px;
+      white-space: nowrap;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: 1px;
+      backdrop-filter: blur(5px);
+    }
+    .alert-marquee { flex: 1; font-weight: bold; }
+
+    /* --- HEADER --- */
+    .site-header {
+      background: var(--header-bg);
+      padding: 25px 0;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+    }
+    .site-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      opacity: 0.4;
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-text h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin: 0;
+    }
+    .logo-text span { color: var(--primary); }
+    .header-date { color: var(--text-muted); font-size: 12px; }
+
+    /* Language Switcher */
+    .lang-switcher {
+      display: flex;
+      gap: 8px;
+    }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--glass);
+      border: 1px solid var(--border);
+      padding: 7px 14px;
+      border-radius: 25px;
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: var(--transition);
+      backdrop-filter: blur(5px);
+    }
+    .lang-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
+    }
+    .lang-btn img {
+      width: 18px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    /* --- NAVIGATION --- */
+    .main-nav {
+      background: rgba(15, 15, 15, 0.95);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 999;
+      backdrop-filter: blur(10px);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 15px;
+      display: flex; height: 50px; align-items: center;
+    }
+    .nav-links { display: flex; gap: 25px; height: 100%; }
+    .nav-links a {
+      display: flex; align-items: center; height: 100%;
+      font-weight: 700; font-size: 13px; color: #bbb;
+      border-top: 3px solid transparent;
+      transition: var(--transition);
+      position: relative;
+    }
+    .nav-links a:hover { color: #fff; border-top-color: var(--primary); }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      right: 50%;
+      height: 2px;
+      background: var(--primary);
+      transition: var(--transition);
+      opacity: 0;
+    }
+    .nav-links a:hover::after {
+      left: 0;
+      right: 0;
+      opacity: 1;
+    }
+    .nav-search { margin-right: auto; }
+    .nav-search input {
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff;
+      padding: 7px 16px; border-radius: 25px 0 0 25px; font-family: inherit; font-size: 12px;
+      width: 160px; transition: var(--transition);
+    }
+    .nav-search input:focus {
+      background: rgba(255,255,255,0.08);
+      border-color: var(--primary);
+      width: 200px;
+    }
+    .search-btn {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      padding: 7px 14px;
+      border-radius: 0 25px 25px 0;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .search-btn:hover { background: var(--primary-dark); transform: scale(1.05); }
+
+    /* --- MAIN LAYOUT --- */
+    .main-container {
+      max-width: 1200px; margin: 40px auto; padding: 0 15px;
+      display: grid; grid-template-columns: 800px 1fr; gap: 40px;
+    }
+
+    /* --- FEATURED SECTION (First Post) --- */
+    .hero-post {
+      position: relative;
+      margin-bottom: 40px;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-lg);
+    }
+    .hero-thumb {
+      width: 100%; height: 450px; object-fit: cover;
+      filter: brightness(0.65);
+      transition: 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .hero-post:hover .hero-thumb { filter: brightness(0.85) scale(1.03); }
+    .hero-content {
+      position: absolute; bottom: 0; right: 0; left: 0;
+      padding: 50px 40px 40px;
+      background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.5) 50%, transparent 100%);
+    }
+    .hero-cat {
+      background: var(--primary); color: #fff;
+      padding: 5px 14px; font-size: 10px; font-weight: bold;
+      border-radius: 20px; text-transform: uppercase;
+      margin-bottom: 12px; display: inline-block;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(192, 57, 43, 0.4);
+    }
+    .hero-title {
+      font-size: 34px; font-weight: 900; color: #fff;
+      margin: 10px 0; line-height: 1.35;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+    .hero-meta { color: rgba(255,255,255,0.7); font-size: 12px; }
+
+    /* --- HOMEPAGE LAYOUT --- */
+    .homepage-loop {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .hero-post, .news-grid-title {
+      width: 100%;
+    }
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md); overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: var(--transition);
+      width: calc(50% - 10px);
+      position: relative;
+    }
+    .post-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      opacity: 0;
+      transition: var(--transition);
+      z-index: 1;
+    }
+    .post-card:hover {
+      border-color: var(--border-light);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      background: var(--bg-card-hover);
+    }
+    .post-card:hover::before { opacity: 1; }
+    .card-thumb { height: 190px; overflow: hidden; position: relative; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    .post-card:hover .card-thumb img { transform: scale(1.08); }
+    .card-body { padding: 22px; flex: 1; display: flex; flex-direction: column; }
+    .card-title { font-size: 15px; font-weight: 800; margin-bottom: 10px; line-height: 1.6; height: 48px; overflow: hidden; }
+    .card-excerpt { font-size: 13px; color: var(--text-muted); height: 55px; overflow: hidden; margin-bottom: 15px; line-height: 1.7; flex: 1; }
+    .card-link {
+      font-size: 11px; font-weight: bold; color: var(--primary);
+      display: inline-flex; align-items: center; gap: 4px;
+      transition: var(--transition);
+    }
+    .card-link:hover { gap: 8px; }
+
+    /* --- SIDEBAR WIDGETS --- */
+    .widget-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 25px;
+      margin-bottom: 30px;
+      transition: var(--transition);
+    }
+    .widget-box:hover {
+      border-color: var(--border-light);
+      box-shadow: var(--shadow-sm);
+    }
+    .widget-header {
+      font-size: 14px; font-weight: 900;
+      color: #fff; text-transform: uppercase;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 12px; margin-bottom: 20px;
+      letter-spacing: 1.5px;
+      position: relative;
+    }
+    .widget-header::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      right: 0;
+      width: 40px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    /* Statistics Widget */
+    .stat-card {
+      background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: var(--transition);
+    }
+    .stat-card:hover {
+      border-color: var(--primary);
+      background: var(--primary-glow);
+    }
+    .stat-icon {
+      font-size: 24px;
+      width: 45px;
+      height: 45px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--primary-glow);
+      color: var(--primary);
+    }
+    .stat-info { flex: 1; text-align: left; }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; }
+    .stat-val { font-size: 28px; font-weight: 900; color: #fff; font-family: 'Vazir', sans-serif; }
+    .stat-update { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
+
+    /* Quote Widget */
+    .quote-box { text-align: center; }
+    .quote-img {
+      width: 85px; height: 85px; border-radius: 50%; object-fit: cover;
+      margin: 0 auto 15px;
+      border: 3px solid var(--primary);
+      box-shadow: 0 0 20px rgba(192, 57, 43, 0.2);
+      transition: var(--transition);
+    }
+    .quote-box:hover .quote-img { transform: scale(1.05); box-shadow: 0 0 30px rgba(192, 57, 43, 0.3); }
+    .quote-text {
+      font-style: italic; font-size: 14px; color: #ccc;
+      margin-bottom: 15px; line-height: 1.7;
+      position: relative;
+      padding: 0 10px;
+    }
+    .quote-text::before {
+      content: '\201C';
+      font-size: 50px;
+      color: var(--primary);
+      opacity: 0.3;
+      position: absolute;
+      top: -15px;
+      right: -5px;
+      font-family: Georgia, serif;
+    }
+    .quote-author { font-weight: bold; color: #fff; font-size: 12px; }
+
+    /* Bank Links */
+    .bank-link {
+      display: block;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      color: #fff;
+      text-decoration: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: bold;
+      text-align: center;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+    .bank-link::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      transition: 0.5s;
+    }
+    .bank-link:hover::before { left: 100%; }
+    .bank-link:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm); color: #fff; }
+    .bank-link-blue { background: linear-gradient(135deg, #1a237e, #1565c0); }
+    .bank-link-green { background: linear-gradient(135deg, #1b5e20, #2e7d32); }
+
+    /* Footer */
+    .main-footer {
+      background: #050505; border-top: 1px solid var(--border);
+      padding: 60px 0 30px; margin-top: 60px;
+      position: relative;
+    }
+    .main-footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--primary), transparent);
+      opacity: 0.3;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .footer-col h4 { 
+      color: #fff; border-bottom: 2px solid var(--primary); 
+      display: inline-block; padding-bottom: 8px; margin-bottom: 20px;
+      font-size: 14px; letter-spacing: 1px;
+    }
+    .footer-col ul li {
+      margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 8px; transition: var(--transition);
+    }
+    .footer-col ul li:hover { padding-right: 8px; }
+    .footer-col ul li a { color: var(--text-muted); font-size: 13px; }
+    .footer-col ul li a:hover { color: var(--primary); }
+    .footer-copyright {
+      text-align: center; margin-top: 40px; color: #444;
+      font-size: 11px; border-top: 1px solid rgba(255,255,255,0.05);
+      padding-top: 20px;
+    }
+
+    /* --- PAGINATION --- */
+    /* Hide Blogger's default pager */
+    .blog-pager { display: none !important; }
+    
+    /* Custom Numbered Pagination */
+    #numbered-pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+      margin: 40px auto;
+      padding: 20px 0;
+      flex-wrap: wrap;
+    }
+    .page-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      height: 42px;
+      padding: 0 14px;
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Vazir', sans-serif;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+    .page-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(192, 57, 43, 0.3);
+    }
+    .page-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 15px rgba(192, 57, 43, 0.4);
+      pointer-events: none;
+    }
+    .page-btn.dots {
+      background: transparent;
+      border: none;
+      pointer-events: none;
+      color: var(--text-muted);
+      min-width: 30px;
+    }
+    .page-info {
+      display: block;
+      text-align: center;
+      margin-bottom: 15px;
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1000px) {
+      .main-container { display: flex; flex-direction: column; }
+      .hero-title { font-size: 22px; }
+      .hero-thumb { height: 300px; }
+      .hero-content { padding: 30px 20px 20px; }
+      .post-card { width: 100%; }
+      .footer-inner { grid-template-columns: 1fr; text-align: center; }
+      .nav-search input { width: 120px; }
+    }
+
+    /* Smooth scroll */
+    html { scroll-behavior: smooth; }
+
+    /* Selection color */
+    ::selection {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+  ]]></b:skin>
+</head>
+
+<body>
+
+  <!-- 1. ALERT BAR (Live from Iran International) -->
+  <div class='alert-bar'>
+    <div class='alert-inner'>
+      <div class='alert-title'><i class='fas fa-bolt' style='margin-left:4px'></i>فوری</div>
+      <div class='alert-marquee'>
+        <marquee direction='right' scrollamount='5' id='live-ticker'>
+          در حال دریافت اخبار...
+        </marquee>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+  //<![CDATA[
+    // === ADVANCED DEDUPLICATION and TICKER SYSTEM ===
+    document.addEventListener('DOMContentLoaded', function() {
+       
+       // 1. Advanced Duplicate Removal (Hero vs Grid)
+       function removeDuplicates() {
+           var heroLink = document.querySelector('.hero-post a');
+           if (!heroLink) return;
+           var heroUrl = heroLink.href;
+           var gridCards = document.querySelectorAll('.post-card');
+           gridCards.forEach(function(card) {
+               var cardLink = card.querySelector('a');
+               if (cardLink && cardLink.href === heroUrl) {
+                   card.remove();
+               }
+           });
+       }
+       removeDuplicates();
+       
+       // 2. Live News Ticker (Iran Intl)
+       var rssUrl = 'https://www.iranintl.com/fa/rss';
+       var timestamp = new Date().getTime();
+       var proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(rssUrl) + '&_t=' + timestamp;
+       
+       fetch(proxyUrl)
+        .then(function(res) { 
+            if (!res.ok) throw new Error("Network response was not ok");
+            return res.text(); 
+        })
+        .then(function(str) {
+            var parser = new DOMParser();
+            var xml = parser.parseFromString(str, "text/xml");
+            var items = xml.getElementsByTagName("item");
+            var headlines = [];
+            for(var i=0; i < Math.min(items.length, 10); i++) {
+                var t = items[i].getElementsByTagName("title")[0];
+                if(t) headlines.push(t.textContent);
+            }
+            if(headlines.length > 0) {
+               var ticker = document.getElementById('live-ticker');
+               if(ticker) ticker.innerHTML = headlines.join(' \u2022 ');
+            } else {
+               throw new Error("No news items found");
+            }
+        })
+        .catch(function(e) {
+            console.error('Ticker Error:', e);
+            var ticker = document.getElementById('live-ticker');
+            if(ticker) ticker.innerHTML = "\u067e\u0648\u0634\u0634 \u0644\u062d\u0638\u0647\u200c\u0627\u06cc \u0645\u0647\u0645\u200c\u062a\u0631\u06cc\u0646 \u0627\u062e\u0628\u0627\u0631 \u0627\u06cc\u0631\u0627\u0646 \u0648 \u062c\u0647\u0627\u0646";
+        });
+    });
+  //]]>
+  </script>
+
+  <!-- 2. HEADER -->
+  <header class='site-header'>
+    <div class='header-content'>
+      <!-- Language Switcher (Left) -->
+      <div class='lang-switcher'>
+        <a href='javascript:void(0)' class='lang-btn' onclick='translateTo("en")' title='English'>
+          <img src='https://flagcdn.com/w40/gb.png' alt='EN'/> EN
+        </a>
+        <a href='javascript:void(0)' class='lang-btn' onclick='translateTo("de")' title='Deutsch'>
+          <img src='https://flagcdn.com/w40/de.png' alt='DE'/> DE
+        </a>
+        <a href='javascript:void(0)' class='lang-btn' onclick='translateTo("fa")' title='فارسی' style='background:var(--primary);color:#fff'>
+          <img src='https://flagcdn.com/w40/ir.png' alt='FA'/> FA
+        </a>
+      </div>
+      <!-- Title & Date -->
+      <div style='text-align:center;flex:1'>
+        <h1 style='font-size:28px;font-weight:900;margin:0;color:#fff'>اخبار سیاسی و حقوق بشری</h1>
+        <div style='font-size:12px;color:var(--text-muted);margin-top:4px'>عضو شبکه مدافعین حقوق بشر در ایران</div>
+      </div>
+      <!-- Persian Date (Right) -->
+      <div class='header-date' id='header-date' style='display: flex; align-items: center;'>
+        <script>document.write(new Date().toLocaleDateString('fa-IR', {weekday:'long', day:'numeric', month:'long', year:'numeric'}));</script>
+        <img alt='Logo' src='https://iili.io/qhSccep.png' style='height: 45px; margin-right: 12px; vertical-align: middle;'/>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Google Translate Widget -->
+  <div id='google_translate_element' style='position:absolute;top:-9999px'></div>
+  <script src='//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'></script>
+  <script>
+  //<![CDATA[
+    (function() {
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.blogspot.com;';
+      document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname + ';';
+    })();
+    
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'fa',
+        includedLanguages: 'en,de',
+        autoDisplay: false
+      }, 'google_translate_element');
+    }
+    
+    function translateTo(lang) {
+      if (lang === 'fa') {
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.blogspot.com;';
+        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname + ';';
+        location.reload();
+        return;
+      }
+      var select = document.querySelector('.goog-te-combo');
+      if (select) {
+        select.value = lang;
+        select.dispatchEvent(new Event('change'));
+      } else {
+        setTimeout(function() {
+          var s = document.querySelector('.goog-te-combo');
+          if (s) { s.value = lang; s.dispatchEvent(new Event('change')); }
+        }, 1000);
+      }
+    }
+  //]]>
+  </script>
+  
+  <!-- Hide Google Translate Bar -->
+  <style>
+    .goog-te-banner-frame, .skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+  </style>
+
+  <!-- 3. NAV -->
+  <nav class='main-nav'>
+    <div class='nav-inner'>
+      <div class='nav-links'>
+        <a href='/'><i class='fas fa-home' style='margin-left:5px;font-size:12px'></i>خانه</a>
+        <a href='/search/label/حقوق%20بشر'>حقوق بشر</a>
+        <a href='/search/label/بین‌الملل'>بین‌الملل</a>
+        <a href='/search/label/گزارش%20ویژه'>گزارش ویژه</a>
+        <a href='/search/label/مقاله'>مقاله</a>
+        <a href='/search/label/آرشیو%20گزارش‌ها'>
+          <i class='fas fa-archive' style='margin-left:5px;font-size:11px'></i>آرشیو گزارش‌ها ▾
+        </a>
+      </div>
+      <div class='nav-search'>
+        <form action='/search' method='get' style='display:flex;'>
+          <input name='q' placeholder='جستجو...' type='text' id='search-input'/>
+          <button type='submit' class='search-btn' title='جستجو'>
+            <i class='fas fa-search'></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 4. MAIN CONTENT AREA -->
+  <div class='main-container'>
+    
+    <!-- LEFT COLUMN: CONTENT -->
+    <div class='main-col'>
+      <b:section id='main-posts' showaddelement='yes'>
+        <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
+          <b:includable id='main' var='this'>
+            
+            <b:if cond='data:view.isHomepage'>
+               <!-- Custom Loop for Homepage -->
+               <div class='homepage-loop news-grid-container'>
+                 <b:loop index='i' values='data:posts' var='post'>
+                   
+                   <b:if cond='data:i == 0'>
+                     <!-- 1. HERO POST (First Item) -->
+                     <article class='hero-post start-grid-item'>
+                       <a expr:href='data:post.url'>
+                         <b:if cond='data:post.featuredImage'>
+                           <img class='hero-thumb' expr:src='data:post.featuredImage'/>
+                         <b:else/>
+                           <div class='hero-thumb' style='background:#111;display:flex;align-items:center;justify-content:center;'>No Image</div>
+                         </b:if>
+                         <div class='hero-content'>
+                           <span class='hero-cat'><i class='fas fa-fire' style='margin-left:4px'></i>خبر ویژه</span>
+                           <h2 class='hero-title'><data:post.title/></h2>
+                           <div class='hero-meta'><data:post.dateHeader/></div>
+                         </div>
+                       </a>
+                     </article>
+                     
+                     <div class='news-grid-title' style='width:100%;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid var(--border);font-size:18px;font-weight:bold;color:#fff;'>
+                       <span style='border-bottom:3px solid var(--primary);padding-bottom:10px;'>آخرین گزارش‌ها</span>
+                     </div>
+                   
+                   <b:else/>
+                     <!-- 2. GRID POSTS (Other Items) -->
+                     <article class='post-card'>
+                       <div class='card-thumb'>
+                         <a expr:href='data:post.url'>
+                           <b:if cond='data:post.featuredImage'>
+                             <img expr:src='resizeImage(data:post.featuredImage, 720, &quot;16:9&quot;)'/>
+                           <b:else/>
+                             <div style='width:100%;height:100%;background:linear-gradient(135deg, #1a1a1a, #222)'></div>
+                           </b:if>
+                         </a>
+                       </div>
+                       <div class='card-body'>
+                         <h3 class='card-title'><a expr:href='data:post.url'><data:post.title/></a></h3>
+                         <div class='card-excerpt'><data:post.snippet/></div>
+                         <a class='card-link' expr:href='data:post.url'>مطالعه کامل <i class='fas fa-arrow-left' style='font-size:10px'></i></a>
+                       </div>
+                     </article>
+                   </b:if>
+                   
+                 </b:loop>
+                 </div> <!-- End Container -->
+                 
+                 <!-- Blogger's Native Pager (hidden, used by our script) -->
+                 <div class='blog-pager' id='blog-pager'>
+                    <b:if cond='data:newerPageUrl'><a expr:href='data:newerPageUrl' id='blog-pager-newer-link'>Next</a></b:if>
+                    <b:if cond='data:olderPageUrl'><a expr:href='data:olderPageUrl' id='blog-pager-older-link'>Previous</a></b:if>
+                 </div>
+
+                 <!-- Custom Numbered Pagination Container -->
+                 <div id='numbered-pagination'></div>
+
+            <b:else/>
+               <!-- Single Post View / Search / Label View -->
+               <b:if cond='data:view.isPost'>
+                 <!-- Single Post -->
+                 <b:loop values='data:posts' var='post'>
+                   <div class='widget-box' style='padding:40px'>
+                     <h1 style='font-size:30px;margin-bottom:20px;line-height:1.5'><data:post.title/></h1>
+                     <div style='color:var(--text-muted);font-size:12px;margin-bottom:25px;padding-bottom:15px;border-bottom:1px solid var(--border)'>
+                       <data:post.dateHeader/>
+                     </div>
+                     <div style='line-height:2.2;font-size:15px;color:#ddd'><data:post.body/></div>
+                   </div>
+                 </b:loop>
+               <b:else/>
+                 <!-- Search / Label Results -->
+                 <div class='homepage-loop news-grid-container'>
+                 <b:loop values='data:posts' var='post'>
+                   <article class='post-card'>
+                     <div class='card-thumb'>
+                       <a expr:href='data:post.url'>
+                         <b:if cond='data:post.featuredImage'>
+                           <img expr:src='resizeImage(data:post.featuredImage, 720, &quot;16:9&quot;)'/>
+                         <b:else/>
+                           <div style='width:100%;height:100%;background:linear-gradient(135deg, #1a1a1a, #222)'></div>
+                         </b:if>
+                       </a>
+                     </div>
+                     <div class='card-body'>
+                       <h3 class='card-title'><a expr:href='data:post.url'><data:post.title/></a></h3>
+                       <div class='card-excerpt'><data:post.snippet/></div>
+                       <a class='card-link' expr:href='data:post.url'>مطالعه کامل ←</a>
+                     </div>
+                   </article>
+                 </b:loop>
+                 </div>
+                 <!-- Native Pager for search/label pages -->
+                 <div class='blog-pager' id='blog-pager'>
+                    <b:if cond='data:newerPageUrl'><a expr:href='data:newerPageUrl' id='blog-pager-newer-link'>Next</a></b:if>
+                    <b:if cond='data:olderPageUrl'><a expr:href='data:olderPageUrl' id='blog-pager-older-link'>Previous</a></b:if>
+                 </div>
+                 <div id='numbered-pagination'></div>
+               </b:if>
+            </b:if>
+          </b:includable>
+        </b:widget>
+      </b:section>
+    </div>
+
+    <!-- RIGHT COLUMN: SIDEBAR -->
+    <aside class='sidebar-col'>
+      <b:section id='sidebar' showaddelement='yes'>
+        
+        <!-- WIDGET 1: QUOTE -->
+        <b:widget id='HTML1' locked='false' title='نقل قول روز' type='HTML'>
+          <b:includable id='main'>
+            <div class='widget-box quote-box'>
+              <div class='widget-header'>سخن روز</div>
+              <img class='quote-img' src='https://iili.io/qlUwhLG.png'/>
+              <div class='quote-text'>"انکار حقوق بشر مردم، به چالش کشیدن انسانیت آنهاست."</div>
+              <div class='quote-author'>- نلسون ماندلا</div>
+            </div>
+          </b:includable>
+        </b:widget>
+
+        <!-- WIDGET 2: INFO BANK -->
+        <b:widget id='HTML2' locked='false' title='بانک اطلاعاتی' type='HTML'>
+          <b:includable id='main'>
+            <div class='widget-box' style='margin-top: 15px;'>
+              <div class='widget-header'>بانک اطلاعاتی</div>
+              <div style='padding: 10px 0;'>
+                <a class='bank-link bank-link-blue' href='https://iranpolnews.blogspot.com/2026/03/blog-post_2781.html' target='_blank'>
+                  <i class='fas fa-scroll' style='margin-left:6px'></i>اعلامیه جهانی حقوق بشر
+                </a>
+                <a class='bank-link bank-link-green' href='https://iranpolnews.blogspot.com/2026/03/blog-post_7378.html' target='_blank'>
+                  <i class='fas fa-globe' style='margin-left:6px'></i>سند 2030 یونسکو
+                </a>
+              </div>
+            </div>
+          </b:includable>
+        </b:widget>
+
+      </b:section>
+    </aside>
+
+  </div>
+
+  <!-- 5. FOOTER -->
+  <footer class='main-footer'>
+    <div class='footer-inner'>
+      <div class='footer-col'>
+        <h4>دسترسی سریع</h4>
+        <ul>
+          <li><a href='/p/blog-page.html'>درباره ما</a></li>
+          <li><a href='/'>آرشیو گزارش‌ها</a></li>
+        </ul>
+      </div>
+      <!-- Logo Bottom Left -->
+      <div class='footer-col' style='display: flex; align-items: flex-end; justify-content: flex-start;'>
+        <img alt='Logo' src='https://iili.io/qhSccep.png' style='height: 140px; width: auto;'/>
+      </div>
+    </div>
+    <div class='footer-copyright'>
+      © 2026 All Rights Reserved.
+    </div>
+  </footer>
+
+  <!-- ============================================= -->
+  <!-- NUMBERED PAGINATION SCRIPT (FIXED VERSION)    -->
+  <!-- Uses Blogger Feed API to get real timestamps  -->
+  <!-- ============================================= -->
+  <script type='text/javascript'>
+  //<![CDATA[
+    var POSTS_PER_PAGE = 20;
+    var MAX_VISIBLE_PAGES = 5;
+
+    (function() {
+      var paginationContainer = document.getElementById('numbered-pagination');
+      if (!paginationContainer) return;
+
+      // Detect if we're on a label page
+      var currentUrl = location.href;
+      var isLabel = currentUrl.indexOf('/search/label/') !== -1;
+      var labelName = '';
+      if (isLabel) {
+        labelName = currentUrl.split('/search/label/')[1];
+        if (labelName.indexOf('?') !== -1) labelName = labelName.split('?')[0];
+        labelName = decodeURIComponent(labelName);
+      }
+
+      // Build feed URL to get total count
+      var feedUrl = isLabel
+        ? '/feeds/posts/summary/-/' + encodeURIComponent(labelName) + '?alt=json-in-script&max-results=0&callback=paginationCount'
+        : '/feeds/posts/summary?alt=json-in-script&max-results=0&callback=paginationCount';
+
+      // Step 1: Get total posts count
+      window.paginationCount = function(data) {
+        var totalPosts = parseInt(data.feed.openSearch$totalResults.$t, 10);
+        if (totalPosts <= POSTS_PER_PAGE) return; // No pagination needed
+
+        var totalPages = Math.ceil(totalPosts / POSTS_PER_PAGE);
+
+        // Determine current page number
+        var currentPage = 1;
+        if (currentUrl.indexOf('updated-max=') !== -1) {
+          // We need to find which page we're on by checking start-index
+          var startIdx = 1;
+          var siMatch = currentUrl.match(/start-index=(\d+)/);
+          if (siMatch) startIdx = parseInt(siMatch[1], 10);
+          currentPage = Math.ceil(startIdx / POSTS_PER_PAGE);
+        }
+
+        // Step 2: Get timestamps for building page links
+        // We fetch the published dates at each page boundary
+        var timestampFeedUrl = isLabel
+          ? '/feeds/posts/summary/-/' + encodeURIComponent(labelName) + '?alt=json-in-script&max-results=' + totalPosts + '&callback=paginationTimestamps&fields=entry(published)'
+          : '/feeds/posts/summary?alt=json-in-script&max-results=' + totalPosts + '&callback=paginationTimestamps&fields=entry(published)';
+
+        window._paginationTotalPages = totalPages;
+        window._paginationCurrentPage = currentPage;
+        window._paginationIsLabel = isLabel;
+        window._paginationLabelName = labelName;
+
+        var script = document.createElement('script');
+        script.src = timestampFeedUrl;
+        document.body.appendChild(script);
+      };
+
+      window.paginationTimestamps = function(data) {
+        var entries = data.feed.entry || [];
+        var totalPages = window._paginationTotalPages;
+        var currentPage = window._paginationCurrentPage;
+        var isLabel2 = window._paginationIsLabel;
+        var labelName2 = window._paginationLabelName;
+
+        // Build array of timestamps at page boundaries
+        var pageTimestamps = [''];  // page 1 = home (no timestamp)
+        for (var p = 1; p < totalPages; p++) {
+          var idx = p * POSTS_PER_PAGE;
+          if (idx < entries.length) {
+            pageTimestamps.push(entries[idx].published.$t);
+          } else if (entries.length > 0) {
+            pageTimestamps.push(entries[entries.length - 1].published.$t);
+          }
+        }
+
+        // Now figure out which page we're actually on by matching URL timestamp
+        if (currentUrl.indexOf('updated-max=') !== -1) {
+          var urlTimestamp = currentUrl.match(/updated-max=([^&]+)/);
+          if (urlTimestamp) {
+            var urlTs = decodeURIComponent(urlTimestamp[1]);
+            // Find closest matching page
+            for (var k = 1; k < pageTimestamps.length; k++) {
+              if (pageTimestamps[k] && pageTimestamps[k].indexOf(urlTs.substring(0, 19)) !== -1) {
+                currentPage = k + 1;
+                break;
+              }
+            }
+            // If no exact match, use start-index
+            if (currentPage === 1 && currentUrl.indexOf('start-index=') !== -1) {
+              var si = currentUrl.match(/start-index=(\d+)/);
+              if (si) currentPage = Math.ceil(parseInt(si[1], 10) / POSTS_PER_PAGE) + 1;
+            }
+            // Still page 1? Try simpler approach
+            if (currentPage === 1) {
+              for (var m = 1; m < pageTimestamps.length; m++) {
+                if (currentUrl.indexOf(encodeURIComponent(pageTimestamps[m])) !== -1 ||
+                    currentUrl.indexOf(pageTimestamps[m]) !== -1) {
+                  currentPage = m + 1;
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        // Build page URL helper
+        function buildPageUrl(pageNum) {
+          if (pageNum === 1) {
+            return isLabel2 ? '/search/label/' + encodeURIComponent(labelName2) : '/';
+          }
+          var ts = pageTimestamps[pageNum - 1];
+          if (!ts) return '#';
+          var base = isLabel2
+            ? '/search/label/' + encodeURIComponent(labelName2) + '?updated-max=' + encodeURIComponent(ts) + '&max-results=' + POSTS_PER_PAGE
+            : '/search?updated-max=' + encodeURIComponent(ts) + '&max-results=' + POSTS_PER_PAGE;
+          return base;
+        }
+
+        // Convert number to Persian
+        function toPersianNum(n) {
+          var persianDigits = ['\u06F0','\u06F1','\u06F2','\u06F3','\u06F4','\u06F5','\u06F6','\u06F7','\u06F8','\u06F9'];
+          return String(n).replace(/\d/g, function(d) { return persianDigits[parseInt(d)]; });
+        }
+
+        // Build pagination HTML
+        var html = '';
+        html += '<span class="page-info">\u0635\u0641\u062d\u0647 ' + toPersianNum(currentPage) + ' \u0627\u0632 ' + toPersianNum(totalPages) + '</span>';
+
+        // Previous button
+        if (currentPage > 1) {
+          html += '<a class="page-btn" href="' + buildPageUrl(currentPage - 1) + '" title="\u0642\u0628\u0644\u06cc"><i class="fas fa-chevron-right"></i></a>';
+        }
+
+        // Page numbers with smart range
+        var startPage = 1;
+        var endPage = totalPages;
+
+        if (totalPages > MAX_VISIBLE_PAGES + 2) {
+          if (currentPage <= Math.ceil(MAX_VISIBLE_PAGES / 2) + 1) {
+            // Near start
+            startPage = 1;
+            endPage = MAX_VISIBLE_PAGES + 1;
+          } else if (currentPage >= totalPages - Math.floor(MAX_VISIBLE_PAGES / 2)) {
+            // Near end
+            startPage = totalPages - MAX_VISIBLE_PAGES;
+            endPage = totalPages;
+          } else {
+            // Middle
+            startPage = currentPage - Math.floor(MAX_VISIBLE_PAGES / 2);
+            endPage = currentPage + Math.floor(MAX_VISIBLE_PAGES / 2);
+          }
+        }
+
+        // First page
+        if (startPage > 1) {
+          html += '<a class="page-btn" href="' + buildPageUrl(1) + '">' + toPersianNum(1) + '</a>';
+          if (startPage > 2) html += '<span class="page-btn dots">...</span>';
+        }
+
+        // Range
+        for (var j = startPage; j <= endPage; j++) {
+          if (j === currentPage) {
+            html += '<span class="page-btn active">' + toPersianNum(j) + '</span>';
+          } else {
+            html += '<a class="page-btn" href="' + buildPageUrl(j) + '">' + toPersianNum(j) + '</a>';
+          }
+        }
+
+        // Last page
+        if (endPage < totalPages) {
+          if (endPage < totalPages - 1) html += '<span class="page-btn dots">...</span>';
+          html += '<a class="page-btn" href="' + buildPageUrl(totalPages) + '">' + toPersianNum(totalPages) + '</a>';
+        }
+
+        // Next button
+        if (currentPage < totalPages) {
+          html += '<a class="page-btn" href="' + buildPageUrl(currentPage + 1) + '" title="\u0628\u0639\u062f\u06cc"><i class="fas fa-chevron-left"></i></a>';
+        }
+
+        paginationContainer.innerHTML = html;
+      };
+
+      // Load the count script
+      var countScript = document.createElement('script');
+      countScript.src = feedUrl;
+      document.body.appendChild(countScript);
+    })();
+  //]]>
+  </script>
+
+</body>
+</html>

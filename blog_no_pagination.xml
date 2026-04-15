@@ -1,0 +1,1061 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:templateUrl='custom-news.xml' b:templateVersion='1.3' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <title><data:view.title.escaped/> | <data:blog.title/></title>
+  
+  <b:include data='blog' name='all-head-content'/>
+
+  <!-- Fonts & Icons -->
+  <link href='https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css' rel='stylesheet' type='text/css'/>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'/>
+
+  <b:skin><![CDATA[
+    /* --- POLITICS & HUMAN RIGHTS THEME VARIABLES --- */
+    :root {
+      --primary: #c0392b; /* Alert Red */
+      --primary-dark: #a93226;
+      --bg-dark: #0a0a0a; /* Deep Black */
+      --bg-card: #141414;
+      --text-main: #ecf0f1;
+      --text-muted: #95a5a6;
+      --border: #2c3e50;
+      --header-bg: #050505;
+    }
+
+    /* --- RESET & BASE --- */
+    * { box-sizing: border-box; outline: none; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Vazir', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      direction: rtl;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    a:hover { color: var(--primary); }
+    img { max-width: 100%; height: auto; display: block; }
+    ul { list-style: none; padding: 0; margin: 0; }
+
+    /* --- TOP ALERT BAR (BREAKING NEWS) --- */
+    .alert-bar {
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+    }
+    .alert-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      display: flex;
+      width: 100%;
+    }
+    .alert-title {
+      background: #000;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-weight: 900;
+      margin-left: 15px;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .alert-marquee { flex: 1; font-weight: bold; }
+
+    /* --- HEADER --- */
+    .site-header {
+      background: var(--header-bg);
+      padding: 25px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-text h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin: 0;
+    }
+    .logo-text span { color: var(--primary); }
+    .header-date { color: var(--text-muted); font-size: 12px; }
+    
+    /* Language Switcher */
+    .lang-switcher {
+      display: flex;
+      gap: 10px;
+    }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #333;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: #aaa;
+      transition: 0.3s;
+    }
+    .lang-btn:hover {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .lang-btn img {
+      width: 18px;
+      height: 12px;
+      border-radius: 2px;
+    }
+
+    /* --- NAVIGATION --- */
+    .main-nav {
+      background: #0f0f0f;
+      border-bottom: 2px solid var(--border);
+      position: sticky; top: 0; z-index: 999;
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 15px;
+      display: flex; height: 50px; align-items: center;
+    }
+    .nav-links { display: flex; gap: 25px; height: 100%; }
+    .nav-links a {
+      display: flex; align-items: center; height: 100%;
+      font-weight: 700; font-size: 13px; color: #ccc;
+      border-top: 3px solid transparent;
+    }
+    .nav-links a:hover { color: #fff; border-top-color: var(--primary); }
+    .nav-search { margin-right: auto; }
+    .nav-search input {
+      background: #222; border: 1px solid #333; color: #fff;
+      padding: 6px 15px; border-radius: 20px 0 0 20px; font-family: inherit; font-size: 12px;
+      width: 150px;
+    }
+    .search-btn {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 0 20px 20px 0;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .search-btn:hover { background: var(--primary-dark); }
+
+    /* --- MAIN LAYOUT --- */
+    .main-container {
+      max-width: 1200px; margin: 40px auto; padding: 0 15px;
+      display: grid; grid-template-columns: 800px 1fr; gap: 40px;
+    }
+
+    /* --- FEATURED SECTION (First Post) --- */
+    .hero-post {
+      position: relative;
+      margin-bottom: 40px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .hero-thumb {
+      width: 100%; height: 450px; object-fit: cover;
+      filter: brightness(0.7);
+      transition: 0.5s;
+    }
+    .hero-post:hover .hero-thumb { filter: brightness(0.9) scale(1.05); }
+    .hero-content {
+      position: absolute; bottom: 0; right: 0; left: 0;
+      padding: 40px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    }
+    .hero-cat {
+      background: var(--primary); color: #fff;
+      padding: 4px 10px; font-size: 11px; font-weight: bold;
+      border-radius: 2px; text-transform: uppercase;
+      margin-bottom: 10px; display: inline-block;
+    }
+    .hero-title {
+      font-size: 36px; font-weight: 900; color: #fff;
+      margin: 10px 0; line-height: 1.3; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .hero-meta { color: #ccc; font-size: 12px; }
+
+    /* --- HOMEPAGE LAYOUT --- */
+    .homepage-loop {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .hero-post, .news-grid-title {
+      width: 100%;
+    }
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid #222;
+      border-radius: 6px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: 0.3s;
+      width: calc(50% - 10px); /* 2 Column Grid */
+    }
+    
+    /* FIX: Hide duplicate first post in grid if it appears */
+    /* If the loop logic fails and prints the first post as a card, this hides it */
+    /* .homepage-loop .post-card:first-of-type { display: none; } */
+    /* Only enable if duplication persists. For now, we trust the XML logic. */
+    
+    .post-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .card-thumb { height: 180px; overflow: hidden; position: relative; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .post-card:hover .card-thumb img { transform: scale(1.1); }
+    .card-body { padding: 20px; }
+    .card-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; line-height: 1.5; height: 48px; overflow: hidden; }
+    .card-excerpt { font-size: 13px; color: var(--text-muted); height: 60px; overflow: hidden; margin-bottom: 15px; }
+
+    /* --- SIDEBAR WIDGETS --- */
+    .widget-box {
+      background: var(--bg-card);
+      border: 1px solid #222;
+      border-radius: 6px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+    .widget-header {
+      font-size: 14px; font-weight: 900;
+      color: #fff; text-transform: uppercase;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 10px; margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    /* Statistics Widget */
+    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; }
+    .stat-row:last-child { border: none; }
+    .stat-label { font-size: 13px; color: #aaa; }
+    .stat-val { font-weight: bold; color: #fff; }
+    .stat-graph { height: 4px; background: #222; width: 100%; margin-top: 5px; border-radius: 2px; overflow: hidden; }
+    .stat-bar { height: 100%; background: var(--primary); }
+
+    /* Quote Widget */
+    .quote-box { text-align: center; }
+    .quote-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; border: 2px solid var(--primary); }
+    .quote-text { font-style: italic; font-size: 14px; color: #ccc; margin-bottom: 15px; line-height: 1.6; }
+    .quote-author { font-weight: bold; color: #fff; font-size: 12px; }
+
+    /* Footer */
+    .main-footer {
+      background: #050505; border-top: 1px solid #222;
+      padding: 60px 0 30px; margin-top: 60px;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .footer-col h4 { color: #fff; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; }
+    .footer-col ul li { margin-bottom: 10px; border-bottom: 1px dotted #222; padding-bottom: 5px; }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1000px) {
+      .main-container { display: flex; flex-direction: column; }
+      .hero-title { font-size: 24px; }
+      .news-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; text-align: center; }
+    }
+    
+    /* Hide Default Pager */
+    
+  ]]></b:skin>
+</head>
+
+<body>
+
+  <!-- 1. ALERT BAR (Live from Iran International) -->
+  <div class='alert-bar'>
+    <div class='alert-inner'>
+      <div class='alert-title'>فوری</div>
+      <div class='alert-marquee'>
+        <marquee direction='right' id='live-ticker' scrollamount='6'>
+          در حال دریافت اخبار...
+        </marquee>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // === ADVANCED DEDUPLICATION and TICKER SYSTEM ===
+    document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+       
+       // 1. Advanced Duplicate Removal (Hero vs Grid)
+       // This function scans ALL grid items and removes any that match the Hero post.
+       function removeDuplicates() {
+           var heroLink = document.querySelector(&#39;.hero-post a&#39;);
+           if (!heroLink) return;
+           
+           var heroUrl = heroLink.href;
+           var gridCards = document.querySelectorAll(&#39;.post-card&#39;);
+           
+           gridCards.forEach(function(card) {
+               var cardLink = card.querySelector(&#39;a&#39;);
+               if (cardLink &amp;&amp; cardLink.href === heroUrl) {
+                   card.remove(); // Completely remove the duplicate element from DOM
+                   console.log(&#39;Duplicate post removed:&#39;, heroUrl);
+               }
+           });
+       }
+       
+       // Run immediately
+       removeDuplicates();
+       
+       // 2. Live News Ticker (Iran Intl)
+       // Uses CORS Proxy + Cache Busting for fresh news
+       var rssUrl = &#39;https://www.iranintl.com/fa/rss&#39;;
+       var timestamp = new Date().getTime();
+       var proxyUrl = &#39;https://corsproxy.io/?&#39; + encodeURIComponent(rssUrl) + &#39;&amp;_t=&#39; + timestamp;
+       
+       fetch(proxyUrl)
+        .then(function(res) { 
+            if (!res.ok) throw new Error(&quot;Network response was not ok&quot;);
+            return res.text(); 
+        })
+        .then(function(str) {
+            var parser = new DOMParser();
+            var xml = parser.parseFromString(str, &quot;text/xml&quot;);
+            var items = xml.getElementsByTagName(&quot;item&quot;);
+            var headlines = [];
+            
+            // Extract top 10 headlines
+            for(var i=0; i &lt; Math.min(items.length, 10); i++) {
+                var t = items[i].getElementsByTagName(&quot;title&quot;)[0];
+                if(t) headlines.push(t.textContent);
+            }
+            
+            // Display
+            if(headlines.length &gt; 0) {
+               var ticker = document.getElementById(&#39;live-ticker&#39;);
+               if(ticker) ticker.innerHTML = headlines.join(&#39; \u2022 &#39;); // Bullet separator
+            } else {
+               throw new Error(&quot;No news items found&quot;);
+            }
+        })
+        .catch(function(e) {
+            console.error(&#39;Ticker Error:&#39;, e);
+            var ticker = document.getElementById(&#39;live-ticker&#39;);
+            if(ticker) ticker.innerHTML = &quot;پوشش لحظه&#8204;ای مهم&#8204;ترین اخبار ایران و جهان&quot;;
+        });
+    });
+  </script>
+
+  <!-- 2. HEADER -->
+  <header class='site-header'>
+    <div class='header-content'>
+      <!-- Language Switcher (Left) -->
+      <div class='lang-switcher'>
+        <a class='lang-btn' href='javascript:void(0)' onclick='translateTo(&quot;en&quot;)' title='English'>
+          <img alt='EN' src='https://flagcdn.com/w40/gb.png'/> EN
+        </a>
+        <a class='lang-btn' href='javascript:void(0)' onclick='translateTo(&quot;de&quot;)' title='Deutsch'>
+          <img alt='DE' src='https://flagcdn.com/w40/de.png'/> DE
+        </a>
+        <a class='lang-btn' href='javascript:void(0)' onclick='translateTo(&quot;fa&quot;)' style='background:var(--primary);color:#fff' title='فارسی'>
+          <img alt='FA' src='https://flagcdn.com/w40/ir.png'/> FA
+        </a>
+      </div>
+      <!-- Persian Date (Center/Right) -->
+      <div class='header-date' id='header-date'>
+        <script>document.write(new Date().toLocaleDateString(&#39;fa-IR&#39;, {weekday:&#39;long&#39;, day:&#39;numeric&#39;, month:&#39;long&#39;, year:&#39;numeric&#39;}));</script>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Google Translate Widget -->
+  <div id='google_translate_element' style='position:absolute;top:-9999px'></div>
+  <script src='//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'></script>
+  <script>
+    // Clear Google Translate cookies on page load - Always start with Persian
+    (function() {
+      document.cookie = &#39;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;&#39;;
+      document.cookie = &#39;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.blogspot.com;&#39;;
+      document.cookie = &#39;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=&#39; + location.hostname + &#39;;&#39;;
+    })();
+    
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: &#39;fa&#39;,
+        includedLanguages: &#39;en,de&#39;,
+        autoDisplay: false
+      }, &#39;google_translate_element&#39;);
+    }
+    
+    function translateTo(lang) {
+      if (lang === &#39;fa&#39;) {
+        // Reset to original - clear cookies and reload
+        document.cookie = &#39;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;&#39;;
+        document.cookie = &#39;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.blogspot.com;&#39;;
+        document.cookie = &#39;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=&#39; + location.hostname + &#39;;&#39;;
+        location.reload();
+        return;
+      }
+      
+      var select = document.querySelector(&#39;.goog-te-combo&#39;);
+      if (select) {
+        select.value = lang;
+        select.dispatchEvent(new Event(&#39;change&#39;));
+      } else {
+        // Fallback: Try again after widget loads
+        setTimeout(function() {
+          var s = document.querySelector(&#39;.goog-te-combo&#39;);
+          if (s) { s.value = lang; s.dispatchEvent(new Event(&#39;change&#39;)); }
+        }, 1000);
+      }
+    }
+  </script>
+  
+  <!-- Hide Google Translate Bar -->
+  <style>
+    .goog-te-banner-frame, .skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+  </style>
+
+  <!-- 3. NAV -->
+  <nav class='main-nav'>
+    <div class='nav-inner'>
+      <div class='nav-links'>
+        <a href='/'>خانه</a>
+        <a href='/search/label/حقوق%20بشر'>حقوق بشر</a>
+
+        <a href='/search/label/بین‌الملل'>بین&#8204;الملل</a>
+        <a href='/search/label/گزارش%20ویژه'>گزارش ویژه</a>
+        <a href='/search/label/مقاله'>مقاله</a>
+      </div>
+      <div class='nav-search'>
+        <form action='/search' method='get' style='display:flex;gap:5px;'>
+          <input id='search-input' name='q' placeholder='جستجو...' type='text'/>
+          <button class='search-btn' title='جستجو' type='submit'>
+            <i class='fas fa-search'></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <!-- 4. MAIN CONTENT AREA -->
+  <div class='main-container'>
+    
+    <!-- LEFT COLUMN: CONTENT -->
+    <div class='main-col'>
+      <b:section id='main-posts' showaddelement='yes'>
+        <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='showDateHeader'>false</b:widget-setting>
+            <b:widget-setting name='commentLabel'>کامنت</b:widget-setting>
+            <b:widget-setting name='style.textcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='showShareButtons'>true</b:widget-setting>
+            <b:widget-setting name='showCommentLink'>true</b:widget-setting>
+            <b:widget-setting name='style.urlcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='showAuthor'>true</b:widget-setting>
+            <b:widget-setting name='style.linkcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='style.unittype'>TextAndImage</b:widget-setting>
+            <b:widget-setting name='style.bgcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='timestampLabel'>در</b:widget-setting>
+            <b:widget-setting name='reactionsLabel'/>
+            <b:widget-setting name='showAuthorProfile'>false</b:widget-setting>
+            <b:widget-setting name='style.layout'>1x1</b:widget-setting>
+            <b:widget-setting name='showLabels'>true</b:widget-setting>
+            <b:widget-setting name='showLocation'>false</b:widget-setting>
+            <b:widget-setting name='showTimestamp'>true</b:widget-setting>
+            <b:widget-setting name='postsPerAd'>1</b:widget-setting>
+            <b:widget-setting name='showBacklinks'>false</b:widget-setting>
+            <b:widget-setting name='style.bordercolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='showInlineAds'>false</b:widget-setting>
+            <b:widget-setting name='showReactions'>false</b:widget-setting>
+          </b:widget-settings>
+          <b:includable id='main' var='this'>
+            
+            <!-- Logic to separate Hero Post vs Grid Posts -->
+            <!-- Note: Requires looped index manually or specific handling -->
+            
+            <b:if cond='data:view.isHomepage'>
+               <!-- Custom Loop for Homepage -->
+               <div class='homepage-loop news-grid-container'>
+                 <b:loop index='i' values='data:posts' var='post'>
+                   
+                   <b:if cond='data:i == 0'>
+                     <!-- 1. HERO POST (First Item) -->
+                     <article class='hero-post start-grid-item'>
+                       <a expr:href='data:post.url'>
+                         <b:if cond='data:post.featuredImage'>
+                           <img class='hero-thumb' expr:src='data:post.featuredImage'/>
+                         <b:else/>
+                           <div class='hero-thumb' style='background:#111;display:flex;align-items:center;justify-content:center;'>No Image</div>
+                         </b:if>
+                         <div class='hero-content'>
+                           <span class='hero-cat'>خبر ویژه</span>
+                           <h2 class='hero-title'><data:post.title/></h2>
+                           <div class='hero-meta'><data:post.dateHeader/></div>
+                         </div>
+                       </a>
+                     </article>
+                     
+                     <div class='news-grid-title' style='width:100%;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #333;font-size:18px;font-weight:bold;color:#fff;'>
+                       <span style='border-bottom:2px solid var(--primary);padding-bottom:10px;'>آخرین گزارش&#8204;ها</span>
+                     </div>
+                   
+                   <b:else/>
+                     <!-- 2. GRID POSTS (Other Items) -->
+                     <article class='post-card'>
+                       <div class='card-thumb'>
+                         <a expr:href='data:post.url'>
+                           <b:if cond='data:post.featuredImage'>
+                             <img expr:src='resizeImage(data:post.featuredImage, 720, &quot;16:9&quot;)'/>
+                           <b:else/>
+                             <div style='width:100%;height:100%;background:#222'></div>
+                           </b:if>
+                         </a>
+                       </div>
+                       <div class='card-body'>
+                         <h3 class='card-title'><a expr:href='data:post.url'><data:post.title/></a></h3>
+                         <div class='card-excerpt'><data:post.snippet/></div>
+                         <a expr:href='data:post.url' style='font-size:11px;font-weight:bold;color:var(--primary)'>مطالعه کامل &gt;</a>
+                       </div>
+                     </article>
+                   </b:if>
+                   
+                 </b:loop>
+                 </div> <!-- End Container -->
+                 
+                 <!-- Pagination -->
+                 <div class='blog-pager' id='blog-pager'>
+                    <b:if cond='data:newerPageUrl'><a expr:href='data:newerPageUrl' id='blog-pager-newer-link'>Next</a></b:if>
+                    <b:if cond='data:olderPageUrl'><a expr:href='data:olderPageUrl' id='blog-pager-older-link'>Previous</a></b:if>
+                 </div>
+
+            <b:else/>
+               <!-- Single Post View code (Simplified) -->
+               <b:loop values='data:posts' var='post'>
+                 <div class='widget-box' style='padding:40px'>
+                   <h1 style='font-size:32px;margin-bottom:20px'><data:post.title/></h1>
+                   <div style='line-height:2.2;font-size:16px;color:#ddd'><data:post.body/></div>
+                 </div>
+               </b:loop>
+            </b:if>
+          </b:includable>
+          <b:includable id='aboutPostAuthor'>
+  <div class='author-name'>
+    <a class='g-profile' expr:href='data:post.author.profileUrl' rel='author' title='author profile'>
+      <span>
+        <data:post.author.name/>
+      </span>
+    </a>
+  </div>
+  <div>
+    <span class='author-desc'>
+      <data:post.author.aboutMe/>
+    </span>
+  </div>
+</b:includable>
+          <b:includable id='addComments'>
+  <a expr:href='data:post.commentsUrl' expr:onclick='data:post.commentsUrlOnclick'>
+    <b:message name='messages.postAComment'/>
+  </a>
+</b:includable>
+          <b:includable id='commentAuthorAvatar'>
+  <div class='avatar-image-container'>
+    <img class='author-avatar' expr:src='data:comment.authorAvatarSrc' height='35' width='35'/>
+  </div>
+</b:includable>
+          <b:includable id='commentDeleteIcon' var='comment'>
+  <span expr:class='&quot;item-control &quot; + data:comment.adminClass'>
+    <b:if cond='data:showCmtPopup'>
+      <div class='goog-toggle-button'>
+        <div class='goog-inline-block comment-action-icon'></div>
+      </div>
+    <b:else/>
+      <a class='comment-delete' expr:href='data:comment.deleteUrl' expr:title='data:messages.deleteComment'>
+        <img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+      </a>
+    </b:if>
+  </span>
+</b:includable>
+          <b:includable id='commentForm' var='post'>
+  <div class='comment-form'>
+    <a name='comment-form'/>
+    <h4 id='comment-post-message'><data:messages.postAComment/></h4>
+    <b:if cond='data:this.messages.blogComment != &quot;&quot;'>
+      <p><data:this.messages.blogComment/></p>
+    </b:if>
+    <b:include data='post' name='commentFormIframeSrc'/>
+    <iframe allowtransparency='allowtransparency' class='blogger-iframe-colorize blogger-comment-from-post' expr:height='data:cmtIframeInitialHeight ?: &quot;90px&quot;' frameborder='0' id='comment-editor' name='comment-editor' src='' width='100%'/>
+    <data:post.cmtfpIframe/>
+    <script type='text/javascript'>
+      BLOG_CMT_createIframe(&#39;<data:post.appRpcRelayPath/>&#39;);
+    </script>
+  </div>
+</b:includable>
+          <b:includable id='commentFormIframeSrc' var='post'>
+  <a expr:href='data:post.commentFormIframeSrc' id='comment-editor-src'/>
+</b:includable>
+          <b:includable id='commentItem' var='comment'>
+  <div class='comment' expr:id='&quot;c&quot; + data:comment.id'>
+    <b:include cond='data:blog.enabledCommentProfileImages' name='commentAuthorAvatar'/>
+
+    <div class='comment-block'>
+      <div class='comment-author'>
+        <b:if cond='data:comment.authorUrl'>
+          <b:message name='messages.authorSaidWithLink'>
+            <b:param expr:value='data:comment.author' name='authorName'/>
+            <b:param expr:value='data:comment.authorUrl' name='authorUrl'/>
+          </b:message>
+        <b:else/>
+          <b:message name='messages.authorSaid'>
+            <b:param expr:value='data:comment.author' name='authorName'/>
+          </b:message>
+        </b:if>
+      </div>
+      <div expr:class='&quot;comment-body&quot; + (data:comment.isDeleted ? &quot; deleted&quot; : &quot;&quot;)'>
+        <data:comment.body/>
+      </div>
+      <div class='comment-footer'>
+        <span class='comment-timestamp'>
+          <a expr:href='data:comment.url' title='comment permalink'>
+            <data:comment.timestamp/>
+          </a>
+          <b:include data='comment' name='commentDeleteIcon'/>
+        </span>
+      </div>
+    </div>
+  </div>
+</b:includable>
+          <b:includable id='commentList' var='comments'>
+  <div id='comments-block'>
+    <b:loop values='data:comments' var='comment'>
+      <b:include data='comment' name='commentItem'/>
+    </b:loop>
+  </div>
+</b:includable>
+          <b:includable id='commentPicker' var='post'>
+  <b:if cond='data:post.showThreadedComments'>
+    <b:include data='post' name='threadedComments'/>
+  <b:else/>
+    <b:include data='post' name='comments'/>
+  </b:if>
+</b:includable>
+          <b:includable id='comments' var='post'>
+  <section expr:class='&quot;comments&quot; + (data:post.embedCommentForm ? &quot; embed&quot; : &quot;&quot;)' expr:data-num-comments='data:post.numberOfComments' id='comments'>
+    <a name='comments'/>
+    <b:if cond='data:post.allowComments'>
+
+      <b:include name='commentsTitle'/>
+
+      <div expr:id='data:widget.instanceId + &quot;_comments-block-wrapper&quot;'>
+        <b:include cond='data:post.comments' data='post.comments' name='commentList'/>
+      </div>
+
+      <b:if cond='data:post.commentPagingRequired'>
+        <div class='paging-control-container'>
+          <b:if cond='data:post.hasOlderLinks'>
+            <a expr:class='data:post.oldLinkClass' expr:href='data:post.oldestLinkUrl'>
+              <data:messages.oldest/>
+            </a>
+            <a expr:class='data:post.oldLinkClass' expr:href='data:post.olderLinkUrl'>
+              <data:messages.older/>
+            </a>
+          </b:if>
+
+          <span class='comment-range-text'>
+            <data:post.commentRangeText/>
+          </span>
+
+          <b:if cond='data:post.hasNewerLinks'>
+            <a expr:class='data:post.newLinkClass' expr:href='data:post.newerLinkUrl'>
+              <data:messages.newer/>
+            </a>
+            <a expr:class='data:post.newLinkClass' expr:href='data:post.newestLinkUrl'>
+              <data:messages.newest/>
+            </a>
+          </b:if>
+        </div>
+      </b:if>
+
+      <div class='footer'>
+        <b:if cond='data:post.embedCommentForm'>
+          <b:if cond='data:post.allowNewComments'>
+            <b:include data='post' name='commentForm'/>
+          <b:else/>
+            <data:post.noNewCommentsText/>
+          </b:if>
+        <b:else/>
+          <b:if cond='data:post.allowComments'>
+            <b:include data='post' name='addComments'/>
+          </b:if>
+        </b:if>
+      </div>
+    </b:if>
+    <b:if cond='data:showCmtPopup'>
+      <div id='comment-popup'>
+        <iframe allowtransparency='allowtransparency' frameborder='0' id='comment-actions' name='comment-actions' scrolling='no'>
+        </iframe>
+      </div>
+    </b:if>
+  </section>
+</b:includable>
+          <b:includable id='commentsTitle'>
+  <h3 class='title'><data:messages.comments/></h3>
+</b:includable>
+          <b:includable id='feedLinks'>
+  <b:if cond='!data:view.isPost'> <!-- Blog feed links -->
+    <b:if cond='data:feedLinks'>
+      <div class='blog-feeds'>
+        <b:include data='feedLinks' name='feedLinksBody'/>
+      </div>
+    </b:if>
+  <b:else/> <!--Post feed links -->
+    <div class='post-feeds'>
+      <b:loop values='data:posts' var='post'>
+        <b:if cond='data:post.allowComments and data:post.feedLinks'>
+          <b:include data='post.feedLinks' name='feedLinksBody'/>
+        </b:if>
+      </b:loop>
+    </div>
+  </b:if>
+</b:includable>
+          <b:includable id='feedLinksBody' var='links'>
+  <div class='feed-links'>
+  <data:messages.subscribeTo/>
+  <b:loop values='data:links' var='f'>
+     <a class='feed-link' expr:href='data:f.url' expr:type='data:f.mimeType' target='_blank'><data:f.name/> (<data:f.feedType/>)</a>
+  </b:loop>
+  </div>
+</b:includable>
+          <b:includable id='homePageLink'>
+  <a class='home-link' expr:href='data:blog.homepageUrl'>
+    <data:messages.home/>
+  </a>
+</b:includable>
+          <b:includable id='iframeComments' var='post'>
+  <!-- G+ comments, no longer available. The includable is retained for backwards-compatibility. -->
+</b:includable>
+          <b:includable id='inlineAd' var='post'>
+  <b:if cond='!data:view.isPreview'>
+    <b:if cond='data:this.adCode or data:this.adClientId or data:blog.adsenseClientId'>
+      <!-- Ad -->
+      <div class='inline-ad'>
+        <b:if cond='data:this.adCode != &quot;&quot;'>
+          <data:this.adCode/>
+        <b:else/>
+          <b:include cond='data:this.adClientId or data:blog.adsenseClientId' name='defaultAdUnit'/>
+        </b:if>
+      </div>
+    </b:if>
+  <b:else/>
+    <div class='inline-ad'>
+      <div class='inline-ad-placeholder'>
+        <span><b:message name='messages.adsGoHere'/></span>
+      </div>
+    </div>
+  </b:if>
+</b:includable>
+          <b:includable id='nextPageLink'>
+  <a class='blog-pager-older-link' expr:href='data:olderPageUrl' expr:id='data:widget.instanceId + &quot;_blog-pager-older-link&quot;' expr:title='data:messages.olderPosts'>
+    <data:messages.olderPosts/>
+  </a>
+</b:includable>
+          <b:includable id='post' var='post'>
+  <div class='post'>
+    <b:include data='post' name='postMeta'/>
+    <b:include data='post' name='postTitle'/>
+    <b:include name='headerByline'/>
+    <b:if cond='data:view.isSingleItem'>
+      <b:include data='post' name='postBody'/>
+    <b:else/>
+      <b:include data='post' name='postBodySnippet'/>
+      <b:include data='post' name='postJumpLink'/>
+    </b:if>
+    <b:include data='post' name='postFooter'/>
+  </div>
+</b:includable>
+          <b:includable id='postBody' var='post'>
+  <!-- If metaDescription is empty, use the post body as the schema.org description too, for G+/FB snippeting. -->
+  <div class='post-body entry-content float-container' expr:id='&quot;post-body-&quot; + data:post.id'>
+    <data:post.body/>
+  </div>
+</b:includable>
+          <b:includable id='postBodySnippet' var='post'>
+  <b:include data='post' name='postBody'/>
+</b:includable>
+          <b:includable id='postCommentsAndAd' var='post'>
+  <article class='post-outer-container'>
+    <!-- Post title and body -->
+    <div class='post-outer'>
+      <b:include data='post' name='post'/>
+    </div>
+
+    <!-- Comments -->
+    <b:include cond='data:view.isSingleItem' data='post' name='commentPicker'/>
+
+    <!-- Show ad inside post container, after comments, if single item. -->
+    <b:include cond='data:view.isSingleItem and data:post.includeAd' data='post' name='inlineAd'/>
+  </article>
+
+  <!-- Show ad outside post container (between posts) for feed pages. -->
+  <b:include cond='data:view.isMultipleItems and data:post.includeAd' data='post' name='inlineAd'/>
+</b:includable>
+          <b:includable id='postCommentsLink'>
+  <b:if cond='data:view.isMultipleItems'>
+    <span class='byline post-comment-link container'>
+      <b:include cond='data:post.commentSource != 1' name='commentsLink'/>
+    </span>
+  </b:if>
+</b:includable>
+          <b:includable id='postFooter' var='post'>
+  <div class='post-footer'>
+    <b:include name='footerBylines'/>
+    <b:include data='post' name='postFooterAuthorProfile'/>
+  </div>
+</b:includable>
+          <b:includable id='postFooterAuthorProfile' var='post'>
+  <b:if cond='data:post.author.aboutMe and data:view.isPost'>
+    <div class='author-profile'>
+      <b:if cond='data:post.author.authorPhoto.url'>
+        <img class='author-image' expr:src='data:post.author.authorPhoto.url' width='50px'/>
+        <div class='author-about'>
+          <b:include data='post' name='aboutPostAuthor'/>
+        </div>
+      <b:else/>
+        <b:include data='post' name='aboutPostAuthor'/>
+      </b:if>
+    </div>
+  </b:if>
+</b:includable>
+          <b:includable id='postHeader' var='post'>
+  <b:include name='headerByline'/>
+</b:includable>
+          <b:includable id='postMeta' var='post'>
+  <b:include data='post' name='postMetadataJSON'/>
+</b:includable>
+          <b:includable id='postPagination'>
+  <div class='blog-pager container' id='blog-pager'>
+    <b:include cond='data:newerPageUrl' name='previousPageLink'/>
+    <b:include cond='data:olderPageUrl' name='nextPageLink'/>
+    <b:include cond='data:view.url != data:blog.homepageUrl' name='homePageLink'/>
+  </div>
+</b:includable>
+          <b:includable id='postTitle' var='post'>
+  <a expr:name='data:post.id'/>
+  <b:if cond='data:post.title != &quot;&quot;'>
+    <h3 class='post-title entry-title'>
+      <b:if cond='data:post.link or (data:post.url and data:view.url != data:post.url)'>
+        <a expr:href='data:post.link ?: data:post.url'><data:post.title/></a>
+      <b:else/>
+        <data:post.title/>
+      </b:if>
+    </h3>
+  </b:if>
+</b:includable>
+          <b:includable id='previousPageLink'>
+  <a class='blog-pager-newer-link' expr:href='data:newerPageUrl' expr:id='data:widget.instanceId + &quot;_blog-pager-newer-link&quot;' expr:title='data:messages.newerPosts'>
+    <data:messages.newerPosts/>
+  </a>
+</b:includable>
+          <b:includable id='threadedCommentForm' var='post'>
+  <div class='comment-form'>
+    <a name='comment-form'/>
+    <h4 id='comment-post-message'><data:messages.postAComment/></h4>
+    <b:if cond='data:this.messages.blogComment != &quot;&quot;'>
+      <p><data:this.messages.blogComment/></p>
+    </b:if>
+    <b:include data='post' name='commentFormIframeSrc'/>
+    <iframe allowtransparency='allowtransparency' class='blogger-iframe-colorize blogger-comment-from-post' expr:height='data:cmtIframeInitialHeight ?: &quot;90px&quot;' frameborder='0' id='comment-editor' name='comment-editor' src='' width='100%'/>
+    <data:post.cmtfpIframe/>
+    <script type='text/javascript'>
+      BLOG_CMT_createIframe(&#39;<data:post.appRpcRelayPath/>&#39;);
+    </script>
+  </div>
+</b:includable>
+          <b:includable id='threadedCommentJs' var='post'>
+  <script async='async' expr:src='data:post.commentSrc' type='text/javascript'></script>
+  <b:template-script inline='true' name='threaded_comments'/>
+  <script type='text/javascript'>
+    blogger.widgets.blog.initThreadedComments(
+        <data:post.commentJso/>,
+        <data:post.commentMsgs/>,
+        <data:post.commentConfig/>);
+  </script>
+</b:includable>
+          <b:includable id='threadedComments' var='post'>
+  <section class='comments threaded' expr:data-embed='data:post.embedCommentForm' expr:data-num-comments='data:post.numberOfComments' id='comments'>
+    <a name='comments'/>
+
+    <b:include name='commentsTitle'/>
+
+    <div class='comments-content'>
+      <b:if cond='data:post.embedCommentForm'>
+        <b:include data='post' name='threadedCommentJs'/>
+      </b:if>
+      <div id='comment-holder'>
+         <data:post.commentHtml/>
+      </div>
+    </div>
+
+    <p class='comment-footer'>
+      <b:if cond='data:post.allowNewComments'>
+        <b:include data='post' name='threadedCommentForm'/>
+      <b:else/>
+        <data:post.noNewCommentsText/>
+      </b:if>
+      <b:if cond='data:post.showManageComments'>
+        <b:include data='post' name='manageComments'/>
+      </b:if>
+    </p>
+
+    <b:if cond='data:showCmtPopup'>
+      <div id='comment-popup'>
+        <iframe allowtransparency='allowtransparency' frameborder='0' id='comment-actions' name='comment-actions' scrolling='no'>
+        </iframe>
+      </div>
+    </b:if>
+  </section>
+</b:includable>
+          <b:includable id='tooltipCss'>
+  <!-- LINT.IfChange -->
+  <style>
+    .post-body a.b-tooltip-container {
+      position: relative;
+      display: inline-block;
+    }
+
+    .post-body a.b-tooltip-container .b-tooltip {
+      display: block !important;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translate(-20%, 1px);
+      visibility: hidden;
+      opacity: 0;
+      z-index: 1;
+      transition: opacity 0.2s ease-in-out;
+    }
+
+    .post-body a.b-tooltip-container .b-tooltip iframe {
+      width: 200px;
+      height: 198px;
+      max-width: none;
+      border: none;
+      border-radius: 20px;
+      box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (hover: hover) {
+      .post-body a.b-tooltip-container:hover .b-tooltip {
+        visibility: visible;
+        opacity: 1;
+      }
+    }
+  </style>
+  <!-- LINT.ThenChange(//depot/google3/java/com/google/blogger/b2/layouts/widgets/v2-style.css) -->
+</b:includable>
+        </b:widget>
+      </b:section>
+    </div>
+
+    <!-- RIGHT COLUMN: SIDEBAR -->
+    <aside class='sidebar-col'>
+      <b:section id='sidebar' showaddelement='yes'>
+        <b:widget id='HTML1' locked='false' title='نقل قول روز' type='HTML' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'/>
+          </b:widget-settings>
+          <b:includable id='main'>
+            <div class='widget-box quote-box'>
+              <div class='widget-header'>سخن روز</div>
+              <img class='quote-img' src='https://iili.io/qlUwhLG.png'/>
+              <div class='quote-text'>&quot;انکار حقوق بشر مردم&#1548; به چالش کشیدن انسانیت آنهاست.&quot;</div>
+              <div class='quote-author'>- نلسون ماندلا</div>
+            </div>
+          </b:includable>
+        </b:widget>
+        <b:widget id='HTML2' locked='false' title='آمار گزارش‌ها' type='HTML' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'/>
+          </b:widget-settings>
+          <b:includable id='main'>
+            <div class='widget-box'>
+              <div class='widget-header'>بانک اطلاعاتی</div>
+              
+              <div class='stat-row'>
+                <span class='stat-label'>حقوق بشر</span>
+                <span class='stat-val'>1,240</span>
+              </div>
+              <div class='stat-graph'><div class='stat-bar' style='width:90%'></div></div>
+              
+              <div class='stat-row' style='margin-top:15px'>
+                <span class='stat-label'>زندانیان سیاسی</span>
+                <span class='stat-val'>850</span>
+              </div>
+              <div class='stat-graph'><div class='stat-bar' style='width:65%'></div></div>
+
+              <div class='stat-row' style='margin-top:15px'>
+                <span class='stat-label'>اعدام&#8204;ها</span>
+                <span class='stat-val'>320</span>
+              </div>
+              <div class='stat-graph'><div class='stat-bar' style='width:30%'></div></div>
+            </div>
+          </b:includable>
+        </b:widget>
+      </b:section>
+    </aside>
+
+  </div>
+
+  <!-- 5. FOOTER -->
+  <footer class='main-footer'>
+    <div class='footer-inner'>
+      <div class='footer-col'>
+        <h4>دسترسی سریع</h4>
+        <ul>
+          <li><a href='/p/blog-page.html'>درباره ما</a></li>
+          <li><a href='/'>آرشیو گزارش&#8204;ها</a></li>
+        </ul>
+      </div>
+    </div>
+    <div style='text-align:center; margin-top:40px; color:#555; font-size:11px; border-top:1px solid #111; padding-top:20px'>
+      &#169; 2026 All Rights Reserved.
+    </div>
+  </footer>
+
+  <!-- Infinite Scroll Script -->
+  <script type='text/javascript'>
+    // Standard Infinite Scroll Logic
+    (function() {
+      var loading = false;
+      // Note: Selector updated for new layout structure
+      var container = document.querySelector(&#39;.homepage-loop&#39;); 
+      var nextLink = document.getElementById(&#39;blog-pager-older-link&#39;);
+      var nextPageUrl = nextLink ? nextLink.href : null;
+
+      if(container &amp;&amp; nextLink) {
+        window.addEventListener(&#39;scroll&#39;, function() {
+          if(loading || !nextPageUrl) return;
+          if((window.innerHeight + window.scrollY) &gt;= document.body.offsetHeight - 800) {
+            loading = true;
+            fetch(nextPageUrl).then(r =&gt; r.text()).then(html =&gt; {
+               var doc = new DOMParser().parseFromString(html, &#39;text/html&#39;);
+               var newPosts = doc.querySelectorAll(&#39;.post-card&#39;);
+               newPosts.forEach(p =&gt; container.appendChild(p));
+               
+               var newNext = doc.getElementById(&#39;blog-pager-older-link&#39;);
+               if(newNext) nextPageUrl = newNext.href; else nextPageUrl = null;
+               loading = false;
+            });
+          }
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>

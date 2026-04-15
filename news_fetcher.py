@@ -296,7 +296,10 @@ class NewsFetcher:
                         if pw_result.get('image'):
                             main_image = pw_result['image']
                         if pw_result.get('content'):
-                            paragraphs = [pw_result['content']]
+                            # Clean audio player / share / timestamp junk from content
+                            cleaned = self._clean_iranintl_content(pw_result['content'])
+                            if cleaned:
+                                paragraphs = [cleaned]
                 
                 # Fallback: try static extraction from initial HTML
                 if not main_image:
@@ -530,6 +533,53 @@ class NewsFetcher:
         
         return None
 
+    def _clean_iranintl_content(self, text: str) -> str:
+        """
+        Clean Iran International content by removing audio player,
+        share buttons, and timestamp UI text that gets scraped accidentally.
+        """
+        if not text:
+            return text
+        
+        # Patterns to remove (audio player, share, timestamps, etc.)
+        junk_patterns = [
+            # Audio player text: "پخش نسخه شنیداری" (Play audio version)
+            r'پخش\s*نسخه\s*شنیداری',
+            # Share button: "اشتراک‌گذاری" or "اشتراکگذاری"
+            r'اشتراک[‌\u200c]?گذاری',
+            # Timestamps: "۲۴ دقیقه پیش" or "۳ ساعت پیش" etc.
+            r'[۰-۹\d]+\s*دقیقه\s*پیش',
+            r'[۰-۹\d]+\s*ساعت\s*پیش',
+            r'[۰-۹\d]+\s*روز\s*پیش',
+            # "لحظاتی پیش" (moments ago)
+            r'لحظاتی\s*پیش',
+            # Play/pause icons or labels
+            r'►\s*پخش',
+            r'▶\s*پخش',
+            # "نسخه شنیداری" alone
+            r'نسخه\s*شنیداری',
+            # "بازپخش" (replay)
+            r'بازپخش',
+            # Bookmark / save
+            r'ذخیره\s*کردن',
+            r'نشان‌گذاری',
+            # Copy link
+            r'کپی\s*لینک',
+            r'رونوشت\s*لینک',
+        ]
+        
+        cleaned = text
+        for pattern in junk_patterns:
+            cleaned = re.sub(pattern, '', cleaned)
+        
+        # Remove multiple consecutive blank lines
+        cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
+        
+        # Strip leading/trailing whitespace
+        cleaned = cleaned.strip()
+        
+        return cleaned
+
     def _fetch_with_playwright(self, url: str, timeout: int = 15000) -> Optional[Dict]:
         """
         Fetch a page using Playwright headless browser.
@@ -601,7 +651,40 @@ class NewsFetcher:
                 # Extract article content
                 article_content = page.evaluate('''
                     () => {
-                        const selectors = ['article', '.article-body', '.post-content', 'main'];
+                        // Strategy 1: Get only <p> text from article content area (excludes header/tools/audio)
+                        const contentDiv = document.querySelector('[class*="ArticleLayout"][class*="content"]')
+                            || document.querySelector('article [class*="content"]');
+                        if (contentDiv) {
+                            const ps = contentDiv.querySelectorAll('p');
+                            if (ps.length > 0) {
+                                const texts = [];
+                                ps.forEach(p => {
+                                    const t = p.innerText.trim();
+                                    if (t.length > 20) texts.push(t);
+                                });
+                                if (texts.length > 0) return texts.join('\n\n');
+                            }
+                        }
+                        
+                        // Strategy 2: Get all <p> from article, skip header elements
+                        const article = document.querySelector('article');
+                        if (article) {
+                            // Remove header and tools sections before extracting
+                            const clone = article.cloneNode(true);
+                            clone.querySelectorAll('header, [class*="tools"], [class*="share"], [class*="audio"], nav, footer').forEach(el => el.remove());
+                            const ps = clone.querySelectorAll('p');
+                            if (ps.length > 0) {
+                                const texts = [];
+                                ps.forEach(p => {
+                                    const t = p.innerText.trim();
+                                    if (t.length > 20) texts.push(t);
+                                });
+                                if (texts.length > 0) return texts.join('\n\n');
+                            }
+                        }
+                        
+                        // Strategy 3: Fallback to generic selectors
+                        const selectors = ['.article-body', '.post-content', 'main'];
                         for (const sel of selectors) {
                             const el = document.querySelector(sel);
                             if (el && el.innerText.length > 100) {
