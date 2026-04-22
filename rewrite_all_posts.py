@@ -235,6 +235,7 @@ def rewrite_all_posts():
     
     success_count = 0
     fail_count = 0
+    consecutive_failures = 0  # Track consecutive failures to detect API key issues
     
     for i, post in enumerate(posts_to_process):
         post_id = post['id']
@@ -270,6 +271,21 @@ def rewrite_all_posts():
             print(f"  [AI] Rewriting with Gemini...")
             new_title, ai_response = ai.process_news(original_title, plain_text)
             
+            # Check if AI returned the original content unchanged (means API failed)
+            if ai_response == plain_text:
+                consecutive_failures += 1
+                print(f"  [FAIL] AI returned original content (failure #{consecutive_failures})")
+                if consecutive_failures >= 3:
+                    print("\n" + "!" * 60)
+                    print("  [FATAL] 3 consecutive AI failures detected!")
+                    print("  This usually means your GEMINI_API_KEY is expired or invalid.")
+                    print("  Please get a new key from: https://aistudio.google.com/apikey")
+                    print("  Then update it in the .env file and re-run this script.")
+                    print("!" * 60)
+                    break
+                time.sleep(5)
+                continue
+            
             if not new_title or new_title == original_title:
                 # AI didn't generate a unique title, try extracting from response
                 if "===TITLE===" in ai_response:
@@ -283,14 +299,16 @@ def rewrite_all_posts():
             new_html = build_rewritten_html(original_content, ai_response, main_image)
             
             if not new_html:
-                print(f"  [FAIL] AI output was insufficient")
-                failed_ids.add(post_id)
-                fail_count += 1
-                save_progress({
-                    "rewritten_ids": list(rewritten_ids),
-                    "failed_ids": list(failed_ids),
-                    "total_processed": len(rewritten_ids) + len(failed_ids)
-                })
+                consecutive_failures += 1
+                print(f"  [FAIL] AI output was insufficient (failure #{consecutive_failures})")
+                if consecutive_failures >= 3:
+                    print("\n" + "!" * 60)
+                    print("  [FATAL] 3 consecutive AI failures detected!")
+                    print("  This usually means your GEMINI_API_KEY is expired or invalid.")
+                    print("  Please get a new key from: https://aistudio.google.com/apikey")
+                    print("  Then update it in the .env file and re-run this script.")
+                    print("!" * 60)
+                    break
                 time.sleep(5)
                 continue
             
@@ -311,15 +329,28 @@ def rewrite_all_posts():
                 print(f"  [OK] Updated: {resp.get('url', 'success')}")
                 success_count += 1
                 rewritten_ids.add(post_id)
+                consecutive_failures = 0  # Reset on success
             else:
                 print(f"  [FAIL] Blogger API returned None")
                 failed_ids.add(post_id)
                 fail_count += 1
             
         except Exception as e:
-            print(f"  [ERROR] {e}")
+            error_str = str(e)
+            print(f"  [ERROR] {error_str[:100]}")
+            
+            # Check for API key errors - stop immediately
+            if 'API_KEY_INVALID' in error_str or 'API key expired' in error_str:
+                print("\n" + "!" * 60)
+                print("  [FATAL] API Key is expired or invalid!")
+                print("  Get a new key from: https://aistudio.google.com/apikey")
+                print("  Update GEMINI_API_KEY in .env file and re-run.")
+                print("!" * 60)
+                break
+            
             failed_ids.add(post_id)
             fail_count += 1
+            consecutive_failures += 1
         
         # Save progress after each post
         save_progress({
@@ -329,7 +360,7 @@ def rewrite_all_posts():
         })
         
         # Rate limiting: wait between posts
-        wait_time = 15  # seconds between each post to avoid API rate limits
+        wait_time = 5  # seconds between each post (reduced for GitHub Actions 6h limit)
         print(f"  [WAIT] {wait_time}s delay...")
         time.sleep(wait_time)
     
