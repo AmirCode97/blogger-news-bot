@@ -13,7 +13,7 @@ class AIProcessor:
         if HAS_AI and GEMINI_API_KEY:
             try:
                 genai.configure(api_key=GEMINI_API_KEY)
-                self.model = genai.GenerativeModel('gemini-2.0-flash')
+                self.model = genai.GenerativeModel('gemini-2.0-flash-lite')
             except:
                 self.model = None
         else:
