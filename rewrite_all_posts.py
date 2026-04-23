@@ -83,35 +83,30 @@ def fix_source_box(html_content):
 def is_already_rewritten(html_content):
     """Detect if a post was already rewritten by AI.
     Checks for markers that only exist in rewritten posts:
-    - English Summary section
     - Clean source box with only iranpolnews (no original source name)
+    - Our specific CSS style markers
     """
-    has_english = '🇬🇧 English Summary' in html_content or 'English Summary' in html_content
     has_clean_source = 'خبرگزاری:</span> iranpolnews' in html_content
     has_no_original_source = 'منبع:' not in html_content
-    # If it has English section AND clean source box, it was already rewritten
-    if has_english and has_clean_source and has_no_original_source:
+    has_our_style = "font-family:'Vazir'" in html_content or "line-height:2.2" in html_content
+    # If it has clean source box AND our styling, it was already rewritten
+    if has_clean_source and has_no_original_source and has_our_style:
         return True
     return False
 
 def build_rewritten_html(original_html, ai_response, main_image):
     """Build new HTML content from AI response, preserving the blog's style."""
-    # Parse AI response
+    # Parse AI response - only Persian now (no English/German)
     final_fa = ""
-    final_en = ""
-    final_de = ""
     
     if "===PERSIAN===" in ai_response:
         try:
-            parts = ai_response.split("===PERSIAN===")[1].split("===ENGLISH===")
-            if len(parts) > 0:
-                final_fa = parts[0].strip()
-            if len(parts) > 1:
-                en_parts = parts[1].split("===GERMAN===")
-                final_en = en_parts[0].strip()
-                if len(en_parts) > 1:
-                    de_parts = en_parts[1].split("===TAGS===")
-                    final_de = de_parts[0].strip()
+            persian_part = ai_response.split("===PERSIAN===")[1]
+            # Remove TAGS or ENGLISH/GERMAN section if AI still outputs them
+            for marker in ["===TAGS===", "===ENGLISH===", "===GERMAN==="]:
+                if marker in persian_part:
+                    persian_part = persian_part.split(marker)[0]
+            final_fa = persian_part.strip()
         except:
             pass
     
@@ -131,7 +126,7 @@ def build_rewritten_html(original_html, ai_response, main_image):
     elif len(final_fa) > 300:
         description_with_break = final_fa[:300] + "<!--more-->" + final_fa[300:]
 
-    # Build the full HTML
+    # Build the full HTML - Persian only
     html_content = f"""
     <style>.post-featured-image, .post-thumbnail {{ display: none !important; }}</style>
     {image_html}
@@ -139,24 +134,6 @@ def build_rewritten_html(original_html, ai_response, main_image):
     <!-- Persian Section -->
     <div style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:'Vazir',sans-serif;">
         {description_with_break}
-    </div>
-    """
-    
-    if final_en:
-        html_content += f"""
-    <!-- English Section -->
-    <div style="margin-top:30px;padding-top:20px;border-top:1px dashed #555;direction:ltr;text-align:left;font-family:sans-serif;color:#fff;">
-        <h3 style="color:#ce0000;margin-bottom:10px;">🇬🇧 English Summary</h3>
-        <div style="font-size:15px;line-height:1.8;color:#fff;">{final_en}</div>
-    </div>
-    """
-    
-    if final_de:
-        html_content += f"""
-    <!-- German Section -->
-    <div style="margin-top:30px;padding-top:20px;border-top:1px dashed #555;direction:ltr;text-align:left;font-family:sans-serif;color:#fff;">
-        <h3 style="color:#ce0000;margin-bottom:10px;">🇩🇪 Zusammenfassung (Deutsch)</h3>
-        <div style="font-size:15px;line-height:1.8;color:#fff;">{final_de}</div>
     </div>
     """
     

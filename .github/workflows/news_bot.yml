@@ -1,9 +1,9 @@
 name: Blogger News Bot
 
 on:
-  schedule:
-    # هر 5 ساعت اجرا می‌شود
-    - cron: "0 */5 * * *"
+#  schedule:
+#    # هر 5 ساعت اجرا می‌شود
+#    - cron: "0 */5 * * *"
   workflow_dispatch: # امکان اجرای دستی
 
 jobs:
