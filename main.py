@@ -158,31 +158,26 @@ class BloggerNewsBot:
                     article_title = processed_title
                     
                     # Parse AI response
+                    # Parse AI response - Persian only (no translations)
                     final_fa = description # Fallback
-                    final_en = ""
-                    final_de = ""
                     
                     if "===PERSIAN===" in ai_response:
-                        parts = ai_response.split("===PERSIAN===")[1].split("===ENGLISH===")
-                        if len(parts) > 0:
-                            final_fa = parts[0].strip()
-                        if len(parts) > 1:
-                            en_parts = parts[1].split("===GERMAN===")
-                            final_en = en_parts[0].strip()
-                            if len(en_parts) > 1:
-                                de_parts = en_parts[1].split("===TAGS===")
-                                final_de = de_parts[0].strip()
-                    else:
-                        # If AI failed to structure, use raw response if distinct from input
-                        if len(ai_response) > 100: 
-                             final_fa = ai_response
+                        try:
+                            persian_part = ai_response.split("===PERSIAN===")[1]
+                            # Remove TAGS or any other sections if present
+                            for marker in ["===TAGS===", "===ENGLISH===", "===GERMAN==="]:
+                                if marker in persian_part:
+                                    persian_part = persian_part.split(marker)[0]
+                            final_fa = persian_part.strip()
+                        except:
+                            pass
+                    elif len(ai_response) > 100: 
+                        # If AI failed to structure but returned long text, use it
+                        final_fa = ai_response
 
                     description = final_fa
-                    english_content = final_en
-                    german_content = final_de
                 else:
-                    english_content = ""
-                    german_content = ""
+                    pass
 
                 # VALIDATE: Skip if no content was extracted
                 if not description or len(description) < 50:
@@ -212,7 +207,7 @@ class BloggerNewsBot:
                 elif len(description) > 300:
                     description_with_break = description[:300] + "<!--more-->" + description[300:]
 
-                # Multi-language HTML Structure
+                # HTML Structure - Persian only
                 html_content = f"""
                 <style>.post-featured-image, .post-thumbnail {{ display: none !important; }}</style>
                 {image_html}
@@ -221,22 +216,6 @@ class BloggerNewsBot:
                 <div style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:'Vazir',sans-serif;">
                     {description_with_break}
                 </div>
-                
-                {f'''
-                <!-- English Section -->
-                <div style="margin-top:30px;padding-top:20px;border-top:1px dashed #555;direction:ltr;text-align:left;font-family:sans-serif;color:#fff;">
-                    <h3 style="color:#ce0000;margin-bottom:10px;">🇬🇧 English Summary</h3>
-                    <div style="font-size:15px;line-height:1.8;color:#fff;">{english_content}</div>
-                </div>
-                ''' if english_content else ''}
-                
-                {f'''
-                <!-- German Section -->
-                <div style="margin-top:30px;padding-top:20px;border-top:1px dashed #555;direction:ltr;text-align:left;font-family:sans-serif;color:#fff;">
-                    <h3 style="color:#ce0000;margin-bottom:10px;">🇩🇪 Zusammenfassung (Deutsch)</h3>
-                    <div style="font-size:15px;line-height:1.8;color:#fff;">{german_content}</div>
-                </div>
-                ''' if german_content else ''}
                 
                 <!-- Source Box -->
                 <div style="text-align: right; direction: rtl;">
