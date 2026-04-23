@@ -16,6 +16,7 @@ import sys
 import json
 import time
 from datetime import datetime
+from bs4 import BeautifulSoup
 
 from blogger_poster import BloggerPoster
 from ai_processor import AIProcessor
@@ -37,18 +38,29 @@ def save_progress(progress):
         json.dump(progress, f, ensure_ascii=False, indent=2)
 
 def extract_plain_text(html_content):
-    """Extract plain text from HTML for AI processing."""
-    # Remove HTML tags
-    text = re.sub(r'<style[^>]*>.*?</style>', '', html_content, flags=re.DOTALL)
-    text = re.sub(r'<script[^>]*>.*?</script>', '', text, flags=re.DOTALL)
-    text = re.sub(r'<!--.*?-->', '', text, flags=re.DOTALL)
-    text = re.sub(r'<[^>]+>', ' ', text)
-    # Clean up whitespace
-    text = re.sub(r'\s+', ' ', text).strip()
-    # Remove source box text patterns
-    text = re.sub(r'خبرگزاری:\s*iranpolnews.*$', '', text)
-    text = re.sub(r'منبع:.*$', '', text)
-    return text.strip()
+    """Extract plain text from HTML for AI processing using BeautifulSoup."""
+    if not html_content:
+        return ""
+    try:
+        soup = BeautifulSoup(html_content, 'html.parser')
+        # Remove style and script tags
+        for tag in soup.find_all(['style', 'script']):
+            tag.decompose()
+        # Get text
+        text = soup.get_text(separator=' ', strip=True)
+        # Remove source box text patterns (only the specific phrase, not everything after)
+        text = re.sub(r'خبرگزاری:\s*iranpolnews', '', text)
+        text = re.sub(r'منبع:\s*[^\s]+', '', text)  # Remove only "منبع: sourcename"
+        text = re.sub(r'English Summary.*', '', text, flags=re.DOTALL)
+        text = re.sub(r'Zusammenfassung.*', '', text, flags=re.DOTALL)
+        # Clean up whitespace
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
+    except:
+        # Fallback to regex
+        text = re.sub(r'<[^>]+>', ' ', html_content)
+        text = re.sub(r'\s+', ' ', text).strip()
+        return text
 
 def extract_image_from_html(html_content):
     """Extract the main image URL from post HTML."""
@@ -259,11 +271,11 @@ def rewrite_all_posts():
             rewritten_ids.add(post_id)
             continue
         
-        # Smart detection: skip posts already rewritten by AI
-        if is_already_rewritten(original_content):
-            print(f"  [SMART SKIP] Already rewritten (detected from content)")
-            rewritten_ids.add(post_id)
-            continue
+        # Smart skip disabled - ALL posts must be rewritten with new format (no translations)
+        # if is_already_rewritten(original_content):
+        #     print(f"  [SMART SKIP] Already rewritten (detected from content)")
+        #     rewritten_ids.add(post_id)
+        #     continue
         
         # Call AI to rewrite
         try:
