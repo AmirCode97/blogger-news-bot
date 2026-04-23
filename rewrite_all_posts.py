@@ -205,6 +205,8 @@ def rewrite_all_posts():
     # Initialize
     poster = BloggerPoster()
     ai = AIProcessor()
+    start_time = time.time()
+    MAX_RUNTIME_SECONDS = 5.5 * 3600  # 5.5 hours - exit before GitHub's 6h limit
     
     if not ai.model:
         print("[FATAL] AI model could not be initialized. Check your GEMINI_API_KEY.")
@@ -363,6 +365,15 @@ def rewrite_all_posts():
         wait_time = 5  # seconds between each post (reduced for GitHub Actions 6h limit)
         print(f"  [WAIT] {wait_time}s delay...")
         time.sleep(wait_time)
+        
+        # Check for timeout (GitHub Actions 6h limit)
+        elapsed = time.time() - start_time
+        if elapsed > MAX_RUNTIME_SECONDS:
+            print("\n" + "!" * 60)
+            print(f"  [TIMEOUT] {elapsed/3600:.1f} hours passed. Saving progress...")
+            print("  Run workflow again to continue from here.")
+            print("!" * 60)
+            break
     
     # Final report
     print("\n" + "=" * 60)
