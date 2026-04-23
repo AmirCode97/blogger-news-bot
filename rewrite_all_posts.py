@@ -80,6 +80,20 @@ def fix_source_box(html_content):
     )
     return html_content
 
+def is_already_rewritten(html_content):
+    """Detect if a post was already rewritten by AI.
+    Checks for markers that only exist in rewritten posts:
+    - English Summary section
+    - Clean source box with only iranpolnews (no original source name)
+    """
+    has_english = '🇬🇧 English Summary' in html_content or 'English Summary' in html_content
+    has_clean_source = 'خبرگزاری:</span> iranpolnews' in html_content
+    has_no_original_source = 'منبع:' not in html_content
+    # If it has English section AND clean source box, it was already rewritten
+    if has_english and has_clean_source and has_no_original_source:
+        return True
+    return False
+
 def build_rewritten_html(original_html, ai_response, main_image):
     """Build new HTML content from AI response, preserving the blog's style."""
     # Parse AI response
@@ -265,6 +279,12 @@ def rewrite_all_posts():
         
         if len(plain_text) < 30:
             print(f"  [SKIP] Too short ({len(plain_text)} chars)")
+            rewritten_ids.add(post_id)
+            continue
+        
+        # Smart detection: skip posts already rewritten by AI
+        if is_already_rewritten(original_content):
+            print(f"  [SMART SKIP] Already rewritten (detected from content)")
             rewritten_ids.add(post_id)
             continue
         
