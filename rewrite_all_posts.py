@@ -209,7 +209,7 @@ def rewrite_all_posts():
     poster = BloggerPoster()
     ai = AIProcessor()
     start_time = time.time()
-    MAX_RUNTIME_SECONDS = 5.5 * 3600  # 5.5 hours - exit before GitHub's 6h limit
+    MAX_RUNTIME_SECONDS = 5 * 3600  # 5 hours - exit well before GitHub's 6h limit to allow progress save
     
     if not ai.model:
         print("[FATAL] AI model could not be initialized. Check your GEMINI_API_KEY.")

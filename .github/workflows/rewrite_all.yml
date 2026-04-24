@@ -25,6 +25,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Rewrite Script
+        timeout-minutes: 330
         env:
           BLOG_ID: ${{ secrets.BLOG_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -32,10 +33,11 @@ jobs:
           GOOGLE_CREDENTIALS_FILE: credentials.json
         run: |
           # اجرای اسکریپت
-          # گیت‌هاب بعد از ۶ ساعت تایم‌اوت میده، اسکریپت خودش پروگرس رو ذخیره میکنه
+          # اسکریپت بعد از ۵ ساعت خودش متوقف میشه تا پروگرس ذخیره بشه
           python rewrite_all_posts.py
 
       - name: Commit and Push Progress
+        if: always()
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
