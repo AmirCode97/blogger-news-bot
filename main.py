@@ -199,13 +199,8 @@ class BloggerNewsBot:
                 
                 source_name = item.get('source', 'Source')
                 
-                # Insert jump break after first paragraph for "Read More" button
+                # No jump break (<!--more-->) used anymore. Posts are short enough to display fully.
                 description_with_break = description
-                if "\n" in description:
-                    parts = description.split("\n", 1)
-                    description_with_break = parts[0] + "\n<!--more-->\n" + parts[1]
-                elif len(description) > 300:
-                    description_with_break = description[:300] + "<!--more-->" + description[300:]
 
                 # HTML Structure - Persian only
                 html_content = f"""
