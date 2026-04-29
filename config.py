@@ -109,14 +109,18 @@ NEWS_SOURCES = [
     # ==================== خبرگزاری هرانا (بخش کارگران) ====================
     {
         "name": "هرانا - کارگران",
-        "url": "https://www.hra-news.org/category/workers/",
-        "rss_url": "https://www.hra-news.org/category/workers/feed/",
-        "enabled": True,
-        "type": "rss",
+        "url": "https://www.hra-news.org/category/labor/",
+        "enabled": False,
+        "type": "scrape",
         "language": "fa",
         "category": "کارگران",
         "priority": 1,
-        "max_items": 5
+        "max_items": 5,
+        "selectors": {
+            "articles": "article",
+            "title": "h2 a, h3 a, .entry-title a",
+            "description": ".entry-summary, .excerpt"
+        }
     },
     # ==================== مرکز اسناد حقوق بشر ایران - غیرفعال ====================
     {

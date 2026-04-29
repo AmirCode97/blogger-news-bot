@@ -189,7 +189,45 @@ class BloggerNewsBot:
                 
                 print(f"  [Content] {len(description)} characters")
                 
-                # Build HTML compatible with Dark Theme (White Text) + White Source Box
+                source_name = item.get('source', 'Source')
+                search_text = (article_title + " " + description).lower()
+                
+                # ==========================================
+                # 1. Smart Label Classification
+                # ==========================================
+                post_labels = []
+                worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
+                prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
+                
+                if any(kw in search_text for kw in worker_keywords):
+                    post_labels.append('کارگران')
+                elif any(kw in search_text for kw in prisoner_keywords):
+                    post_labels.append('وضعیت زندانیان')
+                elif 'ایران اینترنشنال' in source_name:
+                    post_labels.append('بین‌الملل')
+                else:
+                    post_labels.append('حقوق بشر')
+                
+                post_labels = list(set(post_labels))
+                
+                # ==========================================
+                # 2. Cinematic Image Override for Workers
+                # ==========================================
+                if 'کارگران' in post_labels:
+                    import random
+                    cinematic_worker_images = [
+                        "https://c.files.bbci.co.uk/167A6/production/_127419169_gettyimages-1199341499.jpg", # Construction workers
+                        "https://media.npr.org/assets/img/2021/09/03/gettyimages-1234481023_custom-0b32f2f3fce60b64d39c09c13ee0c05562772583.jpg", # Factory workers
+                        "https://media.cnn.com/api/v1/images/stellar/prod/200416151745-02-manufacturing-plant-0414.jpg", # Manufacturing
+                        "https://static.dw.com/image/57250462_605.jpg", # Construction sunset
+                        "https://www.aljazeera.com/wp-content/uploads/2020/04/39e933d7cbf046529367d3d92fbfa609_18.jpeg" # Construction worker
+                    ]
+                    main_image = random.choice(cinematic_worker_images)
+                    print("  [Image Override] Used cinematic stock photo for Workers news.")
+
+                # ==========================================
+                # 3. Build HTML
+                # ==========================================
                 image_html = ""
                 if main_image:
                     print(f"  [Image] {main_image[:60]}...")
@@ -197,19 +235,13 @@ class BloggerNewsBot:
                 else:
                     print(f"  [Warning] No image found for this article")
                 
-                source_name = item.get('source', 'Source')
-                
-                # No jump break (<!--more-->) used anymore. Posts are short enough to display fully.
-                description_with_break = description
-
-                # HTML Structure - Persian only
                 html_content = f"""
                 <style>.post-featured-image, .post-thumbnail {{ display: none !important; }}</style>
                 {image_html}
                 
                 <!-- Persian Section -->
                 <div style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:'Vazir',sans-serif;">
-                    {description_with_break}
+                    {description}
                 </div>
                 
                 <!-- Source Box -->
@@ -220,34 +252,8 @@ class BloggerNewsBot:
                 </div>
                 """
 
-                # 3. PUBLISH
+                # 4. PUBLISH
                 if self.blogger:
-                    # Smart label classification
-                    post_labels = []
-                    search_text = (article_title + " " + description).lower()
-                    
-                    # Keywords for specific categories
-                    worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
-                    prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
-                    
-                    # 1. Check for Workers news
-                    if any(kw in search_text for kw in worker_keywords):
-                        post_labels.append('کارگران')
-                    # 2. Check for Prisoners news
-                    elif any(kw in search_text for kw in prisoner_keywords):
-                        post_labels.append('وضعیت زندانیان')
-                    # 3. Default for Iran International is International
-                    elif 'ایران اینترنشنال' in source_name:
-                        post_labels.append('بین‌الملل')
-                    # 4. Default for Human Rights sources
-                    else:
-                        post_labels.append('حقوق بشر')
-                        
-
-                        
-                    # Ensure uniqueness
-                    post_labels = list(set(post_labels))
-                    
                     post_result = self.blogger.create_post(
                         title=article_title,
                         content=html_content,

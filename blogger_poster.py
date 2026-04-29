@@ -41,7 +41,7 @@ class BloggerPoster:
 
         self.service = build('blogger', 'v3', credentials=self.creds)
 
-    def create_post(self, title, content, labels=None, is_draft=False):
+    def create_post(self, title, content, labels=None, is_draft=False, published_date=None):
         post_body = {
             'kind': 'blogger#post',
             'blog': {'id': self.blog_id},
@@ -49,6 +49,9 @@ class BloggerPoster:
             'content': content,
             'labels': labels or []
         }
+        if published_date:
+            post_body['published'] = published_date
+            
         try:
             return self.service.posts().insert(
                 blogId=self.blog_id, body=post_body, isDraft=is_draft

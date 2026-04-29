@@ -93,7 +93,8 @@ def update_stats_post(poster, stats_data):
                 title="Live Statistics Storage (Do not delete)",
                 content=json_content,
                 labels=["آمار_زنده"],
-                is_draft=False
+                is_draft=False,
+                published_date="2010-01-01T00:00:00Z"
             )
             
         print("[OK] Stats updated successfully.")
