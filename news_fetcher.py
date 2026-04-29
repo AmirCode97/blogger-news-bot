@@ -106,7 +106,7 @@ class NewsFetcher:
 
     def _is_cloudflare_site(self, url: str) -> bool:
         """Check if the URL belongs to a known Cloudflare-protected site."""
-        cf_domains = ['iranhr.net']
+        cf_domains = ['iranhr.net', 'hra-news.org']
         return any(domain in url for domain in cf_domains)
 
     def _make_request(self, url: str, use_proxy: bool = False, timeout: int = 30) -> Optional[requests.Response]:
