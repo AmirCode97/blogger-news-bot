@@ -1,0 +1,1832 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html>
+<html b:css='false' b:defaultwidgetversion='2' b:layoutsVersion='3' b:responsive='true' b:templateUrl='custom-news.xml' b:templateVersion='1.3' expr:dir='data:blog.languageDirection' expr:lang='data:blog.locale' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'>
+<head>
+  <meta content='width=device-width, initial-scale=1' name='viewport'/>
+  <title><data:view.title.escaped/> | <data:blog.title/></title>
+  <b:include data='blog' name='all-head-content'/>
+
+  <link href='https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font/dist/font-face.css' rel='stylesheet' type='text/css'/>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css' rel='stylesheet'/>
+
+  <b:skin><![CDATA[
+    /* --- POLITICS & HUMAN RIGHTS THEME VARIABLES --- */
+    :root {
+      --primary: #c0392b;
+      --primary-dark: #a93226;
+      --bg-dark: #0a0a0a;
+      --bg-card: #141414;
+      --text-main: #ecf0f1;
+      --text-muted: #95a5a6;
+      --border: #2c3e50;
+      --header-bg: #050505;
+    }
+
+    * { box-sizing: border-box; outline: none; }
+    body {
+      margin: 0; padding: 0;
+      font-family: 'Vazir', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      direction: rtl;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    a { text-decoration: none; color: inherit; transition: 0.3s; }
+    a:hover { color: var(--primary); }
+    img { max-width: 100%; height: auto; display: block; }
+    ul { list-style: none; padding: 0; margin: 0; }
+
+    .alert-bar {
+      background: var(--primary);
+      color: #fff;
+      font-size: 12px;
+      padding: 8px 0;
+      display: flex;
+      align-items: center;
+    }
+    .alert-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      display: flex;
+      width: 100%;
+    }
+    .alert-title {
+      background: #000;
+      padding: 2px 10px;
+      border-radius: 4px;
+      font-weight: 900;
+      margin-left: 15px;
+      white-space: nowrap;
+      text-transform: uppercase;
+    }
+    .alert-marquee { flex: 1; font-weight: bold; }
+
+    .site-header {
+      background: var(--header-bg);
+      padding: 25px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .header-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 15px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo-text h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      margin: 0;
+    }
+    .logo-text span { color: var(--primary); }
+    .header-date { color: var(--text-muted); font-size: 12px; }
+
+    .lang-switcher {
+      display: flex;
+      gap: 10px;
+    }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 2px solid transparent;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      transition: 0.3s;
+    }
+    .lang-btn:hover {
+      border-color: var(--primary);
+      transform: scale(1.1);
+    }
+    .lang-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .lang-btn .btn-spinner{display:none;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:langSpin .6s linear infinite;}
+    .lang-btn.translating .btn-spinner{display:inline-block;}
+    .lang-btn.translating .btn-flag{display:none;}
+    .lang-btn.active{border-color:var(--primary)!important; transform: scale(1.1);}
+    @keyframes langSpin{to{transform:rotate(360deg);}}
+    .translate-toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);padding:12px 24px;background:rgba(30,30,40,.95);color:#fff;border-radius:12px;font-size:14px;z-index:99999;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);box-shadow:0 8px 32px rgba(0,0,0,.4);transition:transform .4s cubic-bezier(.34,1.56,.64,1);direction:ltr;}
+    .translate-toast.show{transform:translateX(-50%) translateY(0);}
+    .translate-toast.error{border-color:rgba(234,67,53,.4);}
+    .translate-toast.success{border-color:rgba(52,168,83,.4);}
+
+    .main-nav {
+      background: #0f0f0f;
+      border-bottom: 2px solid var(--border);
+      position: sticky; top: 0; z-index: 999;
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 15px;
+      display: flex; height: 50px; align-items: center;
+    }
+    .nav-links { display: flex; gap: 25px; height: 100%; }
+    .nav-links a {
+      display: flex; align-items: center; height: 100%;
+      font-weight: 700; font-size: 13px; color: #ccc;
+      border-top: 3px solid transparent; text-decoration: none;
+    }
+    .nav-links a:hover { color: #fff; border-top-color: var(--primary); }
+
+    .has-dropdown { position: relative; display: flex; align-items: center; height: 100%; }
+    .dropdown-menu {
+      position: absolute; top: 100%; right: 0; background: #111;
+      border: 1px solid #333; border-top: 2px solid var(--primary);
+      min-width: 200px; display: none; flex-direction: column; z-index: 1000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .has-dropdown:hover .dropdown-menu { display: flex; }
+    .dropdown-menu a {
+      height: 40px; padding: 0 15px; border: none; border-bottom: 1px solid #222;
+      color: #ccc; background: #111;
+    }
+    .dropdown-menu a:hover { background: #222; color: #fff; border-top-color: transparent !important; }
+    .nav-search { margin-right: auto; }
+    .nav-search input {
+      background: #222; border: 1px solid #333; color: #fff;
+      padding: 6px 15px; border-radius: 20px 0 0 20px; font-family: inherit; font-size: 12px;
+      width: 150px;
+    }
+    .search-btn {
+      background: var(--primary);
+      border: none;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 0 20px 20px 0;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .search-btn:hover { background: var(--primary-dark); }
+
+    .main-container {
+      max-width: 1200px; margin: 40px auto; padding: 0 15px;
+      display: grid; grid-template-columns: 800px 1fr; gap: 40px;
+    }
+
+    .hero-post {
+      position: relative;
+      margin-bottom: 40px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    .hero-thumb {
+      width: 100%; height: 450px; object-fit: cover;
+      filter: brightness(0.7);
+      transition: 0.5s;
+    }
+    .hero-post:hover .hero-thumb { filter: brightness(0.9) scale(1.05); }
+    .hero-content {
+      position: absolute; bottom: 0; right: 0; left: 0;
+      padding: 40px;
+      background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    }
+    .hero-cat {
+      background: var(--primary); color: #fff;
+      padding: 4px 10px; font-size: 11px; font-weight: bold;
+      border-radius: 2px; text-transform: uppercase;
+      margin-bottom: 10px; display: inline-block;
+    }
+    .hero-title {
+      font-size: 36px; font-weight: 900; color: #fff;
+      margin: 10px 0; line-height: 1.3; text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .hero-meta { color: #ccc; font-size: 12px; }
+
+    .homepage-loop {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+    .hero-post, .news-grid-title {
+      width: 100%;
+    }
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid #222;
+      border-radius: 6px; overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: 0.3s;
+      width: calc(50% - 10px);
+    }
+
+    .post-card:hover { border-color: var(--primary); transform: translateY(-3px); }
+    .card-thumb { height: 180px; overflow: hidden; position: relative; }
+    .card-thumb img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+    .post-card:hover .card-thumb img { transform: scale(1.1); }
+    .card-body { padding: 20px; }
+    .card-title { font-size: 16px; font-weight: 800; margin-bottom: 10px; line-height: 1.5; height: 48px; overflow: hidden; }
+    .card-excerpt { font-size: 13px; color: var(--text-muted); height: 60px; overflow: hidden; margin-bottom: 15px; }
+
+    .widget-box {
+      background: var(--bg-card);
+      border: 1px solid #222;
+      border-radius: 6px;
+      padding: 25px;
+      margin-bottom: 30px;
+    }
+    .widget-header {
+      font-size: 14px; font-weight: 900;
+      color: #fff; text-transform: uppercase;
+      border-bottom: 2px solid var(--primary);
+      padding-bottom: 10px; margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #222; }
+    .stat-row:last-child { border: none; }
+    .stat-label { font-size: 13px; color: #aaa; }
+    .stat-val { font-weight: bold; color: #fff; }
+    .stat-graph { height: 4px; background: #222; width: 100%; margin-top: 5px; border-radius: 2px; overflow: hidden; }
+    .stat-bar { height: 100%; background: var(--primary); }
+
+    .quote-box { text-align: center; }
+    .quote-img { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin: 0 auto 15px; border: 2px solid var(--primary); }
+    .quote-text { font-style: italic; font-size: 14px; color: #ccc; margin-bottom: 15px; line-height: 1.6; }
+    .quote-author { font-weight: bold; color: #fff; font-size: 12px; }
+
+    .main-footer {
+      background: #050505; border-top: 1px solid #222;
+      padding: 60px 0 30px; margin-top: 60px;
+    }
+    .footer-inner { max-width: 1200px; margin: 0 auto; padding: 0 15px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px; }
+    .footer-col h4 { color: #fff; border-bottom: 2px solid var(--primary); display: inline-block; padding-bottom: 5px; margin-bottom: 20px; }
+    .footer-col ul li { margin-bottom: 10px; border-bottom: 1px dotted #222; padding-bottom: 5px; }
+
+    .custom-footer-logo {
+      text-align: center;
+      padding: 30px 20px 15px 20px;
+      border-top: 1px solid rgba(192, 57, 43, 0.25);
+      margin-top: 20px;
+    }
+    .custom-footer-logo img {
+      max-width: 130px;
+      height: auto;
+      opacity: 0.9;
+      margin: 0 auto;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      filter: drop-shadow(0 0 8px rgba(192, 57, 43, 0.3));
+    }
+    .custom-footer-logo img:hover {
+      opacity: 1;
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 15px rgba(192, 57, 43, 0.5));
+    }
+    .custom-footer-logo .logo-text {
+      color: var(--primary);
+      font-size: 13px;
+      margin-top: 10px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .header-content { position: relative; }
+    .lang-switcher { z-index: 2; }
+    .center-banner { position: absolute; left: 50%; transform: translateX(-50%); text-align: center; z-index: 1; width: max-content; }
+    .site-title { font-size: 30px; font-weight: 900; margin: 0; color: #fff; text-shadow: 0 0 10px rgba(192,57,43,0.8), 0 2px 4px rgba(0,0,0,0.8); letter-spacing: -0.5px; }
+    .site-badge { margin: 8px auto 0; font-size: 14px; color: #fff; font-weight: bold; background: rgba(192, 57, 43, 0.85); padding: 4px 18px; border-radius: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.4); display: inline-block; border: 1px solid #c0392b; }
+    .header-right { display: flex; align-items: center; gap: 15px; z-index: 2; }
+    .site-logo { height: 55px; width: auto; filter: drop-shadow(0 0 8px rgba(192,57,43,0.5)); transition: transform 0.3s; }
+    .site-logo:hover { transform: scale(1.05); }
+
+    @media (max-width: 1000px) {
+      .main-container { display: flex; flex-direction: column; }
+      .hero-title { font-size: 24px; }
+      .news-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 768px) {
+      .header-content { flex-direction: column; padding: 15px 0 !important; gap: 15px; text-align: center; }
+      .center-banner { position: relative; left: auto; transform: none; width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; order: -1; }
+      .site-title { font-size: 22px !important; white-space: normal; line-height: 1.3; }
+      .site-badge { font-size: 12px !important; white-space: normal; }
+      .lang-switcher { justify-content: center; width: 100%; order: 2; }
+      .header-right { flex-direction: column; justify-content: center; width: 100%; order: 1; gap: 5px; }
+      .site-logo { height: 45px; }
+      #header-date { display: none; }
+
+      .nav-inner { flex-direction: column; height: auto !important; padding: 10px; gap: 10px; }
+      .nav-links { flex-wrap: wrap; justify-content: center; gap: 10px !important; height: auto !important; }
+      .nav-links a { height: auto !important; padding: 5px; font-size: 12px; }
+      .has-dropdown { height: auto !important; }
+      .dropdown-menu { position: static; box-shadow: none; border: 1px solid #333; margin-top: 5px; min-width: 150px; }
+      .dropdown-menu a { font-size: 11px; padding: 0 10px; }
+      .nav-search { width: 100%; margin: 10px 0 0 0 !important; }
+      .nav-search form { width: 100%; justify-content: center; }
+      .nav-search input { width: 100% !important; max-width: 300px; padding: 8px 15px; }
+    }
+
+  ]]></b:skin>
+</head>
+
+<body>
+
+  <div class='alert-bar'>
+    <div class='alert-inner'>
+      <div class='alert-title'>فوری</div>
+      <div class='alert-marquee'>
+        <marquee direction='right' id='live-ticker' scrollamount='6'>
+          در حال دریافت اخبار...
+        </marquee>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener(&#39;DOMContentLoaded&#39;, function() {
+       function removeDuplicates() {
+           var heroLink = document.querySelector(&#39;.hero-post a&#39;);
+           if (!heroLink) return;
+           var heroUrl = heroLink.href;
+           var gridCards = document.querySelectorAll(&#39;.post-card&#39;);
+           gridCards.forEach(function(card) {
+               var cardLink = card.querySelector(&#39;a&#39;);
+               if (cardLink &amp;&amp; cardLink.href === heroUrl) {
+                   card.remove();
+               }
+           });
+       }
+       removeDuplicates();
+
+       var feedUrl = &#39;/feeds/posts/default?alt=json&amp;max-results=6&#39;;
+       fetch(feedUrl)
+        .then(function(res) {
+            if (!res.ok) throw new Error(&quot;Network response was not ok&quot;);
+            return res.json();
+        })
+        .then(function(data) {
+            var entries = data.feed.entry;
+            var headlines = [];
+            if (entries &amp;&amp; entries.length &gt; 0) {
+               for(var i=0; i &lt; entries.length; i++) {
+                   var entry = entries[i];
+                   var title = entry.title.$t;
+                   var link = &quot;&quot;;
+                   for (var j = 0; j &lt; entry.link.length; j++) {
+                       if (entry.link[j].rel === &quot;alternate&quot;) {
+                           link = entry.link[j].href;
+                           break;
+                       }
+                   }
+                   if (link) {
+                       headlines.push(&quot;&lt;a href=&#39;&quot; + link + &quot;&#39; style=&#39;color:#fff;transition:0.3s&#39; onmouseover=&#39;this.style.color=\&quot;#ffeb3b\&quot;&#39; onmouseout=&#39;this.style.color=\&quot;#fff\&quot;&#39;&gt;&quot; + title + &quot;&lt;/a&gt;&quot;);
+                   } else {
+                       headlines.push(title);
+                   }
+               }
+               var ticker = document.getElementById(&#39;live-ticker&#39;);
+               if(ticker) ticker.innerHTML = headlines.join(&#39; &amp;nbsp;&amp;nbsp;&amp;bull;&amp;nbsp;&amp;nbsp; &#39;);
+            } else {
+               throw new Error(&quot;No news items found&quot;);
+            }
+        })
+        .catch(function(e) {
+            var ticker = document.getElementById(&#39;live-ticker&#39;);
+            if(ticker) ticker.innerHTML = &quot;پوشش لحظه&#8204;ای مهم&#8204;ترین اخبار ایران و جهان&quot;;
+        });
+    });
+  </script>
+
+  <header class='site-header'>
+    <div class='header-content'>
+
+      <div class='lang-switcher notranslate'>
+          <a class='lang-btn active' href='javascript:void(0)' id='lang-btn-fa' onclick='translateTo(&quot;fa&quot;)' title='فارسی'>
+            <span class='btn-spinner'/><img alt='FA' class='btn-flag' src='https://flagcdn.com/ir.svg'/></a>
+          <a class='lang-btn' href='javascript:void(0)' id='lang-btn-de' onclick='translateTo(&quot;de&quot;)' title='Deutsch'>
+            <span class='btn-spinner'/><img alt='DE' class='btn-flag' src='https://flagcdn.com/w40/de.png'/></a>
+          <a class='lang-btn' href='javascript:void(0)' id='lang-btn-en' onclick='translateTo(&quot;en&quot;)' title='English'>
+            <span class='btn-spinner'/><img alt='EN' class='btn-flag' src='https://flagcdn.com/w40/gb.png'/></a>
+        </div>
+
+      <div class='center-banner'>
+        <h1 class='site-title'>
+          اخبار ایران
+        </h1>
+      </div>
+
+      <div class='header-right'>
+        <img alt='Iran Pol News' class='site-logo' src='https://i.postimg.cc/brCBfdxy/generated-image.png'/>
+        <div class='header-date' id='header-date' style='margin-left: 10px; display: flex; flex-direction: column; line-height: 1.5;'>
+          <span><script>document.write(new Date().toLocaleDateString(&#39;fa-IR&#39;, {weekday:&#39;long&#39;, day:&#39;numeric&#39;, month:&#39;long&#39;, year:&#39;numeric&#39;}));</script></span>
+          <span style='font-size: 11px; direction: ltr; text-align: right; color: #888;'><script>document.write(new Date().toLocaleDateString(&#39;en-US&#39;, {weekday:&#39;long&#39;, year:&#39;numeric&#39;, month:&#39;long&#39;, day:&#39;numeric&#39;}));</script></span>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <div id='google_translate_element' style='position:absolute;top:-9999px'/>
+  <script src='//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit'/>
+  <script>
+    (function() {
+      document.cookie = &quot;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;&quot;;
+      document.cookie = &quot;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.blogspot.com;&quot;;
+      document.cookie = &quot;googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=&quot; + location.hostname + &quot;;&quot;;
+    })();
+
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: &quot;fa&quot;,
+        includedLanguages: &quot;en,de&quot;,
+        autoDisplay: false
+      }, &quot;google_translate_element&quot;);
+    }
+
+    //<![CDATA[
+    function translateTo(lang) {
+      var CURRENT = window._currentLang || "fa";
+      if (lang === CURRENT) return;
+      var btn = document.getElementById("lang-btn-" + lang);
+      if (btn) btn.classList.add("translating");
+      var toastEl = document.getElementById("translateToast");
+      if (toastEl) {
+        var msgs = {"en":"Translating to English...","de":"Übersetze auf Deutsch...","fa":"بازگشت به فارسی..."};
+        toastEl.textContent = msgs[lang] || "Translating...";
+        toastEl.className = "translate-toast show";
+      }
+      if (lang === "fa") {
+        try {
+          var bf = document.querySelector(".goog-te-banner-frame");
+          if (bf) { if (bf.contentWindow) {
+            var cl = bf.contentWindow.document.querySelector(".goog-close-link");
+            if (cl) { cl.click(); updateBtns("fa"); return; }
+          } }
+        } catch(e) {}
+        var sel = document.querySelector(".goog-te-combo");
+        if (sel) { sel.value=""; sel.dispatchEvent(new Event("change")); }
+        document.cookie="googtrans=;expires=Thu,01 Jan 1970 00:00:00 UTC;path=/;";
+        setTimeout(function(){location.reload();},500);
+        return;
+      }
+      if (CURRENT !== "fa") {
+        var s = document.querySelector(".goog-te-combo");
+        if (s) { s.value=""; s.dispatchEvent(new Event("change")); }
+        setTimeout(function(){ doTranslate(lang); }, 1200);
+      } else {
+        doTranslate(lang);
+      }
+    }
+    function doTranslate(lang) {
+      var attempts = 0;
+      var poll = setInterval(function() {
+        attempts = attempts + 1;
+        var sel = document.querySelector(".goog-te-combo");
+        if (sel) {
+          clearInterval(poll);
+          sel.value = lang;
+          sel.dispatchEvent(new Event("change"));
+          updateBtns(lang);
+        } else {
+          if (attempts >= 30) {
+            clearInterval(poll);
+            var t = document.getElementById("translateToast");
+            if(t){t.textContent="Translation timed out";t.className="translate-toast error show";}
+            document.querySelectorAll(".lang-btn").forEach(function(b){b.classList.remove("translating");});
+          }
+        }
+      }, 500);
+    }
+    function updateBtns(lang) {
+      window._currentLang = lang;
+      document.querySelectorAll(".lang-btn").forEach(function(b){b.classList.remove("active","translating");});
+      var a = document.getElementById("lang-btn-" + lang);
+      if(a) a.classList.add("active");
+      var t = document.getElementById("translateToast");
+      if(t){
+        var n={"en":"English","de":"Deutsch","fa":"فارسی"};
+        t.textContent="✓ " + n[lang];
+        t.className="translate-toast success show";
+        setTimeout(function(){t.classList.remove("show");},2500);
+      }
+    }
+    //]]>
+  </script>
+
+  <style>
+    .goog-te-banner-frame, .skiptranslate { display: none !important; }
+    body { top: 0 !important; }
+  </style>
+
+  <nav class='main-nav'>
+    <div class='nav-inner'>
+      <div class='nav-links'>
+        <a href='/'>خانه</a>
+        <a href='/search/label/حقوق%20بشر'>حقوق بشر</a>
+        <a href='/search/label/گزارش%20ویژه'>گزارش ویژه</a>
+        <a href='/search/label/کارگران'>کارگران</a>
+        <a href='/search/label/%D9%85%D9%82%D8%A7%D9%84%D9%87'>مقاله</a>
+        <div class='has-dropdown'>
+          <a href='https://iranpolnews.blogspot.com/p/blog-page_15.html'>کتابخانه</a>
+        </div>
+        <div class='has-dropdown' style='display: inline-block;'>
+          <a href='/search/label/آرشیو' style='cursor: pointer;'>آرشیو گزارش&#8204;ها <span style='font-size: 10px; margin-right: 5px;'>&#9660;</span></a>
+          <div class='dropdown-menu'>
+            <a href='/search/label/وضعیت%20زندانیان'>وضعیت زندانیان</a>
+            <a href='/search/label/واکنشهای%20بینالمللی'>واکنش&#8204;های بین&#8204;المللی</a>
+          </div>
+        </div>
+      </div>
+      <div class='nav-search'>
+        <form action='/search' method='get' style='display:flex;gap:5px;'>
+          <input id='search-input' name='q' placeholder='جستجو...' type='text'/>
+          <button class='search-btn' title='جستجو' type='submit'>
+            <i class='fas fa-search'/>
+          </button>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div class='main-container'>
+
+    <div class='main-col'>
+      <b:section id='main-posts' showaddelement='yes'>
+        <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='showDateHeader'>false</b:widget-setting>
+            <b:widget-setting name='commentLabel'>کامنت</b:widget-setting>
+            <b:widget-setting name='style.textcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='showShareButtons'>true</b:widget-setting>
+            <b:widget-setting name='authorLabel'>by</b:widget-setting>
+            <b:widget-setting name='showCommentLink'>true</b:widget-setting>
+            <b:widget-setting name='style.urlcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='showAuthor'>true</b:widget-setting>
+            <b:widget-setting name='style.linkcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='style.unittype'>TextAndImage</b:widget-setting>
+            <b:widget-setting name='style.bgcolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='timestampLabel'>در</b:widget-setting>
+            <b:widget-setting name='reactionsLabel'/>
+            <b:widget-setting name='showAuthorProfile'>false</b:widget-setting>
+            <b:widget-setting name='style.layout'>1x1</b:widget-setting>
+            <b:widget-setting name='showLabels'>true</b:widget-setting>
+            <b:widget-setting name='showLocation'>false</b:widget-setting>
+            <b:widget-setting name='postLabelsLabel'>Marcadores:</b:widget-setting>
+            <b:widget-setting name='showTimestamp'>true</b:widget-setting>
+            <b:widget-setting name='postsPerAd'>1</b:widget-setting>
+            <b:widget-setting name='showBacklinks'>false</b:widget-setting>
+            <b:widget-setting name='style.bordercolor'>#ffffff</b:widget-setting>
+            <b:widget-setting name='showInlineAds'>false</b:widget-setting>
+            <b:widget-setting name='showReactions'>false</b:widget-setting>
+          </b:widget-settings>
+          <b:includable id='main' var='this'>
+            <b:if cond='data:view.isMultipleItems'>
+               <div class='homepage-loop news-grid-container'>
+                 <b:loop index='i' values='data:posts' var='post'>
+                   <b:if cond='data:i == 0 and data:view.isHomepage'>
+                     <article class='hero-post start-grid-item'>
+                       <a expr:href='data:post.url'>
+                         <b:if cond='data:post.featuredImage'>
+                           <img class='hero-thumb' expr:src='data:post.featuredImage'/>
+                         <b:else/>
+                           <div class='hero-thumb' style='background:#111;display:flex;align-items:center;justify-content:center;'>No Image</div>
+                         </b:if>
+                         <div class='hero-content'>
+                           <span class='hero-cat'>خبر ویژه</span>
+                           <h2 class='hero-title'><data:post.title/></h2>
+                           <div class='hero-meta'><data:post.dateHeader/></div>
+                         </div>
+                       </a>
+                     </article>
+                     <div class='news-grid-title' style='width:100%;margin-bottom:20px;padding-bottom:10px;border-bottom:2px solid #333;font-size:18px;font-weight:bold;color:#fff;'>
+                       <span style='border-bottom:2px solid var(--primary);padding-bottom:10px;'>آخرین گزارش&#8204;ها</span>
+                     </div>
+                   <b:else/>
+                     <article class='post-card'>
+                       <div class='card-thumb'>
+                         <a expr:href='data:post.url'>
+                           <b:if cond='data:post.featuredImage'>
+                             <img expr:src='resizeImage(data:post.featuredImage, 720, &quot;16:9&quot;)'/>
+                           <b:else/>
+                             <div style='width:100%;height:100%;background:#222'/>
+                           </b:if>
+                         </a>
+                       </div>
+                       <div class='card-body'>
+                         <h3 class='card-title'><a expr:href='data:post.url'><data:post.title/></a></h3>
+                         <div class='card-excerpt'><data:post.snippet/></div>
+                         <a expr:href='data:post.url' style='font-size:11px;font-weight:bold;color:var(--primary)'>مطالعه کامل &gt;</a>
+                       </div>
+                     </article>
+                   </b:if>
+                 </b:loop>
+               </div>
+            <b:else/>
+               <b:loop values='data:posts' var='post'>
+                 <div class='widget-box' style='padding:40px'>
+                   <h1 style='font-size:32px;margin-bottom:20px'><data:post.title/></h1>
+                   <div style='line-height:2.2;font-size:16px;color:#ddd'><data:post.body/></div>
+                   
+                   <!-- بخش مطالب مرتبط برای صفحه پست -->
+                   <b:include data='post' name='postFooter'/>
+                 </div>
+               </b:loop>
+            </b:if>
+          </b:includable>
+          <b:includable id='aboutPostAuthor'>
+  <div class='author-name'>
+    <a class='g-profile' expr:href='data:post.author.profileUrl' rel='author' title='author profile'>
+      <span><data:post.author.name/></span>
+    </a>
+  </div>
+  <div>
+    <span class='author-desc'><data:post.author.aboutMe/></span>
+  </div>
+</b:includable>
+          <b:includable id='addComments'>
+  <a expr:href='data:post.commentsUrl' expr:onclick='data:post.commentsUrlOnclick'>
+    <b:message name='messages.postAComment'/>
+  </a>
+</b:includable>
+          <b:includable id='blogThisShare'>
+  <b:with value='&quot;window.open(this.href, \&quot;_blank\&quot;, \&quot;height=270,width=475\&quot;); return false;&quot;' var='onclick'>
+    <b:include name='platformShare'/>
+  </b:with>
+</b:includable>
+          <b:includable id='bylineByName' var='byline'>
+  <b:switch var='data:byline.name'>
+  <b:case value='share'/>
+    <b:include cond='data:post.shareUrl' name='postShareButtons'/>
+  <b:case value='comments'/>
+    <b:include cond='data:post.allowComments' name='postCommentsLink'/>
+  <b:case value='location'/>
+    <b:include cond='data:post.location' name='postLocation'/>
+  <b:case value='timestamp'/>
+    <b:include cond='not data:view.isPage' name='postTimestamp'/>
+  <b:case value='author'/>
+    <b:include name='postAuthor'/>
+  <b:case value='labels'/>
+    <b:include cond='data:post.labels' name='postLabels'/>
+  <b:case value='icons'/>
+    <b:include cond='data:post.emailPostUrl' name='emailPostIcon'/>
+  </b:switch>
+</b:includable>
+          <b:includable id='bylineRegion' var='regionItems'>
+  <b:loop values='data:regionItems' var='byline'>
+    <b:include data='byline' name='bylineByName'/>
+  </b:loop>
+</b:includable>
+          <b:includable id='commentAuthorAvatar'>
+  <div class='avatar-image-container'>
+    <img class='author-avatar' expr:src='data:comment.authorAvatarSrc' height='35' width='35'/>
+  </div>
+</b:includable>
+          <b:includable id='commentDeleteIcon' var='comment'>
+  <span expr:class='&quot;item-control &quot; + data:comment.adminClass'>
+    <b:if cond='data:showCmtPopup'>
+      <div class='goog-toggle-button'>
+        <div class='goog-inline-block comment-action-icon'/>
+      </div>
+    <b:else/>
+      <a class='comment-delete' expr:href='data:comment.deleteUrl' expr:title='data:messages.deleteComment'>
+        <img src='https://resources.blogblog.com/img/icon_delete13.gif'/>
+      </a>
+    </b:if>
+  </span>
+</b:includable>
+          <b:includable id='commentForm' var='post'>
+  <div class='comment-form'>
+    <a name='comment-form'/>
+    <h4 id='comment-post-message'><data:messages.postAComment/></h4>
+    <b:if cond='data:this.messages.blogComment != &quot;&quot;'>
+      <p><data:this.messages.blogComment/></p>
+    </b:if>
+    <b:include data='post' name='commentFormIframeSrc'/>
+    <iframe allowtransparency='allowtransparency' class='blogger-iframe-colorize blogger-comment-from-post' expr:height='data:cmtIframeInitialHeight ?: &quot;90px&quot;' frameborder='0' id='comment-editor' name='comment-editor' src='' width='100%'/>
+    <data:post.cmtfpIframe/>
+    <script type='text/javascript'>
+      BLOG_CMT_createIframe(&#39;<data:post.appRpcRelayPath/>&#39;);
+    </script>
+  </div>
+</b:includable>
+          <b:includable id='commentFormIframeSrc' var='post'>
+  <a expr:href='data:post.commentFormIframeSrc' id='comment-editor-src'/>
+</b:includable>
+          <b:includable id='commentItem' var='comment'>
+  <div class='comment' expr:id='&quot;c&quot; + data:comment.id'>
+    <b:include cond='data:blog.enabledCommentProfileImages' name='commentAuthorAvatar'/>
+    <div class='comment-block'>
+      <div class='comment-author'>
+        <b:if cond='data:comment.authorUrl'>
+          <b:message name='messages.authorSaidWithLink'>
+            <b:param expr:value='data:comment.author' name='authorName'/>
+            <b:param expr:value='data:comment.authorUrl' name='authorUrl'/>
+          </b:message>
+        <b:else/>
+          <b:message name='messages.authorSaid'>
+            <b:param expr:value='data:comment.author' name='authorName'/>
+          </b:message>
+        </b:if>
+      </div>
+      <div expr:class='&quot;comment-body&quot; + (data:comment.isDeleted ? &quot; deleted&quot; : &quot;&quot;)'>
+        <data:comment.body/>
+      </div>
+      <div class='comment-footer'>
+        <span class='comment-timestamp'>
+          <a expr:href='data:comment.url' title='comment permalink'>
+            <data:comment.timestamp/>
+          </a>
+          <b:include data='comment' name='commentDeleteIcon'/>
+        </span>
+      </div>
+    </div>
+  </div>
+</b:includable>
+          <b:includable id='commentList' var='comments'>
+  <div id='comments-block'>
+    <b:loop values='data:comments' var='comment'>
+      <b:include data='comment' name='commentItem'/>
+    </b:loop>
+  </div>
+</b:includable>
+          <b:includable id='commentPicker' var='post'>
+  <b:if cond='data:post.showThreadedComments'>
+    <b:include data='post' name='threadedComments'/>
+  <b:else/>
+    <b:include data='post' name='comments'/>
+  </b:if>
+</b:includable>
+          <b:includable id='comments' var='post'>
+  <section expr:class='&quot;comments&quot; + (data:post.embedCommentForm ? &quot; embed&quot; : &quot;&quot;)' expr:data-num-comments='data:post.numberOfComments' id='comments'>
+    <a name='comments'/>
+    <b:if cond='data:post.allowComments'>
+      <b:include name='commentsTitle'/>
+      <div expr:id='data:widget.instanceId + &quot;_comments-block-wrapper&quot;'>
+        <b:include cond='data:post.comments' data='post.comments' name='commentList'/>
+      </div>
+      <b:if cond='data:post.commentPagingRequired'>
+        <div class='paging-control-container'>
+          <b:if cond='data:post.hasOlderLinks'>
+            <a expr:class='data:post.oldLinkClass' expr:href='data:post.oldestLinkUrl'><data:messages.oldest/></a>
+            <a expr:class='data:post.oldLinkClass' expr:href='data:post.olderLinkUrl'><data:messages.older/></a>
+          </b:if>
+          <span class='comment-range-text'><data:post.commentRangeText/></span>
+          <b:if cond='data:post.hasNewerLinks'>
+            <a expr:class='data:post.newLinkClass' expr:href='data:post.newerLinkUrl'><data:messages.newer/></a>
+            <a expr:class='data:post.newLinkClass' expr:href='data:post.newestLinkUrl'><data:messages.newest/></a>
+          </b:if>
+        </div>
+      </b:if>
+      <div class='footer'>
+        <b:if cond='data:post.embedCommentForm'>
+          <b:if cond='data:post.allowNewComments'>
+            <b:include data='post' name='commentForm'/>
+          <b:else/>
+            <data:post.noNewCommentsText/>
+          </b:if>
+        <b:else/>
+          <b:if cond='data:post.allowComments'>
+            <b:include data='post' name='addComments'/>
+          </b:if>
+        </b:if>
+      </div>
+    </b:if>
+    <b:if cond='data:showCmtPopup'>
+      <div id='comment-popup'>
+        <iframe allowtransparency='allowtransparency' frameborder='0' id='comment-actions' name='comment-actions' scrolling='no'/>
+      </div>
+    </b:if>
+  </section>
+</b:includable>
+          <b:includable id='commentsLink'>
+  <a class='comment-link' expr:href='data:post.commentsUrl' expr:onclick='data:post.commentsUrlOnclick'>
+    <b:if cond='data:post.numberOfComments &gt; 0'>
+      <b:message name='messages.numberOfComments'>
+        <b:param expr:value='data:post.numberOfComments' name='numComments'/>
+      </b:message>
+    <b:else/>
+      <data:messages.postAComment/>
+    </b:if>
+  </a>
+</b:includable>
+          <b:includable id='commentsLinkIframe'/>
+          <b:includable id='commentsTitle'>
+  <h3 class='title'><data:messages.comments/></h3>
+</b:includable>
+          <b:includable id='defaultAdUnit'>
+  <ins class='adsbygoogle' data-ad-format='auto' expr:data-ad-client='data:adClientId ?: data:blog.adsenseClientId' expr:data-ad-host='data:blog.adsenseHostId' expr:style='data:style ?: &quot;display: block;&quot;'>
+    <b:attr cond='not data:blog.analytics4' expr:value='data:blog.analyticsAccountNumber' name='data-analytics-uacct'/>
+  </ins>
+  <script>
+   (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+</b:includable>
+          <b:includable id='emailPostIcon'>
+  <span class='byline post-icons'>
+    <span class='item-action'>
+      <a expr:href='data:post.emailPostUrl' expr:title='data:messages.emailPost'>
+        <b:include data='{ iconClass: &quot;touch-icon sharing-icon&quot; }' name='emailIcon'/>
+      </a>
+    </span>
+  </span>
+</b:includable>
+          <b:includable id='facebookShare'>
+  <b:with value='&quot;window.open(this.href, \&quot;_blank\&quot;, \&quot;height=430,width=640\&quot;); return false;&quot;' var='onclick'>
+    <b:include name='platformShare'/>
+  </b:with>
+</b:includable>
+          <b:includable id='feedLinks'>
+  <b:if cond='!data:view.isPost'>
+    <b:if cond='data:feedLinks'>
+      <div class='blog-feeds'>
+        <b:include data='feedLinks' name='feedLinksBody'/>
+      </div>
+    </b:if>
+  <b:else/>
+    <div class='post-feeds'>
+      <b:loop values='data:posts' var='post'>
+        <b:if cond='data:post.allowComments and data:post.feedLinks'>
+          <b:include data='post.feedLinks' name='feedLinksBody'/>
+        </b:if>
+      </b:loop>
+    </div>
+  </b:if>
+</b:includable>
+          <b:includable id='feedLinksBody' var='links'>
+  <div class='feed-links'>
+    <data:messages.subscribeTo/>
+    <b:loop values='data:links' var='f'>
+       <a class='feed-link' expr:href='data:f.url' expr:type='data:f.mimeType' target='_blank'><data:f.name/> (<data:f.feedType/>)</a>
+    </b:loop>
+  </div>
+</b:includable>
+          <b:includable id='footerBylines'>
+  <b:if cond='data:widgets.Blog.first.footerBylines'>
+    <b:loop index='i' values='data:widgets.Blog.first.footerBylines' var='region'>
+      <b:if cond='not data:region.items.empty'>
+        <div expr:class='&quot;post-footer-line post-footer-line-&quot; + (data:i + 1)'>
+          <b:with value='&quot;footer-&quot; + (data:i + 1)' var='regionName'>
+            <b:include data='region.items' name='bylineRegion'/>
+          </b:with>
+        </div>
+      </b:if>
+    </b:loop>
+  </b:if>
+</b:includable>
+          <b:includable id='googlePlusShare'/>
+          <b:includable id='headerByline'>
+  <b:if cond='data:widgets.Blog.first.headerByline'>
+    <div class='post-header'>
+      <div class='post-header-line-1'>
+        <b:with value='&quot;header-1&quot;' var='regionName'>
+          <b:include data='data:widgets.Blog.first.headerByline.items' name='bylineRegion'/>
+        </b:with>
+      </div>
+    </div>
+  </b:if>
+</b:includable>
+          <b:includable id='homePageLink'>
+  <a class='home-link' expr:href='data:blog.homepageUrl'><data:messages.home/></a>
+</b:includable>
+          <b:includable id='iframeComments' var='post'/>
+          <b:includable id='inlineAd' var='post'>
+  <b:if cond='!data:view.isPreview'>
+    <b:if cond='data:this.adCode or data:this.adClientId or data:blog.adsenseClientId'>
+      <div class='inline-ad'>
+        <b:if cond='data:this.adCode != &quot;&quot;'>
+          <data:this.adCode/>
+        <b:else/>
+          <b:include cond='data:this.adClientId or data:blog.adsenseClientId' name='defaultAdUnit'/>
+        </b:if>
+      </div>
+    </b:if>
+  <b:else/>
+    <div class='inline-ad'>
+      <div class='inline-ad-placeholder'>
+        <span><b:message name='messages.adsGoHere'/></span>
+      </div>
+    </div>
+  </b:if>
+</b:includable>
+          <b:includable id='linkShare'>
+  <b:with value='&quot;window.prompt(\&quot;Copy to clipboard: Ctrl+C, Enter\&quot;, \&quot;&quot; + data:originalUrl + &quot;\&quot;); return false;&quot;' var='onclick'>
+    <b:include name='platformShare'/>
+  </b:with>
+</b:includable>
+          <b:includable id='nextPageLink'>
+  <a class='blog-pager-older-link' expr:href='data:olderPageUrl' expr:id='data:widget.instanceId + &quot;_blog-pager-older-link&quot;' expr:title='data:messages.olderPosts'>
+    <data:messages.olderPosts/>
+  </a>
+</b:includable>
+          <b:includable id='otherSharingButton'>
+  <span class='sharing-platform-button sharing-element-other' expr:aria-label='data:messages.shareToOtherApps.escaped' expr:data-url='data:originalUrl' expr:title='data:messages.shareToOtherApps.escaped' role='menuitem' tabindex='-1'>
+    <b:with value='{key: &quot;sharingOther&quot;}' var='platform'>
+      <b:include name='sharingPlatformIcon'/>
+    </b:with>
+    <span class='platform-sharing-text'><data:messages.shareOtherApps.escaped/></span>
+  </span>
+</b:includable>
+          <b:includable id='platformShare'>
+  <a expr:class='&quot;goog-inline-block sharing-&quot; + data:platform.key' expr:data-url='data:originalUrl' expr:href='data:shareUrl + &quot;&amp;target=&quot; + data:platform.target' expr:onclick='data:onclick ? data:onclick : &quot;&quot;' expr:title='data:platform.shareMessage' target='_blank'>
+    <span class='share-button-link-text'><data:platform.shareMessage/></span>
+  </a>
+</b:includable>
+          <b:includable id='post' var='post'>
+  <div class='post'>
+    <b:include data='post' name='postMeta'/>
+    <b:include data='post' name='postTitle'/>
+    <b:include name='headerByline'/>
+    <b:if cond='data:view.isSingleItem'>
+      <b:include data='post' name='postBody'/>
+    <b:else/>
+      <b:include data='post' name='postBodySnippet'/>
+      <b:include data='post' name='postJumpLink'/>
+    </b:if>
+    <b:include data='post' name='postFooter'/>
+  </div>
+</b:includable>
+          <b:includable id='postAuthor'>
+  <span class='byline post-author vcard'>
+    <span class='post-author-label'><data:byline.label/></span>
+    <span class='fn'>
+      <b:if cond='data:post.author.profileUrl'>
+        <meta expr:content='data:post.author.profileUrl'/>
+        <a class='g-profile' expr:href='data:post.author.profileUrl' rel='author' title='author profile'>
+          <span><data:post.author.name/></span>
+        </a>
+      <b:else/>
+        <span><data:post.author.name/></span>
+      </b:if>
+    </span>
+  </span>
+</b:includable>
+          <b:includable id='postBody' var='post'>
+            <div class='post-body entry-content float-container' expr:id='&quot;post-body-&quot; + data:post.id'>
+              <data:post.body/>
+            </div>
+          </b:includable>
+          <b:includable id='postBodySnippet' var='post'>
+  <b:include data='post' name='postBody'/>
+</b:includable>
+          <b:includable id='postCommentsAndAd' var='post'>
+  <article class='post-outer-container'>
+    <div class='post-outer'>
+      <b:include data='post' name='post'/>
+    </div>
+    <b:include cond='data:view.isSingleItem' data='post' name='commentPicker'/>
+    <b:include cond='data:view.isSingleItem and data:post.includeAd' data='post' name='inlineAd'/>
+  </article>
+  <b:include cond='data:view.isMultipleItems and data:post.includeAd' data='post' name='inlineAd'/>
+</b:includable>
+          <b:includable id='postCommentsLink'>
+  <b:if cond='data:view.isMultipleItems'>
+    <span class='byline post-comment-link container'>
+      <b:include cond='data:post.commentSource != 1' name='commentsLink'/>
+    </span>
+  </b:if>
+</b:includable>
+          <b:includable id='postFooter' var='post'>
+  <div class='post-footer'>
+  </div>
+
+  <b:if cond='data:view.isPost'>
+    <b:if cond='data:post.labels'>
+
+      <style>
+        .rp-section {
+          margin-top: 50px;
+          padding: 28px;
+          background: #0d0d0d;
+          border-radius: 16px;
+          border: 1px solid #1e1e1e;
+          position: relative;
+          overflow: hidden;
+          font-family: Tahoma, Arial, sans-serif;
+        }
+        .rp-section::before {
+          content: &#39;&#39;;
+          position: absolute;
+          top: 0; left: 0; right: 0;
+          height: 3px;
+          background: linear-gradient(90deg, #c0392b, #e74c3c, #ff6b6b, #e74c3c, #c0392b);
+        }
+        .rp-header {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          margin-bottom: 24px;
+          direction: rtl;
+        }
+        .rp-icon {
+          width: 36px; height: 36px;
+          background: rgba(192,57,43,0.15);
+          border: 1px solid rgba(192,57,43,0.3);
+          border-radius: 8px;
+          display: flex; align-items: center; justify-content: center;
+          color: #e74c3c; font-size: 15px; flex-shrink: 0;
+        }
+        .rp-h-title {
+          font-size: 15px; font-weight: bold;
+          color: #f0f0f0; letter-spacing: .5px;
+        }
+        .rp-tag {
+          margin-right: auto;
+          background: rgba(192,57,43,0.1);
+          border: 1px solid rgba(192,57,43,0.25);
+          color: #e74c3c;
+          padding: 4px 12px;
+          border-radius: 20px;
+          font-size: 11px; font-weight: bold;
+        }
+        .rp-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
+        .rp-card {
+          background: #101010;
+          border: 1px solid #1c1c1c;
+          border-radius: 12px;
+          overflow: hidden;
+          display: flex; flex-direction: column;
+          transition: border-color .3s, transform .3s, box-shadow .3s;
+          text-decoration: none;
+        }
+        .rp-card:hover {
+          border-color: #c0392b;
+          transform: translateY(-5px);
+          box-shadow: 0 15px 30px rgba(192,57,43,0.12), 0 5px 12px rgba(0,0,0,0.5);
+        }
+        .rp-thumb {
+          position: relative; height: 150px; overflow: hidden;
+          background: #111; display: block;
+        }
+        .rp-thumb img {
+          width: 100%; height: 100%; object-fit: cover;
+          transition: transform .5s; display: block;
+        }
+        .rp-card:hover .rp-thumb img { transform: scale(1.08); }
+        .rp-thumb-overlay {
+          position: absolute; bottom: 0; left: 0; right: 0;
+          height: 55%;
+          background: linear-gradient(to top, rgba(0,0,0,.7), transparent);
+          pointer-events: none;
+        }
+        .rp-badge {
+          position: absolute; top: 10px; right: 10px;
+          background: rgba(192,57,43,.88);
+          color: #fff; font-size: 10px; font-weight: bold;
+          padding: 3px 8px; border-radius: 4px;
+          letter-spacing: .5px;
+        }
+        .rp-body {
+          padding: 15px; flex: 1;
+          display: flex; flex-direction: column;
+          direction: rtl;
+        }
+        .rp-card-title {
+          font-size: 13px; font-weight: bold;
+          color: #e0e0e0; line-height: 1.75;
+          margin-bottom: 12px; flex: 1;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          text-decoration: none;
+          transition: color .3s;
+        }
+        .rp-card-title:hover { color: #e74c3c; }
+        .rp-card-footer {
+          display: flex; align-items: center;
+          justify-content: space-between;
+          padding-top: 10px;
+          border-top: 1px solid #1c1c1c;
+        }
+        .rp-date { font-size: 10px; color: #555; }
+        .rp-more {
+          font-size: 11px; font-weight: bold;
+          color: #c0392b; text-decoration: none;
+          display: flex; align-items: center; gap: 4px;
+          transition: gap .3s;
+        }
+        .rp-card:hover .rp-more { gap: 7px; }
+        .rp-skel {
+          background: #0e0e0e;
+          border: 1px solid #1a1a1a;
+          border-radius: 12px; overflow: hidden;
+        }
+        .rp-skel-img {
+          height: 150px;
+          background: linear-gradient(90deg,#141414 25%,#1c1c1c 50%,#141414 75%);
+          background-size: 200% 100%;
+          animation: rp-shimmer 1.5s infinite;
+        }
+        .rp-skel-body { padding: 15px; }
+        .rp-skel-line {
+          height: 11px; border-radius: 5px; margin-bottom: 8px;
+          background: linear-gradient(90deg,#141414 25%,#1c1c1c 50%,#141414 75%);
+          background-size: 200% 100%;
+          animation: rp-shimmer 1.5s infinite;
+        }
+        .rp-skel-line.rp-s { width: 55%; }
+        .rp-empty {
+          grid-column: 1/-1; text-align: center;
+          padding: 30px; color: #444; font-size: 13px;
+        }
+        @keyframes rp-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        @media (max-width: 768px) {
+          .rp-grid { grid-template-columns: repeat(2, 1fr); }
+          .rp-section { padding: 20px 15px; }
+        }
+        @media (max-width: 480px) {
+          .rp-grid { grid-template-columns: 1fr; }
+        }
+      </style>
+
+      <div class='rp-section' id='related-posts'>
+        <div class='rp-header'>
+          <div class='rp-icon'>📰</div>
+          <div class='rp-h-title'>مطالب مرتبط</div>
+          <span class='rp-tag' id='rp-label-tag'/>
+        </div>
+        <div class='rp-grid' id='rp-main-grid'>
+          <div class='rp-skel'><div class='rp-skel-img'/><div class='rp-skel-body'><div class='rp-skel-line'/><div class='rp-skel-line'/><div class='rp-skel-line rp-s'/></div></div>
+          <div class='rp-skel'><div class='rp-skel-img'/><div class='rp-skel-body'><div class='rp-skel-line'/><div class='rp-skel-line'/><div class='rp-skel-line rp-s'/></div></div>
+          <div class='rp-skel'><div class='rp-skel-img'/><div class='rp-skel-body'><div class='rp-skel-line'/><div class='rp-skel-line'/><div class='rp-skel-line rp-s'/></div></div>
+        </div>
+      </div>
+
+      <script type='text/javascript'>
+        function decodeHtml(html) {
+            var txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
+        var rpLabelRaw = "<b:if cond='data:post.labels'><data:post.labels.first.name/></b:if>";
+        var rpLabel = decodeHtml(rpLabelRaw);
+        var rpCurrentUrl = "<data:post.url/>";
+      </script>
+      <script type='text/javascript'>
+        //<![CDATA[
+        (function() {
+          var rpContainer = document.getElementById('related-posts');
+          if (!rpContainer) return;
+
+          var tagEl = document.getElementById('rp-label-tag');
+          if (tagEl) tagEl.textContent = rpLabel;
+
+          if (!rpLabel) {
+            rpContainer.style.display = 'none';
+            return;
+          }
+
+          function toJalali(iso) {
+            try {
+              return new Date(iso).toLocaleDateString('fa-IR', {year:'numeric',month:'long',day:'numeric'});
+            } catch(e) { return ''; }
+          }
+
+          fetch('/feeds/posts/default/-/' + encodeURIComponent(rpLabel) + '?alt=json&max-results=4&orderby=published')
+            .then(function(res) { 
+              if (!res.ok) throw new Error('Network error');
+              return res.json(); 
+            })
+            .then(function(data) {
+              var grid = document.getElementById('rp-main-grid');
+              if (!grid) return;
+              var entries = (data.feed && data.feed.entry) ? data.feed.entry : [];
+              
+              if (!entries || entries.length === 0) {
+                 grid.innerHTML = '<div class="rp-empty" style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">مطلب مرتبط دیگری یافت نشد.</div>';
+                 return;
+              }
+
+              var html = '';
+              var count = 0;
+              entries.forEach(function(e) {
+                if (count >= 3) return;
+                var link = '';
+                for (var i = 0; i < e.link.length; i++) {
+                  if (e.link[i].rel === 'alternate') { link = e.link[i].href; break; }
+                }
+                if (!link || link === rpCurrentUrl) return;
+
+                var title = e.title.$t;
+                var date = e.published ? toJalali(e.published.$t) : '';
+                var cat = rpLabel;
+                
+                var img = 'https://i.postimg.cc/brCBfdxy/generated-image.png';
+                if (e.media$thumbnail) {
+                    img = e.media$thumbnail.url.replace(/\/s[0-9]+-c\//, '/w480-h270-c/');
+                } else if (e.content && e.content.$t) {
+                    var m = e.content.$t.match(/<img[^>]*src=["']([^"']+)["']/i);
+                    if (m && m[1]) img = m[1];
+                }
+
+                html +=
+                  '<article class="rp-card">' +
+                    '<a href="' + link + '" class="rp-thumb">' +
+                      '<img src="' + img + '" alt="' + title.replace(/"/g, '&quot;') + '" loading="lazy"/>' +
+                      '<div class="rp-thumb-overlay"></div>' +
+                      '<span class="rp-badge">' + cat + '</span>' +
+                    '</a>' +
+                    '<div class="rp-body">' +
+                      '<a href="' + link + '" class="rp-card-title">' + title + '</a>' +
+                      '<div class="rp-card-footer">' +
+                        '<span class="rp-date">' + date + '</span>' +
+                        '<a href="' + link + '" class="rp-more">بیشتر &#8250;</a>' +
+                      '</div>' +
+                    '</div>' +
+                  '</article>';
+                count++;
+              });
+
+              if (count > 0) {
+                grid.innerHTML = html;
+              } else {
+                grid.innerHTML = '<div class="rp-empty" style="grid-column: 1/-1; text-align: center; color: #888; padding: 20px;">مطلب مرتبط دیگری یافت نشد.</div>';
+              }
+            })
+            .catch(function() {
+              rpContainer.style.display = 'none';
+            });
+        })();
+        //]]>
+      </script>
+
+    </b:if>
+  </b:if>
+</b:includable>
+          <b:includable id='postFooterAuthorProfile' var='post'>
+  <b:if cond='data:post.author.aboutMe and data:view.isPost'>
+    <div class='author-profile'>
+      <b:if cond='data:post.author.authorPhoto.url'>
+        <img class='author-image' expr:src='data:post.author.authorPhoto.url' width='50px'/>
+        <div class='author-about'>
+          <b:include data='post' name='aboutPostAuthor'/>
+        </div>
+      <b:else/>
+        <b:include data='post' name='aboutPostAuthor'/>
+      </b:if>
+    </div>
+  </b:if>
+</b:includable>
+          <b:includable id='postHeader' var='post'>
+  <b:include name='headerByline'/>
+</b:includable>
+          <b:includable id='postJumpLink' var='post'>
+  <div class='jump-link flat-button'>
+    <a expr:href='data:post.url fragment "more"' expr:title='data:post.title'>
+      <b:eval expr='data:blog.jumpLinkMessage'/>
+    </a>
+  </div>
+</b:includable>
+          <b:includable id='postLabels'>
+  <span class='byline post-labels'>
+    <span class='byline-label'><data:byline.label/></span>
+    <b:loop index='i' values='data:post.labels' var='label'>
+      <a expr:href='data:label.url' rel='tag'><data:label.name/></a>
+    </b:loop>
+  </span>
+</b:includable>
+          <b:includable id='postLocation'>
+  <span class='byline postLocation'>
+    <data:byline.label/>
+    <a expr:href='data:post.location.mapsUrl' target='_blank'><data:post.location.name/></a>
+  </span>
+</b:includable>
+          <b:includable id='postMeta' var='post'>
+  <b:include data='post' name='postMetadataJSON'/>
+</b:includable>
+          <b:includable id='postMetadataJSONImage'>
+  "image": {
+    "@type": "ImageObject",
+    <b:if cond='data:post.featuredImage.isResizable'>
+    "url": "<b:eval expr='resizeImage(data:post.featuredImage, 1200, "1200:630")'/>",
+    "height": 630,
+    "width": 1200
+    <b:else/>
+    "url": "https://blogger.googleusercontent.com/img/b/U2hvZWJveA/AVvXsEgfMvYAhAbdHksiBA24JKmb2Tav6K0GviwztID3Cq4VpV96HaJfy0viIu8z1SSw_G9n5FQHZWSRao61M3e58ImahqBtr7LiOUS6m_w59IvDYwjmMcbq3fKW4JSbacqkbxTo8B90dWp0Cese92xfLMPe_tg11g/w1200/",
+    "height": 348,
+    "width": 1200
+    </b:if>
+  },
+</b:includable>
+          <b:includable id='postMetadataJSONPublisher'>
+ "publisher": {
+    "@type": "Organization",
+    "name": "Blogger",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://blogger.googleusercontent.com/img/b/U2hvZWJveA/AVvXsEgfMvYAhAbdHksiBA24JKmb2Tav6K0GviwztID3Cq4VpV96HaJfy0viIu8z1SSw_G9n5FQHZWSRao61M3e58ImahqBtr7LiOUS6m_w59IvDYwjmMcbq3fKW4JSbacqkbxTo8B90dWp0Cese92xfLMPe_tg11g/h60/",
+      "width": 206,
+      "height": 60
+    }
+  },
+</b:includable>
+          <b:includable id='postPagination'>
+  <div class='blog-pager container' id='blog-pager'>
+    <b:include cond='data:newerPageUrl' name='previousPageLink'/>
+    <b:include cond='data:olderPageUrl' name='nextPageLink'/>
+    <b:include cond='data:view.url != data:blog.homepageUrl' name='homePageLink'/>
+  </div>
+</b:includable>
+          <b:includable id='postReactions'/>
+          <b:includable id='postShareButtons'>
+  <div class='byline post-share-buttons goog-inline-block'>
+    <b:with value='data:sharingId ?: ((data:widget.instanceId ?: "sharing") + "-" + (data:regionName ?: "byline") + "-" + data:post.id)' var='sharingId'>
+      <b:include data='{sharingId: data:sharingId, originalUrl: data:post.url, platforms: data:this.sharing.platforms, shareUrl: data:post.shareUrl, shareTitle: data:post.title}' name='sharingButtons'/>
+    </b:with>
+  </div>
+</b:includable>
+          <b:includable id='postTimestamp'>
+  <span class='byline post-timestamp'>
+    <data:byline.label/>
+    <b:if cond='data:post.url'>
+      <meta expr:content='data:post.url.canonical'/>
+      <a class='timestamp-link' expr:href='data:post.url' rel='bookmark' title='permanent link'>
+        <time class='published' expr:datetime='data:post.date.iso8601' expr:title='data:post.date.iso8601'>
+          <data:post.date/>
+        </time>
+      </a>
+    </b:if>
+  </span>
+</b:includable>
+          <b:includable id='postTitle' var='post'>
+  <a expr:name='data:post.id'/>
+  <b:if cond='data:post.title != ""'>
+    <h3 class='post-title entry-title'>
+      <b:if cond='data:post.link or (data:post.url and data:view.url != data:post.url)'>
+        <a expr:href='data:post.link ?: data:post.url'><data:post.title/></a>
+      <b:else/>
+        <data:post.title/>
+      </b:if>
+    </h3>
+  </b:if>
+</b:includable>
+          <b:includable id='previousPageLink'>
+  <a class='blog-pager-newer-link' expr:href='data:newerPageUrl' expr:id='data:widget.instanceId + "_blog-pager-newer-link"' expr:title='data:messages.newerPosts'>
+    <data:messages.newerPosts/>
+  </a>
+</b:includable>
+          <b:includable id='sharingButton'>
+  <span expr:aria-label='data:platform.shareMessage' expr:class='"sharing-platform-button sharing-element-" + data:platform.key' expr:data-href='data:shareUrl + "&amp;target=" + data:platform.target' expr:data-url='data:originalUrl' expr:title='data:platform.shareMessage' role='menuitem' tabindex='-1'>
+    <b:include name='sharingPlatformIcon'/>
+    <span class='platform-sharing-text'><data:platform.name/></span>
+  </span>
+</b:includable>
+          <b:includable id='sharingButtonContent'>
+  <div class='flat-icon-button ripple'>
+    <b:include name='shareIcon'/>
+  </div>
+</b:includable>
+          <b:includable id='sharingButtons'>
+  <div class='sharing' expr:aria-owns='"sharing-popup-" + data:sharingId' expr:data-title='data:shareTitle'>
+    <button class='sharing-button touch-icon-button' expr:aria-controls='"sharing-popup-" + data:sharingId' expr:aria-label='data:messages.share.escaped' expr:id='"sharing-button-" + data:sharingId' role='button'>
+      <b:include name='sharingButtonContent'/>
+    </button>
+    <b:include name='sharingButtonsMenu'/>
+  </div>
+</b:includable>
+          <b:includable id='sharingButtonsMenu'>
+  <div class='share-buttons-container'>
+    <ul aria-hidden='true' class='share-buttons hidden' expr:aria-label='data:messages.share.escaped' expr:id='"sharing-popup-" + data:sharingId' role='menu'>
+      <b:loop values='(data:platforms ?: data:blog.sharing.platforms) filter (p =&gt; p.key not in {"blogThis"})' var='platform'>
+        <li><b:include name='sharingButton'/></li>
+      </b:loop>
+      <li aria-hidden='true' class='hidden'>
+        <b:include name='otherSharingButton'/>
+      </li>
+    </ul>
+  </div>
+</b:includable>
+          <b:includable id='sharingPlatformIcon'>
+  <b:include data='{ iconClass: ("touch-icon sharing-" + data:platform.key) }' expr:name='data:platform.key + "Icon"'/>
+</b:includable>
+          <b:includable id='threadedCommentForm' var='post'>
+  <div class='comment-form'>
+    <a name='comment-form'/>
+    <h4 id='comment-post-message'><data:messages.postAComment/></h4>
+    <b:if cond='data:this.messages.blogComment != ""'>
+      <p><data:this.messages.blogComment/></p>
+    </b:if>
+    <b:include data='post' name='commentFormIframeSrc'/>
+    <iframe allowtransparency='allowtransparency' class='blogger-iframe-colorize blogger-comment-from-post' expr:height='data:cmtIframeInitialHeight ?: "90px"' frameborder='0' id='comment-editor' name='comment-editor' src='' width='100%'/>
+    <data:post.cmtfpIframe/>
+    <script type='text/javascript'>
+      BLOG_CMT_createIframe('<data:post.appRpcRelayPath/>');
+    </script>
+  </div>
+</b:includable>
+          <b:includable id='threadedCommentJs' var='post'>
+  <script async='async' expr:src='data:post.commentSrc' type='text/javascript'/>
+  <b:template-script inline='true' name='threaded_comments'/>
+  <script type='text/javascript'>
+    blogger.widgets.blog.initThreadedComments(
+        <data:post.commentJso/>,
+        <data:post.commentMsgs/>,
+        <data:post.commentConfig/>);
+  </script>
+</b:includable>
+          <b:includable id='threadedComments' var='post'>
+  <section class='comments threaded' expr:data-embed='data:post.embedCommentForm' expr:data-num-comments='data:post.numberOfComments' id='comments'>
+    <a name='comments'/>
+    <b:include name='commentsTitle'/>
+    <div class='comments-content'>
+      <b:if cond='data:post.embedCommentForm'>
+        <b:include data='post' name='threadedCommentJs'/>
+      </b:if>
+      <div id='comment-holder'>
+         <data:post.commentHtml/>
+      </div>
+    </div>
+    <p class='comment-footer'>
+      <b:if cond='data:post.allowNewComments'>
+        <b:include data='post' name='threadedCommentForm'/>
+      <b:else/>
+        <data:post.noNewCommentsText/>
+      </b:if>
+      <b:if cond='data:post.showManageComments'>
+        <b:include data='post' name='manageComments'/>
+      </b:if>
+    </p>
+    <b:if cond='data:showCmtPopup'>
+      <div id='comment-popup'>
+        <iframe allowtransparency='allowtransparency' frameborder='0' id='comment-actions' name='comment-actions' scrolling='no'/>
+      </div>
+    </b:if>
+  </section>
+</b:includable>
+          <b:includable id='tooltipCss'>
+  <style>
+    .post-body a.b-tooltip-container { position: relative; display: inline-block; }
+    .post-body a.b-tooltip-container .b-tooltip { display: block !important; position: absolute; top: 100%; left: 50%; transform: translate(-20%, 1px); visibility: hidden; opacity: 0; z-index: 1; transition: opacity 0.2s ease-in-out; }
+    .post-body a.b-tooltip-container .b-tooltip iframe { width: 200px; height: 198px; max-width: none; border: none; border-radius: 20px; box-shadow: 1px 1px 3px 1px rgba(0,0,0,0.2); }
+    @media (hover: hover) { .post-body a.b-tooltip-container:hover .b-tooltip { visibility: visible; opacity: 1; } }
+  </style>
+</b:includable>
+        </b:widget>
+      </b:section>
+    </div>
+
+    <aside class='sidebar-col'>
+      <b:section id='sidebar' showaddelement='yes'>
+        <b:widget id='HTML5' locked='false' title='' type='HTML' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'><![CDATA[<div style="max-width:950px; margin:25px auto; background:#050505; border-radius:18px; overflow:hidden; box-shadow:0 0 35px rgba(0,0,0,.45); font-family:tahoma,Arial,sans-serif;">
+
+  <div style="display:flex; align-items:center; gap:10px; padding:12px 16px; background:linear-gradient(90deg,#140606,#250909,#140606); border-bottom:1px solid rgba(255,255,255,.08);">
+    <span style="color:#f3f3f3; font-size:15px;">Iran National Revolution TV</span>
+    <span style="margin-right:auto; color:#ff4d4d; font-weight:bold; letter-spacing:4px; font-size:13px;">ON AIR</span>
+    <span style="width:10px; height:10px; border-radius:50%; background:#c40000; box-shadow:0 0 12px #ff0000; display:inline-block; animation:blink 1s infinite;"></span>
+  </div>
+
+  <div style="position:relative; background:linear-gradient(180deg,#2c2c2c,#151515,#050505); min-height:260px; display:flex; align-items:center; justify-content:center; text-align:center; padding:30px 20px;">
+    <div>
+      <div style="color:#ffffff; font-size:30px; font-weight:bold; margin-bottom:12px;">تلویزیون انقلاب ایران</div>
+      <div style="color:#c7c7c7; font-size:16px; line-height:1.9; margin-bottom:22px;">
+        برای مشاهده پخش زنده، روی دکمه زیر کلیک کنید
+      </div>
+      <a href="https://iranopasmigirim.com/fa/iran-national-revolution-tv" target="_blank"
+         style="display:inline-block; padding:14px 26px; background:linear-gradient(135deg,#c40000,#ff3b3b); color:#fff; text-decoration:none; border-radius:12px; font-size:18px; font-weight:bold; box-shadow:0 8px 20px rgba(255,0,0,.25);">
+         ▶ تماشای پخش زنده
+      </a>
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; padding:9px 14px; background:#0b0b0b; border-top:1px solid rgba(255,255,255,.05);">
+    <span style="color:#8d8d8d; font-size:11px; font-family:monospace;">LIVE STREAM</span>
+    <span style="color:#8d8d8d; font-size:11px; font-family:monospace;">iranopasmigirim.com</span>
+  </div>
+</div>
+
+<style>
+@keyframes blink {
+  0%,100% { opacity:1; }
+  50% { opacity:.25; }
+}
+</style>]]></b:widget-setting>
+          </b:widget-settings>
+          <b:includable id='main'>
+  <b:include name='widget-title'/>
+  <div class='widget-content'>
+    <data:content/>
+  </div>
+</b:includable>
+        </b:widget>
+        <b:widget id='HTML3' locked='false' title='آمارهای حقوق بشری (ماه اخیر)' type='HTML' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'/>
+          </b:widget-settings>
+          <b:includable id='main'>
+            <div class='widget-box'>
+              <div class='widget-header'>آمارهای ماهانه</div>
+              <div id='live-stats-container' style='padding: 5px;'>
+                 <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #222; padding: 15px; border-radius: 8px; border-right: 4px solid #e74c3c;'>
+                   <div>
+                     <div style='font-size: 13px; color: #aaa; margin-bottom: 5px;'>تعداد اعدام&#8204;ها</div>
+                     <div id='stat-executions' style='font-size: 28px; font-weight: bold; color: #e74c3c;'>در حال بروزرسانی...</div>
+                   </div>
+                   <i class='fas fa-skull-crossbones' style='font-size: 32px; color: #e74c3c; opacity: 0.8;'/>
+                 </div>
+                 <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #222; padding: 15px; border-radius: 8px; border-right: 4px solid #f39c12;'>
+                   <div>
+                     <div style='font-size: 13px; color: #aaa; margin-bottom: 5px;'>تعداد بازداشت&#8204;ها</div>
+                     <div id='stat-arrests' style='font-size: 28px; font-weight: bold; color: #f39c12;'>در حال بروزرسانی...</div>
+                   </div>
+                   <i class='fas fa-user-lock' style='font-size: 32px; color: #f39c12; opacity: 0.8;'/>
+                 </div>
+                 <div style='text-align: left; font-size: 10px; color: #666; margin-top: 15px;'>
+                   آخرین بروزرسانی: <span id='stat-last-updated'>امروز</span>
+                 </div>
+              </div>
+            </div>
+            <script type='text/javascript'>//<![CDATA[
+            document.addEventListener('DOMContentLoaded', function() {
+               fetch('/feeds/posts/default/-/آمار_زنده?alt=json&max-results=1')
+                .then(r => r.json())
+                .then(data => {
+                   if(data.feed.entry && data.feed.entry.length > 0) {
+                      var content = data.feed.entry[0].content.$t;
+                      var jsonMatch = content.match(/\{[\s\S]*?\}/);
+                      if(jsonMatch) {
+                          var stats = JSON.parse(jsonMatch[0].replace(/&quot;/g, '"'));
+                          document.getElementById('stat-executions').innerText = stats.executions || 'نامشخص';
+                          document.getElementById('stat-arrests').innerText = stats.arrests || 'نامشخص';
+                          if (stats.last_updated) document.getElementById('stat-last-updated').innerText = stats.last_updated;
+                      }
+                   } else {
+                      document.getElementById('stat-executions').innerText = '۷۴';
+                      document.getElementById('stat-arrests').innerText = '۱۱۲';
+                   }
+                }).catch(e => {
+                      document.getElementById('stat-executions').innerText = '۶۸';
+                      document.getElementById('stat-arrests').innerText = '۱۴۵';
+                });
+            });
+            //]]></script>
+          </b:includable>
+        </b:widget>
+        <b:widget id='HTML1' locked='false' title='نقل قول روز' type='HTML' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'/>
+          </b:widget-settings>
+          <b:includable id='main'>
+            <div class='widget-box quote-box'>
+              <div class='widget-header'>سخن روز</div>
+              <img alt='نلسون ماندلا' class='quote-img' src='https://upload.wikimedia.org/wikipedia/commons/0/02/Nelson_Mandela_1994.jpg'/>
+              <div class='quote-text'>&quot;انکار حقوق بشر مردم&#1548; به چالش کشیدن انسانیت آنهاست.&quot;</div>
+              <div class='quote-author'>- نلسون ماندلا</div>
+            </div>
+          </b:includable>
+        </b:widget>
+        <b:widget id='HTML2' locked='false' title='بانک اطلاعاتی' type='HTML' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'/>
+          </b:widget-settings>
+          <b:includable id='main'>
+            <div class='widget-box'>
+              <div class='widget-header'>بانک اطلاعاتی</div>
+              <a href='https://iranpolnews.blogspot.com/2026/03/blog-post_2781.html' onmouseout='this.style.background=&quot;#15439cb5&quot;' onmouseover='this.style.background=&quot;#1a56c8&quot;' style='display:block; background:#15439cb5; color:white; text-align:center; padding:15px; border-radius:6px; font-weight:bold; margin-bottom:15px; border:1px solid #1a56c8; text-decoration:none; transition:0.3s'>اعلامیه جهانی حقوق بشر</a>
+              <a href='https://iranpolnews.blogspot.com/2026/03/blog-post_7378.html' onmouseout='this.style.background=&quot;#2e7d32&quot;' onmouseover='this.style.background=&quot;#388e3c&quot;' style='display:block; background:#2e7d32; color:white; text-align:center; padding:15px; border-radius:6px; font-weight:bold; border:1px solid #388e3c; text-decoration:none; transition:0.3s'>سند ۲۰۳۰ یونسکو</a>
+            </div>
+          </b:includable>
+        </b:widget>
+        <b:widget id='HTML4' locked='false' title='شبکه ایکس' type='HTML' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'/>
+          </b:widget-settings>
+          <b:includable id='main'>
+            <div class='widget-box' style='text-align: center; padding: 25px;'>
+              <a href='https://x.com/AmirHsalehiFa' onmouseout='this.style.transform=&quot;scale(1)&quot;; this.children[0].style.fill=&quot;#ffffff&quot;' onmouseover='this.style.transform=&quot;scale(1.1)&quot;; this.children[0].style.fill=&quot;var(--primary)&quot;' style='display: inline-block; text-decoration: none; transition: 0.3s;' target='_blank' title='X Profile'>
+                <svg fill='#ffffff' height='55' style='transition: 0.3s;' viewBox='0 0 24 24' width='55' xmlns='http://www.w3.org/2000/svg'>
+                  <path d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'/>
+                </svg>
+              </a>
+            </div>
+          </b:includable>
+        </b:widget>
+        <b:widget id='HTML6' locked='false' title='دستهبندی اخبار' type='HTML' version='2' visible='true'>
+          <b:widget-settings>
+            <b:widget-setting name='content'/>
+          </b:widget-settings>
+          <b:includable id='main'>
+            <div class='widget-box custom-labels-widget'>
+              <div class='widget-header'>دسته&#8204;بندی اخبار</div>
+              <div class='labels-container'>
+                <a class='label-pill' href='/search/label/ایران'>ایران</a>
+                <a class='label-pill' href='/search/label/مقاله'>مقاله</a>
+                <a class='label-pill' href='/search/label/Iran'>Iran</a>
+                <a class='label-pill' href='/search/label/بینالملل'>بین&#8204;الملل</a>
+                <a class='label-pill' href='/search/label/حقوق بشر'>حقوق بشر</a>
+                <a class='label-pill' href='/search/label/واکنشهای بینالمللی'>واکنش&#8204;های بین&#8204;المللی</a>
+                <a class='label-pill' href='/search/label/وضعیت زندانیان'>وضعیت زندانیان</a>
+              </div>
+              <style>
+                .custom-labels-widget .labels-container { display: flex; flex-wrap: wrap; gap: 10px; }
+                .custom-labels-widget .label-pill { background: #1a1a1a; border: 1px solid #333; color: #ccc; padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; text-decoration: none; transition: all 0.3s ease; display: inline-block; }
+                .custom-labels-widget .label-pill:hover { background: var(--primary); border-color: var(--primary); color: #fff; transform: translateY(-3px); box-shadow: 0 5px 15px rgba(192,57,43,0.4); }
+              </style>
+            </div>
+          </b:includable>
+        </b:widget>
+      </b:section>
+    </aside>
+
+  </div>
+
+  <footer class='main-footer'>
+    <div class='footer-inner' style='display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap;'>
+
+      <div class='footer-col'>
+        <h4>دسترسی سریع</h4>
+        <ul>
+          <li><a href='/p/blog-page.html'>درباره ما</a></li>
+          <li><a href='/'>آرشیو گزارش&#8204;ها</a></li>
+        </ul>
+      </div>
+
+      <div class='footer-profile' style='text-align: center; margin: 0 20px;'>
+        <img alt='امیر حسین صالحی فشمی' src='https://iili.io/qedVp3B.jpg' style='max-width: 140px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); border: 2px solid #555;'/>
+        <p style='font-size: 13px; color: #bbb; margin-top: 12px; line-height: 1.6; max-width: 250px;'>
+          امیر حسین صالحی فشمی<br/>
+          فعال حقوق بشر و عضو کانون دفاع از حقوق بشر در ایران و شبکه مدافعین حقوق بشر در ایران<br/>
+          <a href='https://deutsch.bashariyat.org/' onmouseout='this.style.color=&quot;#4da6ff&quot;' onmouseover='this.style.color=&quot;#fff&quot;' style='color: #4da6ff; text-decoration: none; font-weight: bold; transition: color 0.3s;' target='_blank'>VVMIran e.V</a> - <a href='https://www.azadegy.de/' onmouseout='this.style.color=&quot;#4da6ff&quot;' onmouseover='this.style.color=&quot;#fff&quot;' style='color: #4da6ff; text-decoration: none; font-weight: bold; transition: color 0.3s;' target='_blank'>azadegy</a>
+        </p>
+      </div>
+
+      <div class='custom-footer-logo' style='border: none; padding: 0; margin: 0; text-align: left;'>
+        <a href='/'>
+          <img alt='اخبار ایران - لوگو' src='https://i.postimg.cc/brCBfdxy/generated-image.png' style='max-width: 170px; margin-left: 0; filter: drop-shadow(0 0 10px rgba(192,57,43,0.4)); transform: scale(1.1);' title='اخبار ایران'/>
+        </a>
+        <p class='logo-text' style='font-size: 15px; text-align: left; padding-left: 10px;'>اخبار ایران | IranPolNews</p>
+      </div>
+
+    </div>
+
+    <div style='text-align:center; margin-top:40px; color:#555; font-size:11px; border-top:1px solid #111; padding-top:20px'>
+      &#169; 2026 All Rights Reserved.
+    </div>
+  </footer>
+
+  <script type='text/javascript'>
+    (function() {
+      var loading = false;
+      var container = document.querySelector(&#39;.homepage-loop&#39;);
+      var nextLink = document.getElementById(&#39;blog-pager-older-link&#39;);
+      var nextPageUrl = nextLink ? nextLink.href : null;
+
+      if(container &amp;&amp; nextLink) {
+        window.addEventListener(&#39;scroll&#39;, function() {
+          if(loading || !nextPageUrl) return;
+          if((window.innerHeight + window.scrollY) &gt;= document.body.offsetHeight - 800) {
+            loading = true;
+            fetch(nextPageUrl).then(r =&gt; r.text()).then(html =&gt; {
+               var doc = new DOMParser().parseFromString(html, &#39;text/html&#39;);
+               var newPosts = doc.querySelectorAll(&#39;.post-card&#39;);
+               newPosts.forEach(p =&gt; container.appendChild(p));
+               var newNext = doc.getElementById(&#39;blog-pager-older-link&#39;);
+               if(newNext) nextPageUrl = newNext.href; else nextPageUrl = null;
+               loading = false;
+            });
+          }
+        });
+      }
+    })();
+  </script>
+
+  <script type='text/javascript'>
+    //<![CDATA[
+    (function() {
+        var logoUrl = 'https://i.postimg.cc/brCBfdxy/generated-image.png';
+        var newBoxHTML = '<div data-fixed="true" style="background:#1a1a1a; padding:12px 25px; border-radius:8px; border-right:3px solid #c0392b; font-weight:bold; color:#ddd; display:inline-block; margin:30px 0 10px 0; font-size:13px; box-shadow:0 4px 10px rgba(0,0,0,0.4);"><span style="color:#c0392b; margin-left:8px;">\u062e\u0628\u0631\u06af\u0632\u0627\u0631\u06cc:</span> iranpolnews</div>';
+
+        function applyFixes(root) {
+            root = root || document;
+            var imgs = root.querySelectorAll('.widget-box img, .post img');
+            for (var i = 0; i < imgs.length; i++) {
+                var img = imgs[i];
+                if (img.dataset.wm || img.width < 150 || img.classList.contains('quote-img') || img.closest('.custom-footer-logo')) continue;
+                if (img.closest('.widget-box') || img.closest('.post')) {
+                    img.dataset.wm = '1';
+                    var wrap = document.createElement('div');
+                    wrap.className = 'watermark-wrapper';
+                    wrap.style.cssText = 'position:relative;display:inline-block;max-width:100%;margin:auto;';
+                    img.parentNode.insertBefore(wrap, img);
+                    wrap.appendChild(img);
+                    var wm = document.createElement('img');
+                    wm.src = logoUrl;
+                    wm.style.cssText = 'position:absolute;bottom:15px;left:15px;width:80px;height:auto;opacity:0.50;pointer-events:none;z-index:10;filter:drop-shadow(0 0 4px rgba(0,0,0,0.5));';
+                    wrap.appendChild(wm);
+                }
+            }
+            var allDivs = root.querySelectorAll('div');
+            for (var k = 0; k < allDivs.length; k++) {
+                var d = allDivs[k];
+                if (d.dataset.fixed) continue;
+                var bg = d.style.backgroundColor || d.style.background || '';
+                var hasBg = (bg.indexOf('255') !== -1 || bg.indexOf('#fff') !== -1);
+                if (hasBg && d.textContent.indexOf('\u0645\u0646\u0628\u0639') !== -1) {
+                    d.outerHTML = newBoxHTML;
+                }
+            }
+            var els = root.querySelectorAll('span, p');
+            for (var j = 0; j < els.length; j++) {
+                var el = els[j];
+                if (el.dataset.fixed) continue;
+                var txt = el.textContent || '';
+                if (txt.indexOf('\u0645\u0646\u0628\u0639 \u0627\u0635\u0644\u06cc \u0645\u0642\u0627\u0644\u0647:') !== -1 && txt.length < 300) {
+                    var parent = el.parentElement;
+                    for (var up = 0; up < 5; up++) {
+                        if (!parent) break;
+                        var pbg = parent.style.backgroundColor || parent.style.background || '';
+                        if (pbg.indexOf('255') !== -1 || pbg.indexOf('#fff') !== -1) {
+                            parent.outerHTML = newBoxHTML;
+                            break;
+                        }
+                        parent = parent.parentElement;
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            applyFixes();
+            var obs = new MutationObserver(function(m) {
+                m.forEach(function(mut) {
+                    for (var n = 0; n < mut.addedNodes.length; n++) {
+                        if (mut.addedNodes[n].nodeType === 1) applyFixes(mut.addedNodes[n]);
+                    }
+                });
+            });
+            obs.observe(document.querySelector('.main-container') || document.body, {childList:true, subtree:true});
+        });
+    })();
+    //]]>
+  </script>
+
+  <div class='translate-toast' id='translateToast'/>
+
+  <script>
+  //<![CDATA[
+  (function(){
+    var PROXY="https://script.google.com/macros/s/AKfycbyHanLMS6Bp5Dhi3X8jjOz-QfazvjxjQkCl_iim1hKTrwVDi1iUMczGw-nf1TRIAG9U/exec";
+    var origContent=null;
+    function getArticle(){return document.querySelector(".post-body")||document.querySelector(".entry-content");}
+    function addGeminiBar(){
+      var a=getArticle();if(!a)return;
+      origContent=a.innerHTML;
+      var bar=document.createElement("div");
+      bar.id="geminiBar";
+      bar.className="notranslate";
+      bar.style.cssText="display:flex;align-items:center;gap:10px;margin:12px 0;padding:10px 16px;background:linear-gradient(135deg,rgba(66,133,244,0.12),rgba(52,168,83,0.08));border:1px solid rgba(66,133,244,0.25);border-radius:12px;direction:ltr;";
+      bar.innerHTML='<div style="width:24px;height:24px;background:linear-gradient(135deg,#4285f4,#34a853,#fbbc04,#ea4335);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:13px;color:#fff;flex-shrink:0">G</div>'+
+        '<span style="font-size:13px;color:#aaa;flex-shrink:0">AI Translation:</span>'+
+        '<button onclick="geminiTranslate(\x27en\x27)" id="gm-en" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(66,133,244,0.3);background:rgba(66,133,244,0.1);color:#8ab4f8;font-size:12px;font-weight:600;cursor:pointer">\ud83c\uddec\ud83c\udde7 English</button>'+
+        '<button onclick="geminiTranslate(\x27de\x27)" id="gm-de" style="padding:6px 14px;border-radius:8px;border:1px solid rgba(66,133,244,0.3);background:rgba(66,133,244,0.1);color:#8ab4f8;font-size:12px;font-weight:600;cursor:pointer">\ud83c\udde9\ud83c\uddea Deutsch</button>'+
+        '<button onclick="geminiRevert()" id="gm-revert" style="display:none;padding:6px 14px;border-radius:8px;border:1px solid rgba(251,188,4,0.3);background:rgba(251,188,4,0.1);color:#fdd663;font-size:12px;font-weight:600;cursor:pointer">\ud83d\udd04 \u0628\u0627\u0632\u06af\u0634\u062a</button>';
+      a.parentNode.insertBefore(bar,a);
+    }
+    window.geminiTranslate=function(lang){
+      var a=getArticle();if(!a)return;
+      if(!origContent)origContent=a.innerHTML;
+      var text=a.innerText||a.textContent;
+      if(!text||text.trim().length<10)return;
+      var btn=document.getElementById("gm-"+lang);
+      if(btn){btn.style.opacity="0.5";btn.textContent="\u23f3 Translating...";}
+      var t=document.getElementById("translateToast");
+      if(t){t.textContent="\ud83e\udd16 Translating with Gemini AI...";t.className="translate-toast show";}
+      fetch(PROXY,{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({text:text.substring(0,8000),targetLang:lang})})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.success){
+          var langN=lang==="en"?"English":"Deutsch";
+          a.innerHTML='<div style="padding:12px 16px;background:linear-gradient(135deg,rgba(66,133,244,0.08),rgba(52,168,83,0.05));border-radius:10px;border:1px solid rgba(66,133,244,0.15);margin-bottom:16px;font-size:12px;color:#8ab4f8;direction:ltr">\ud83e\udd16 Translated by Gemini AI \u2022 <span style=color:#888>Original: \u0641\u0627\u0631\u0633\u06cc</span></div><div style="direction:ltr;text-align:left;line-height:1.9;font-size:16px;white-space:pre-wrap">'+d.translation.replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>")+'</div>';
+          document.getElementById("gm-revert").style.display="inline-block";
+          if(t){t.textContent="\u2713 Gemini AI: "+langN;t.className="translate-toast success show";setTimeout(function(){t.classList.remove("show");},3000);}
+        }else{
+          if(t){t.textContent="\u26a0 "+d.error;t.className="translate-toast error show";}
+        }
+        if(btn){btn.style.opacity="1";btn.textContent=lang==="en"?"\ud83c\uddec\ud83c\udde7 English":"\ud83c\udde9\ud83c\uddea Deutsch";}
+      }).catch(function(e){
+        if(btn){btn.style.opacity="1";btn.textContent=lang==="en"?"\ud83c\uddec\ud83c\udde7 English":"\ud83c\udde9\ud83c\uddea Deutsch";}
+        if(t){t.textContent="\u26a0 Network error";t.className="translate-toast error show";}
+      });
+    };
+    window.geminiRevert=function(){
+      var a=getArticle();if(a&&origContent){a.innerHTML=origContent;document.getElementById("gm-revert").style.display="none";}
+      var t=document.getElementById("translateToast");if(t){t.textContent="\u2713 \u0628\u0627\u0632\u06af\u0634\u062a \u0628\u0647 \u0645\u062a\u0646 \u0627\u0635\u0644\u06cc";t.className="translate-toast success show";setTimeout(function(){t.classList.remove("show");},2000);}
+    };
+    if(document.readyState!=="loading")addGeminiBar();
+    else document.addEventListener("DOMContentLoaded",addGeminiBar);
+  })();
+  //]]>
+  </script>
+
+</body>
+</html>

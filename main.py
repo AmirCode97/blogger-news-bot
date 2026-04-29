@@ -222,23 +222,28 @@ class BloggerNewsBot:
 
                 # 3. PUBLISH
                 if self.blogger:
-                    # Smart label logic: Iran International → گزارش ویژه, Others → حقوق بشر
+                    # Smart label classification
                     post_labels = []
-                    if 'ایران اینترنشنال' in source_name:
-                        post_labels.extend(['گزارش ویژه', 'بین‌الملل'])
-                    else:
-                        post_labels.extend(['حقوق بشر', 'Iran'])
-                        
-                    # 1. وضعیت زندانیان (Prisoners Situation)
                     search_text = (article_title + " " + description).lower()
-                    prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه']
-                    if any(kw in search_text for kw in prisoner_keywords):
-                        post_labels.extend(['وضعیت زندانیان', 'آرشیو'])
+                    
+                    # Keywords for specific categories
+                    worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
+                    prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
+                    
+                    # 1. Check for Workers news
+                    if any(kw in search_text for kw in worker_keywords):
+                        post_labels.append('کارگران')
+                    # 2. Check for Prisoners news
+                    elif any(kw in search_text for kw in prisoner_keywords):
+                        post_labels.append('وضعیت زندانیان')
+                    # 3. Default for Iran International is International
+                    elif 'ایران اینترنشنال' in source_name:
+                        post_labels.append('بین‌الملل')
+                    # 4. Default for Human Rights sources
+                    else:
+                        post_labels.append('حقوق بشر')
                         
-                    # 2. واکنش‌های بین‌المللی (International Reactions)
-                    int_keywords = ['سازمان ملل', 'عفو بین‌الملل', 'پارلمان اروپا', 'تحریم', 'بیانیه', 'جاوید رحمان', 'کمیته حقیقت‌ياب', 'شورای حقوق بشر']
-                    if any(kw in search_text for kw in int_keywords):
-                        post_labels.extend(['واکنشهای بین‌المللی', 'آرشیو'])
+
                         
                     # Ensure uniqueness
                     post_labels = list(set(post_labels))
