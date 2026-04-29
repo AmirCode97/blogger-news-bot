@@ -146,7 +146,13 @@ class NewsFetcher:
         url = source.get('rss_url', source.get('url'))
         try:
             safe_print(f"[RSS] Fetching from {source['name']}...")
-            feed = feedparser.parse(url)
+            
+            response = self._make_request(url, use_proxy=True)
+            if not response:
+                safe_print(f"  [Error] Could not fetch RSS XML")
+                return []
+                
+            feed = feedparser.parse(response.content)
             
             for entry in feed.entries[:source.get('max_items', 5)]:
                 title = entry.get('title', '').strip()

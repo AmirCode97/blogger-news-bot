@@ -13,3 +13,4 @@ schedule>=1.2.0
 pysocks>=1.7.1
 cloudscraper>=1.2.71
 playwright>=1.40.0
+jdatetime>=4.1.1
