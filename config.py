@@ -106,12 +106,17 @@ NEWS_SOURCES = [
             "image": "img"
         }
     },
+    # ==================== خبرگزاری هرانا (بخش کارگران) ====================
     {
-        "name": "مجموعه فعالان حقوق بشر در ایران (HRA)",
-        "url": "https://www.hra-iran.org/fa/",
-        "enabled": False,  # غیرفعال طبق درخواست
+        "name": "هرانا - کارگران",
+        "url": "https://www.hra-news.org/category/workers/",
+        "rss_url": "https://www.hra-news.org/category/workers/feed/",
+        "enabled": True,
         "type": "rss",
-        "max_items": 4
+        "language": "fa",
+        "category": "کارگران",
+        "priority": 1,
+        "max_items": 5
     },
     # ==================== مرکز اسناد حقوق بشر ایران - غیرفعال ====================
     {
