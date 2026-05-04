@@ -199,8 +199,13 @@ class BloggerNewsBot:
                 worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
                 prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
                 
+                # برچسب «کارگران» فقط برای اخبار هرانا اعمال شود
+                is_herana = 'هرانا' in source_name
                 if any(kw in search_text for kw in worker_keywords):
-                    post_labels.append('کارگران')
+                    if is_herana:
+                        post_labels.append('کارگران')
+                    else:
+                        post_labels.append('حقوق بشر')
                 elif any(kw in search_text for kw in prisoner_keywords):
                     post_labels.append('وضعیت زندانیان')
                 elif 'ایران اینترنشنال' in source_name:
