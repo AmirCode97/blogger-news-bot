@@ -2,8 +2,8 @@ name: Blogger News Bot
 
 on:
   schedule:
-    # هر 5 ساعت اجرا می‌شود
-    - cron: "0 */5 * * *"
+    # هر 6 ساعت اجرا می‌شود
+    - cron: "0 */6 * * *"
   workflow_dispatch: # امکان اجرای دستی
 
 jobs:
@@ -41,7 +41,7 @@ jobs:
           GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_ADMIN_CHAT_ID=${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
-          CHECK_INTERVAL_HOURS=5
+          CHECK_INTERVAL_HOURS=6
           MAX_NEWS_PER_CHECK=20
           USE_PROXY=true
           EOF

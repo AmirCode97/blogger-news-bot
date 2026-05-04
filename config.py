@@ -20,8 +20,8 @@ TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "")
 
 # ==================== News Settings ====================
-CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "5"))
-MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))  # Total: 10+5+5+5+5=30
+CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "6"))
+MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))  # Total: 5+7+7+7+5=31
 
 # ==================== Proxy Settings ====================
 # برای دور زدن محدودیت‌های Cloudflare
@@ -55,7 +55,7 @@ NEWS_SOURCES = [
         "enabled": True,
         "category": "بین‌الملل",
         "priority": 1,
-        "max_items": 10,
+        "max_items": 5,
     },
     # ==================== ایران اینترنشنال - گزارش ویژه (تحلیلی) ====================
     # غیرفعال - خبرها از RSS فید اصلی می‌آیند
@@ -96,7 +96,7 @@ NEWS_SOURCES = [
         "language": "fa",
         "enabled": True,  # فعال - 5 خبر
         "category": "حقوق بشر",
-        "max_items": 5,
+        "max_items": 7,
         "use_proxy": True, # استفاده از پروکسی برای اطمینان
         "selectors": {
             "articles": "article",
@@ -139,7 +139,7 @@ NEWS_SOURCES = [
         "enabled": True, # فعال
         "category": "حقوق بشر",
         "priority": 2,
-        "max_items": 5,
+        "max_items": 7,
         "selectors": {
             "articles": "article",
             "title": ".jeg_post_title a, h3.jeg_post_title a, h2 a, h3 a, h4 a",
@@ -158,7 +158,7 @@ NEWS_SOURCES = [
         "enabled": True,
         "category": "حقوق بشر",
         "priority": 1,
-        "max_items": 5,
+        "max_items": 7,
     },
     # ==================== حقوق بشر در ایران (HumanRightsInIR) - WordPress RSS ====================
     {
