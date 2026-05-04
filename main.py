@@ -220,15 +220,89 @@ class BloggerNewsBot:
                 # ==========================================
                 if 'کارگران' in post_labels:
                     import random
-                    cinematic_worker_images = [
-                        "https://c.files.bbci.co.uk/167A6/production/_127419169_gettyimages-1199341499.jpg", # Construction workers
-                        "https://media.npr.org/assets/img/2021/09/03/gettyimages-1234481023_custom-0b32f2f3fce60b64d39c09c13ee0c05562772583.jpg", # Factory workers
-                        "https://media.cnn.com/api/v1/images/stellar/prod/200416151745-02-manufacturing-plant-0414.jpg", # Manufacturing
-                        "https://static.dw.com/image/57250462_605.jpg", # Construction sunset
-                        "https://www.aljazeera.com/wp-content/uploads/2020/04/39e933d7cbf046529367d3d92fbfa609_18.jpeg" # Construction worker
-                    ]
-                    main_image = random.choice(cinematic_worker_images)
-                    print("  [Image Override] Used cinematic stock photo for Workers news.")
+                    
+                    # دسته‌بندی عکس‌ها بر اساس موضوع خبر
+                    worker_image_categories = {
+                        'protest': {  # تجمع و اعتراض صنفی
+                            'keywords': ['تجمع', 'اعتراض', 'تحصن', 'اعتصاب', 'صنفی', 'راهپیمایی', 'تظاهرات'],
+                            'images': [
+                                "https://cdn.pixabay.com/photo/2021/01/30/14/22/women-5963960_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2019/04/03/01/26/protest-4099351_640.jpg",
+                                "https://cdn.pixabay.com/photo/2016/08/03/15/25/atlantic-city-1566984_640.jpg",
+                                "https://cdn.pixabay.com/photo/2019/09/28/18/07/protester-4511419_640.jpg",
+                                "https://cdn.pixabay.com/photo/2021/02/18/12/59/women-6027128_640.jpg",
+                            ]
+                        },
+                        'safety': {  # فقدان ایمنی کار
+                            'keywords': ['ایمنی', 'حادثه', 'حوادث کار', 'سقوط', 'انفجار', 'آتش‌سوزی'],
+                            'images': [
+                                "https://cdn.pixabay.com/photo/2019/09/22/08/57/fire-fighting-4495488_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2016/09/16/17/16/health-and-safety-1674578_640.jpg",
+                                "https://cdn.pixabay.com/photo/2020/11/12/16/58/worker-5736096_640.jpg",
+                                "https://cdn.pixabay.com/photo/2017/09/11/14/52/active-2739217_640.jpg",
+                                "https://cdn.pixabay.com/photo/2021/06/09/01/37/worker-6322029_640.jpg",
+                            ]
+                        },
+                        'wages': {  # معوقات مزدی / مطالبات مزدی / مشکلات بیمه
+                            'keywords': ['معوقات', 'مزدی', 'دستمزد', 'حقوق', 'بیمه', 'معیشت', 'مطالبات', 'حق‌بیمه'],
+                            'images': [
+                                "https://cdn.pixabay.com/photo/2019/02/25/15/01/hartz-4-4019810_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2016/05/29/16/57/poverty-1423343_640.jpg",
+                                "https://cdn.pixabay.com/photo/2014/09/26/11/44/hands-462298_640.jpg",
+                                "https://cdn.pixabay.com/photo/2015/07/15/06/42/man-845709_640.jpg",
+                                "https://cdn.pixabay.com/photo/2019/03/22/21/12/inequality-4074203_640.jpg",
+                            ]
+                        },
+                        'unemployment': {  # بیکاری و تعدیل
+                            'keywords': ['بیکاری', 'تعدیل', 'اخراج', 'بازنشسته', 'بازنشستگان', 'تعطیل'],
+                            'images': [
+                                "https://cdn.pixabay.com/photo/2015/07/14/06/09/man-844211_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2020/02/07/04/36/painting-4826081_640.jpg",
+                                "https://cdn.pixabay.com/photo/2019/05/14/13/57/tramp-4202447_640.jpg",
+                                "https://cdn.pixabay.com/photo/2017/02/16/02/31/no-money-2070384_640.jpg",
+                            ]
+                        },
+                        'statistics': {  # آمار و گزارش
+                            'keywords': ['آمار', 'گزارش', 'بررسی', 'وضعیت'],
+                            'images': [
+                                "https://cdn.pixabay.com/photo/2018/09/19/22/29/statistic-3689675_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2017/10/17/14/10/financial-2860753_640.jpg",
+                            ]
+                        },
+                        'injury': {  # مصدومیت و مرگ کارگر
+                            'keywords': ['مصدومیت', 'مرگ', 'جان باختن', 'فوت', 'کشته', 'مجروح', 'زخمی'],
+                            'images': [
+                                "https://cdn.pixabay.com/photo/2015/10/18/09/33/accident-994005_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2015/10/17/17/17/accident-992866_640.jpg",
+                                "https://cdn.pixabay.com/photo/2015/10/18/09/35/accident-994007_640.jpg",
+                                "https://cdn.pixabay.com/photo/2017/05/01/02/55/safety-shoes-2274590_640.jpg",
+                                "https://cdn.pixabay.com/photo/2017/06/22/20/43/safety-shoes-2432467_640.jpg",
+                            ]
+                        },
+                        'construction': {  # ساختمانی و عمرانی (پیش‌فرض)
+                            'keywords': [],
+                            'images': [
+                                "https://cdn.pixabay.com/photo/2018/01/20/08/01/craftsmen-3094035_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2019/02/25/20/13/site-4020496_640.jpg",
+                                "https://cdn.pixabay.com/photo/2015/11/03/08/56/maurer-1019810_640.jpg",
+                                "https://cdn.pixabay.com/photo/2017/05/15/22/10/tunnel-2316267_640.jpg",
+                                "https://cdn.pixabay.com/photo/2013/09/12/15/22/welding-181656_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2021/05/14/08/45/welding-6252829_640.jpg",
+                                "https://cdn.pixabay.com/photo/2021/06/09/01/55/worker-6322085_1280.jpg",
+                                "https://cdn.pixabay.com/photo/2021/12/29/01/23/worker-6900536_640.jpg",
+                            ]
+                        },
+                    }
+                    
+                    # تشخیص هوشمند موضوع خبر
+                    selected_category = 'construction'  # پیش‌فرض
+                    for cat_name, cat_data in worker_image_categories.items():
+                        if any(kw in search_text for kw in cat_data['keywords']):
+                            selected_category = cat_name
+                            break
+                    
+                    main_image = random.choice(worker_image_categories[selected_category]['images'])
+                    print(f"  [Image Override] Topic: {selected_category} → stock photo selected.")
 
                 # ==========================================
                 # 3. Build HTML

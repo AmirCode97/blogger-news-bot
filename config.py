@@ -110,7 +110,7 @@ NEWS_SOURCES = [
     {
         "name": "هرانا - کارگران",
         "url": "https://www.hra-news.org/category/labor/",
-        "enabled": False,
+        "enabled": True,
         "type": "scrape",
         "language": "fa",
         "category": "کارگران",
