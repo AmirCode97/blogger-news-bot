@@ -36,6 +36,16 @@ def deduplicate_text(text):
 
     return "\n\n".join(unique_paragraphs)
 
+def proxy_external_image(url):
+    if not url:
+        return ""
+    # Already on CDN or data URL or empty
+    if "jsdelivr.net" in url or url.startswith("data:"):
+        return url
+    from urllib.parse import quote
+    # wsrv.nl is a free, fast global image cache proxy unblocked in Iran
+    return f"https://wsrv.nl/?url={quote(url)}"
+
 from typing import List, Dict
 
 from config import (
@@ -57,10 +67,25 @@ class BloggerNewsBot:
         self.blogger = None
         self.telegram = None
         self.use_telegram_review = False
+        self.resolved_images = {}
         
         print("[INFO] Initializing Blogger News Bot...")
         print(f"[INFO] Blog ID: {BLOG_ID}")
         print(f"[INFO] Check interval: Every {CHECK_INTERVAL_HOURS} hours")
+        
+        # Load resolved stock images mappings
+        try:
+            import json
+            resolved_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resolved_images.json")
+            if os.path.exists(resolved_path):
+                with open(resolved_path, "r", encoding="utf-8") as f:
+                    self.resolved_images = json.load(f)
+                print(f"[OK] Loaded {len(self.resolved_images)} resolved stock images.")
+            else:
+                print("[WARNING] resolved_images.json not found!")
+        except Exception as e:
+            print(f"[ERROR] Loading resolved_images.json: {e}")
+
         print(f"[INFO] Duplicate cache: {self.duplicate_detector.get_stats()}")
 
     def _init_ai(self):
@@ -222,99 +247,98 @@ class BloggerNewsBot:
                     import random
                     
                     # دسته‌بندی عکس‌ها بر اساس موضوع خبر
-                    _B = "https://plain-weur-prod-public.komododecks.com/202605/11"
                     worker_image_categories = {
                         'protest': {  # تجمع و اعتراض صنفی
                             'keywords': ['تجمع', 'اعتراض', 'تحصن', 'اعتصاب', 'صنفی', 'راهپیمایی', 'تظاهرات'],
                             'images': [
-                                f"{_B}/xvVwjvWLG5ADOxW4EIgY/image.png",
-                                f"{_B}/7kyrBNbl4c2KS8vircgB/image.png",
-                                f"{_B}/3XhhBrieVpJFtVtLookz/image.png",
+                                "xvVwjvWLG5ADOxW4EIgY",
+                                "7kyrBNbl4c2KS8vircgB",
+                                "3XhhBrieVpJFtVtLookz",
                             ]
                         },
                         'safety': {  # فقدان ایمنی کار
                             'keywords': ['ایمنی', 'حادثه', 'حوادث کار', 'سقوط', 'انفجار', 'آتش‌سوزی'],
                             'images': [
-                                f"{_B}/dxiHs3AT6IjhOmWZTBaR/image.png",
-                                f"{_B}/tFZVcFQcUPRmG9hAknot/image.png",
-                                f"{_B}/NXgu2fiLV7oKWSt5JUuh/image.png",
-                                f"{_B}/JjVnVdCMXy6iolMIDaZj/image.png",
-                                f"{_B}/MjllixzobHAV3Nth51Wr/image.png",
-                                f"{_B}/TVA9RuHRUvcGXteJcBHv/image.png",
-                                f"{_B}/fTPZtAObAols1lEMuvse/image.png",
-                                f"{_B}/L4vX7v7jBCOfJznZRiTh/image.png",
-                                f"{_B}/lw6Ipz4OXADzZDLf4GzL/image.png",
-                                f"{_B}/5X4QQndDLzDs02bYOhWp/image.png",
-                                f"{_B}/fKwKc5NHmDRZbalTqqgT/image.png",
+                                "dxiHs3AT6IjhOmWZTBaR",
+                                "tFZVcFQcUPRmG9hAknot",
+                                "NXgu2fiLV7oKWSt5JUuh",
+                                "JjVnVdCMXy6iolMIDaZj",
+                                "MjllixzobHAV3Nth51Wr",
+                                "TVA9RuHRUvcGXteJcBHv",
+                                "fTPZtAObAols1lEMuvse",
+                                "L4vX7v7jBCOfJznZRiTh",
+                                "lw6Ipz4OXADzZDLf4GzL",
+                                "5X4QQndDLzDs02bYOhWp",
+                                "fKwKc5NHmDRZbalTqqgT",
                             ]
                         },
                         'wages': {  # معوقات مزدی / مطالبات مزدی / مشکلات بیمه
                             'keywords': ['معوقات', 'مزدی', 'دستمزد', 'حقوق', 'بیمه', 'معیشت', 'مطالبات', 'حق‌بیمه'],
                             'images': [
-                                f"{_B}/rnZiSzeEEjpFAtw5Ozvw/image.png",
-                                f"{_B}/Fyv9ksReWCkwEan3OozA/image.png",
-                                f"{_B}/xvVwjvWLG5ADOxW4EIgY/image.png",
-                                f"{_B}/1f0FOBPjZ2bBjqiprIkp/image.png",
-                                f"{_B}/HHk1ato9bgvQfZFgfsFF/image.png",
-                                f"{_B}/5jbEVltP8kfK9yrSj9NP/image.png",
-                                f"{_B}/GQY4znGiq9XsHgqIL0Jv/image.png",
-                                f"{_B}/aCSKcmmHHvwJNibT0POX/image.png",
-                                f"{_B}/RbTWgy4tmbXxofhEYD3j/image.png",
-                                f"{_B}/3XhhBrieVpJFtVtLookz/image.png",
-                                f"{_B}/K6pWnYcCIIlNtoh4cDKF/image.png",
-                                f"{_B}/h0D5PmQziVoH8bwSfVJn/image.png",
-                                f"{_B}/bwStazSQyv0rHfPwsKqS/image.png",
-                                f"{_B}/4LsX7qJLZi06uBnW8ONx/image.png",
-                                f"{_B}/43j4MvIyLLHNRaUR4xyK/image.png",
-                                f"{_B}/7oesnmsu0RfrE2W7Lk0C/image.png",
+                                "rnZiSzeEEjpFAtw5Ozvw",
+                                "Fyv9ksReWCkwEan3OozA",
+                                "xvVwjvWLG5ADOxW4EIgY",
+                                "1f0FOBPjZ2bBjqiprIkp",
+                                "HHk1ato9bgvQfZFgfsFF",
+                                "5jbEVltP8kfK9yrSj9NP",
+                                "GQY4znGiq9XsHgqIL0Jv",
+                                "aCSKcmmHHvwJNibT0POX",
+                                "RbTWgy4tmbXxofhEYD3j",
+                                "3XhhBrieVpJFtVtLookz",
+                                "K6pWnYcCIIlNtoh4cDKF",
+                                "h0D5PmQziVoH8bwSfVJn",
+                                "bwStazSQyv0rHfPwsKqS",
+                                "4LsX7qJLZi06uBnW8ONx",
+                                "43j4MvIyLLHNRaUR4xyK",
+                                "7oesnmsu0RfrE2W7Lk0C",
                             ]
                         },
                         'unemployment': {  # بیکاری و تعدیل
                             'keywords': ['بیکاری', 'تعدیل', 'اخراج', 'بازنشسته', 'بازنشستگان', 'تعطیل'],
                             'images': [
-                                f"{_B}/Fyv9ksReWCkwEan3OozA/image.png",
-                                f"{_B}/1f0FOBPjZ2bBjqiprIkp/image.png",
-                                f"{_B}/gom8LzRHEvtsHkKDgoAh/image.png",
-                                f"{_B}/LCNF3R3yiHWI23eZ2pRX/image.png",
-                                f"{_B}/LOeqev3kgW0RAOCaII2l/image.png",
-                                f"{_B}/aCSKcmmHHvwJNibT0POX/image.png",
-                                f"{_B}/RbTWgy4tmbXxofhEYD3j/image.png",
-                                f"{_B}/johotPThTTQum2OKM2Xr/image.png",
-                                f"{_B}/4LsX7qJLZi06uBnW8ONx/image.png",
-                                f"{_B}/43j4MvIyLLHNRaUR4xyK/image.png",
+                                "Fyv9ksReWCkwEan3OozA",
+                                "1f0FOBPjZ2bBjqiprIkp",
+                                "gom8LzRHEvtsHkKDgoAh",
+                                "LCNF3R3yiHWI23eZ2pRX",
+                                "LOeqev3kgW0RAOCaII2l",
+                                "aCSKcmmHHvwJNibT0POX",
+                                "RbTWgy4tmbXxofhEYD3j",
+                                "johotPThTTQum2OKM2Xr",
+                                "4LsX7qJLZi06uBnW8ONx",
+                                "43j4MvIyLLHNRaUR4xyK",
                             ]
                         },
                         'statistics': {  # آمار و گزارش
                             'keywords': ['آمار', 'گزارش', 'بررسی', 'وضعیت'],
                             'images': [
-                                f"{_B}/HHk1ato9bgvQfZFgfsFF/image.png",
-                                f"{_B}/7oesnmsu0RfrE2W7Lk0C/image.png",
-                                f"{_B}/K6pWnYcCIIlNtoh4cDKF/image.png",
+                                "HHk1ato9bgvQfZFgfsFF",
+                                "7oesnmsu0RfrE2W7Lk0C",
+                                "K6pWnYcCIIlNtoh4cDKF",
                             ]
                         },
                         'injury': {  # مصدومیت و مرگ کارگر
                             'keywords': ['مصدومیت', 'مرگ', 'جان باختن', 'فوت', 'کشته', 'مجروح', 'زخمی'],
                             'images': [
-                                f"{_B}/FexfZ6Z9FojX7y6kMfRH/image.png",
-                                f"{_B}/lbyYxUafXnxPCDT1DTul/image.png",
-                                f"{_B}/opBNOv604Cccl4DLBh33/image.png",
-                                f"{_B}/djBWFeRxBpG2ZR4NgCR1/image.png",
-                                f"{_B}/z5zgF2E9yC3E3EHwViDu/image.png",
-                                f"{_B}/P67wCQolqce71iGfEw0g/image.png",
-                                f"{_B}/bMWHv8lA1GzcwnImumn7/image.png",
-                                f"{_B}/p54CDjq7NrukeAnOYpIq/image.png",
-                                f"{_B}/T4C2bHaksBsaY3DOLobO/image.png",
-                                f"{_B}/gEuvCQ8HVFQPT74zJSaH/image.png",
+                                "FexfZ6Z9FojX7y6kMfRH",
+                                "lbyYxUafXnxPCDT1DTul",
+                                "opBNOv604Cccl4DLBh33",
+                                "djBWFeRxBpG2ZR4NgCR1",
+                                "z5zgF2E9yC3E3EHwViDu",
+                                "P67wCQolqce71iGfEw0g",
+                                "bMWHv8lA1GzcwnImumn7",
+                                "p54CDjq7NrukeAnOYpIq",
+                                "T4C2bHaksBsaY3DOLobO",
+                                "gEuvCQ8HVFQPT74zJSaH",
                             ]
                         },
                         'construction': {  # ساختمانی و عمرانی (پیش‌فرض)
                             'keywords': [],
                             'images': [
-                                f"{_B}/zwDqgNNNtfGzNZod4M2M/image.png",
-                                f"{_B}/lbyYxUafXnxPCDT1DTul/image.png",
-                                f"{_B}/fKwKc5NHmDRZbalTqqgT/image.png",
-                                f"{_B}/gom8LzRHEvtsHkKDgoAh/image.png",
-                                f"{_B}/dxiHs3AT6IjhOmWZTBaR/image.png",
+                                "zwDqgNNNtfGzNZod4M2M",
+                                "lbyYxUafXnxPCDT1DTul",
+                                "fKwKc5NHmDRZbalTqqgT",
+                                "gom8LzRHEvtsHkKDgoAh",
+                                "dxiHs3AT6IjhOmWZTBaR",
                             ]
                         },
                     }
@@ -326,16 +350,19 @@ class BloggerNewsBot:
                             selected_category = cat_name
                             break
                     
-                    main_image = random.choice(worker_image_categories[selected_category]['images'])
-                    print(f"  [Image Override] Topic: {selected_category} → stock photo selected.")
+                    selected_id = random.choice(worker_image_categories[selected_category]['images'])
+                    filename = self.resolved_images.get(selected_id, f"{selected_id}.png")
+                    main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
+                    print(f"  [Image Override] Topic: {selected_category} → stock photo selected: {main_image}")
 
                 # ==========================================
-                # 3. Build HTML
+                # 3. Build HTML (with unblocked image proxy)
                 # ==========================================
                 image_html = ""
                 if main_image:
-                    print(f"  [Image] {main_image[:60]}...")
-                    image_html = f'<div style="margin-bottom:25px;text-align:center;"><img src="{main_image}" style="width:100%;max-width:800px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.4);"></div>'
+                    proxied_image = proxy_external_image(main_image)
+                    print(f"  [Image] {proxied_image[:60]}...")
+                    image_html = f'<div style="margin-bottom:25px;text-align:center;"><img src="{proxied_image}" style="width:100%;max-width:800px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.4);"></div>'
                 else:
                     print(f"  [Warning] No image found for this article")
                 
