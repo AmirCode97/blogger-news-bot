@@ -31,9 +31,18 @@ except ImportError:
 # Import config
 from config import NEWS_SOURCES, FILTER_KEYWORDS, USE_PROXY, PROXY_URL, FREE_PROXIES
 
+def scrub_secrets(text):
+    if not isinstance(text, str):
+        text = str(text)
+    # Scrub proxy credentials of format user:pass
+    text = re.sub(r'(https?://)[^:@/]+:[^:@/]+@', r'\1***:***@', text)
+    return text
+
 def safe_print(text):
+    text = scrub_secrets(text)
     try:
-        print(text.encode(sys.stdout.encoding, errors='replace').decode(sys.stdout.encoding))
+        encoding = sys.stdout.encoding or 'utf-8'
+        print(text.encode(encoding, errors='replace').decode(encoding))
     except:
         print(text.encode('utf-8', errors='replace').decode('utf-8'))
 

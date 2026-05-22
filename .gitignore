@@ -28,6 +28,12 @@ missing_report.txt
 posts_contents_utf8.txt
 posts_list.json
 b64_token.txt
+bank_posts_info.json
+widget_html.txt
+blog.html
+blog2.html
+blog_source.txt
+single_post.html
 *.log
 
 # OS
