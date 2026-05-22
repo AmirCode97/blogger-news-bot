@@ -356,6 +356,48 @@ class BloggerNewsBot:
                     print(f"  [Image Override] Topic: {selected_category} → stock photo selected: {main_image}")
 
                 # ==========================================
+                # 2b. Category Fallbacks for other labels if no image is found
+                # ==========================================
+                if not main_image:
+                    import random
+                    print(f"  [Image Fallback] No image found. Selecting category-specific stock photo...")
+                    
+                    category_fallbacks = {
+                        'وضعیت زندانیان': [
+                            "FexfZ6Z9FojX7y6kMfRH", "lbyYxUafXnxPCDT1DTul", "opBNOv604Cccl4DLBh33",
+                            "djBWFeRxBpG2ZR4NgCR1", "z5zgF2E9yC3E3EHwViDu", "P67wCQolqce71iGfEw0g",
+                            "bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO",
+                            "gEuvCQ8HVFQPT74zJSaH"
+                        ],
+                        'حقوق بشر': [
+                            "xvVwjvWLG5ADOxW4EIgY", "7kyrBNbl4c2KS8vircgB", "3XhhBrieVpJFtVtLookz",
+                            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
+                        ],
+                        'بین‌الملل': [
+                            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
+                        ]
+                    }
+                    
+                    fallback_id = None
+                    for label in post_labels:
+                        if label in category_fallbacks:
+                            fallback_id = random.choice(category_fallbacks[label])
+                            print(f"  [Image Fallback] Category '{label}' → Selected ID: {fallback_id}")
+                            break
+                            
+                    if not fallback_id and self.resolved_images:
+                        fallback_id = random.choice(list(self.resolved_images.keys()))
+                        print(f"  [Image Fallback] Generic fallback → Selected ID: {fallback_id}")
+                        
+                    if fallback_id:
+                        filename = self.resolved_images.get(fallback_id, f"{fallback_id}.png")
+                        if filename.endswith(".jpg") or filename.endswith(".png"):
+                            pass
+                        else:
+                            filename = f"{filename}.png"
+                        main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
+
+                # ==========================================
                 # 3. Build HTML (with unblocked image proxy)
                 # ==========================================
                 image_html = ""
