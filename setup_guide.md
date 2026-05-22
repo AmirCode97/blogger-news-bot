@@ -70,7 +70,7 @@ cp .env.example .env
 سپس فایل را ویرایش کنید:
 
 ```env
-BLOG_ID=1276802394255833723
+BLOG_ID= ..........
 GOOGLE_CREDENTIALS_FILE=credentials.json
 GEMINI_API_KEY=your_key_here
 TELEGRAM_BOT_TOKEN=your_bot_token
