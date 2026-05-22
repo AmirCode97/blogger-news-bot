@@ -2,7 +2,7 @@
 import os
 try:
     import google.generativeai as genai
-    from config import GEMINI_API_KEY, AI_SYSTEM_PROMPT
+    from config import GEMINI_API_KEY, APP_EXTRA_CONFIG
     HAS_AI = True
 except Exception as e:
     print(f"[Warning] AI Library failed to load: {e}")
@@ -24,7 +24,7 @@ class AIProcessor:
             return title, content
         
         try:
-            prompt = f"{AI_SYSTEM_PROMPT}\n\nTitle: {title}\nContent: {content}"
+            prompt = f"{APP_EXTRA_CONFIG}\n\nTitle: {title}\nContent: {content}"
             response = self.model.generate_content(prompt)
             ai_text = response.text
             

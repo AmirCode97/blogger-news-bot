@@ -160,10 +160,10 @@ FILTER_KEYWORDS = [
 ]
 
 # ==================== Gemini AI ====================
-AI_SYSTEM_PROMPT = os.getenv("APP_EXTRA_CONFIG", "")
+APP_EXTRA_CONFIG = os.getenv("APP_EXTRA_CONFIG", "")
 
-if not AI_SYSTEM_PROMPT:
-    AI_SYSTEM_PROMPT = "You are a helpful news assistant. Summarize and rewrite the input news in Persian."
+if not APP_EXTRA_CONFIG:
+    APP_EXTRA_CONFIG = "You are a helpful news assistant. Summarize and rewrite the input news in Persian."
 
 AI_TRANSLATE_PROMPT = """
 این خبر انگلیسی را به فارسی ترجمه کن:
