@@ -1,6 +1,13 @@
 
 import os
 import sys
+
+# Reconfigure standard output and error streams to UTF-8 to prevent 'charmap' encoding errors on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
 import re
 import time
 import schedule
@@ -392,12 +399,12 @@ class BloggerNewsBot:
                     for label in post_labels:
                         if label in category_fallbacks:
                             fallback_id = random.choice(category_fallbacks[label])
-                            print(f"  [Image Fallback] Category '{label}' → Selected ID: {fallback_id}")
+                            print(f"  [Image Fallback] Category '{label}' -> Selected ID: {fallback_id}")
                             break
                             
                     if not fallback_id and self.resolved_images:
                         fallback_id = random.choice(list(self.resolved_images.keys()))
-                        print(f"  [Image Fallback] Generic fallback → Selected ID: {fallback_id}")
+                        print(f"  [Image Fallback] Generic fallback -> Selected ID: {fallback_id}")
                         
                     if fallback_id:
                         filename = self.resolved_images.get(fallback_id, f"{fallback_id}.png")
