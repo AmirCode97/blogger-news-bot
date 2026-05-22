@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ==================== Blogger API ====================
-BLOG_ID = os.getenv("BLOG_ID", "1276802394255833723")
+BLOG_ID = os.getenv("BLOG_ID")
 GOOGLE_CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE", "credentials.json")
 
 # ==================== Gemini AI ====================
