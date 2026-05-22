@@ -39,18 +39,16 @@ jobs:
         env:
           BLOG_ID: ${{ secrets.BLOG_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+          APP_EXTRA_CONFIG: ${{ secrets.APP_EXTRA_CONFIG }}
         run: |
           cat > .env << EOF
           BLOG_ID=$BLOG_ID
           GOOGLE_CREDENTIALS_FILE=credentials.json
           GEMINI_API_KEY=$GEMINI_API_KEY
-          TELEGRAM_BOT_TOKEN=$TELEGRAM_BOT_TOKEN
-          TELEGRAM_ADMIN_CHAT_ID=$TELEGRAM_ADMIN_CHAT_ID
           CHECK_INTERVAL_HOURS=6
           MAX_NEWS_PER_CHECK=20
           USE_PROXY=true
+          APP_EXTRA_CONFIG=$APP_EXTRA_CONFIG
           EOF
 
       - name: Restore news cache
@@ -67,7 +65,6 @@ jobs:
         env:
           PYTHONUNBUFFERED: 1
           BLOGGER_TOKEN_BASE64: ${{ secrets.BLOGGER_TOKEN_BASE64 }}
-          AI_SYSTEM_PROMPT: ${{ secrets.AI_SYSTEM_PROMPT }}
 
       - name: Save news cache
         uses: actions/cache/save@v4

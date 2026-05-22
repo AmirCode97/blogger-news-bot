@@ -159,13 +159,11 @@ FILTER_KEYWORDS = [
     "mahsa amini", "execution", "arrest"
 ]
 
-# ==================== Gemini AI System Prompt ====================
-# استراتژی سئو و دستورالعمل‌های بازنویسی هوش مصنوعی به دلایل امنیتی و رقابتی به صورت متغیر محیطی بارگذاری می‌شود.
-AI_SYSTEM_PROMPT = os.getenv("AI_SYSTEM_PROMPT", "")
+# ==================== Gemini AI ====================
+AI_SYSTEM_PROMPT = os.getenv("APP_EXTRA_CONFIG", "")
 
 if not AI_SYSTEM_PROMPT:
-    # یک پرامپت ساده به عنوان پشتیبان در صورت عدم تنظیم متغیر محیطی
-    AI_SYSTEM_PROMPT = "تو یک دستیار خبری هستی. خبرهای ورودی را به زبان فارسی خلاصه و بازنویسی کن."
+    AI_SYSTEM_PROMPT = "You are a helpful news assistant. Summarize and rewrite the input news in Persian."
 
 AI_TRANSLATE_PROMPT = """
 این خبر انگلیسی را به فارسی ترجمه کن:
