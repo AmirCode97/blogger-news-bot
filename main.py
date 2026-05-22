@@ -53,6 +53,120 @@ def proxy_external_image(url):
     # wsrv.nl is a free, fast global image cache proxy unblocked in Iran
     return f"https://wsrv.nl/?url={quote(url)}"
 
+def strip_markdown(text):
+    """Remove all Markdown formatting symbols from text while preserving the actual content."""
+    if not text:
+        return text
+    # Remove heading markers (##, ###, etc.)
+    text = re.sub(r'^#{1,6}\s*', '', text, flags=re.MULTILINE)
+    # Remove bold+italic (***text*** or ___text___)
+    text = re.sub(r'\*{3}(.+?)\*{3}', r'\1', text)
+    text = re.sub(r'_{3}(.+?)_{3}', r'\1', text)
+    # Remove bold (**text** or __text__)
+    text = re.sub(r'\*{2}(.+?)\*{2}', r'\1', text)
+    text = re.sub(r'_{2}(.+?)_{2}', r'\1', text)
+    # Remove italic (*text* or _text_) - careful not to break normal underscores
+    text = re.sub(r'(?<!\w)\*([^\*\n]+?)\*(?!\w)', r'\1', text)
+    # Remove inline code (`text`)
+    text = re.sub(r'`([^`]+?)`', r'\1', text)
+    # Remove horizontal rules (---, ***, ___)
+    text = re.sub(r'^[\-\*_]{3,}\s*$', '', text, flags=re.MULTILINE)
+    # Remove blockquote markers (> text)
+    text = re.sub(r'^>\s*', '', text, flags=re.MULTILINE)
+    # Remove bullet point markers (* item, - item) at start of lines
+    text = re.sub(r'^\s*[\*\-\+]\s+', '', text, flags=re.MULTILINE)
+    # Remove numbered list markers (1. item)
+    text = re.sub(r'^\s*\d+\.\s+', '', text, flags=re.MULTILINE)
+    # Remove any remaining standalone ** or ***
+    text = re.sub(r'\*{2,3}', '', text)
+    # Remove === markers that weren't parsed
+    text = re.sub(r'={3,}[A-Z]+={3,}', '', text)
+    # Clean up excessive whitespace
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    return text.strip()
+
+def strip_ai_noise(text):
+    """Remove AI meta-commentary, analysis, and thinking-out-loud lines that should not appear in blog posts."""
+    if not text:
+        return text
+    # Patterns that indicate AI analysis/commentary (not actual news content)
+    noise_patterns = [
+        r'^.*بسیار عالی.*$',
+        r'^.*با توجه به نقش.*$',
+        r'^.*پیشنهادات بازنویسی.*$',
+        r'^.*سناریوی \d.*$',
+        r'^.*عنوان پیشنهادی.*$',
+        r'^.*گزینه [الفب].*$',
+        r'^.*چرا\?\!?\?.*$',
+        r'^.*نکات سئو.*$',
+        r'^.*محتوای پیشنهادی.*$',
+        r'^.*بهینه‌سازی برای جستجو.*$',
+        r'^.*لینک‌سازی داخلی.*$',
+        r'^.*عنوان اصلی \(پیشنهادی.*$',
+        r'^.*تاکید بر فوریت.*$',
+        r'^.*تاکید بر گستردگی.*$',
+        r'^.*ساختار پاراگراف.*$',
+        r'^.*کلمات کلیدی در عنوان.*$',
+        r'^.*قالب‌بندی:.*$',
+        r'^.*خوانایی:.*$',
+        r'^.*first appeared on.*$',
+        r'^.*The post.*appeared.*$',
+        r'^.*بازنویسی می‌کنم.*$',
+        r'^.*تمرکز بر سردبیری.*$',
+        r'^.*مناسب برای تیتر.*$',
+        r'^.*بار دراماتیک.*$',
+        r'^.*مخاطب را به خواندن.*$',
+        r'^.*عنوان:\s*$',
+        r'^.*محتوا:\s*$',
+        r'^.*پیوند اول:.*$',
+        r'^.*اطلاعات تکمیلی:\s*$',
+        r'^.*توضیحات\s*\(Meta Description\).*$',
+        r'^.*در صورتی که خبرگزاری.*$',
+        r'^.*تاریخ انتشار.*در انتهای متن.*$',
+        r'^.*درج واضح منبع.*$',
+        r'^.*استفاده از لیست.*$',
+        r'^.*استفاده از جملات کوتاه.*$',
+        r'^.*عنوان \(Title\).*$',
+        r'^.*عنوان خبری و مستقیم.*$',
+        r'^.*محتوای بازنویسی شده.*$',
+        r'^.*هشدار شدید حقوق بشر.*$',
+        r'^.*عنوان اصلی \(پیشنهادی.*$',
+        r'^.*چرا\?\?.*$',
+        r'^.*گستردگی را نشان.*$',
+        r'^.*احساس فوریت و اهمیت.*$',
+        r'^.*کلمات کلیدی قوی.*$',
+        r'^.*موتورهای جستجو.*مفید.*$',
+        r'^.*کمک می‌کند تا اطلاعات.*$',
+        r'^.*حفظ اعتبار.*$',
+        r'^.*سئو بسیار مهم.*$',
+        r'^.*در یک سناریوی واقعی.*$',
+        r'^.*رعایت شده.*$',
+        r'^.*خبرگزاری در ابتدای.*$',
+        r'^.*اضافه کردن نام.*$',
+        r'^.*توضیح:.*در خروجی بالا.*$',
+        r'^.*در پاراگراف اول پوشش.*$',
+        r'^.*صفحه به صورت ضمنی.*$',
+        r'^.*منابع معتبر.*دیده می‌شود.*$',
+        r'^.*جذابیت یا اطلاعاتی ندارد.*$',
+        r'^.*عبارت به طور معمول.*$',
+        r'^.*حاوی کلمات کلیدی اصلی.*$',
+    ]
+    lines = text.split('\n')
+    clean_lines = []
+    for line in lines:
+        stripped = line.strip()
+        if not stripped:
+            clean_lines.append(line)
+            continue
+        is_noise = False
+        for pattern in noise_patterns:
+            if re.search(pattern, stripped):
+                is_noise = True
+                break
+        if not is_noise:
+            clean_lines.append(line)
+    return '\n'.join(clean_lines)
+
 from typing import List, Dict
 
 from config import (
@@ -205,6 +319,12 @@ class BloggerNewsBot:
                             meta_description = meta_part.strip()
                         except:
                             pass
+                    
+                    # CLEAN AI OUTPUT: Remove Markdown symbols and AI analysis noise
+                    final_fa = strip_ai_noise(final_fa)
+                    final_fa = strip_markdown(final_fa)
+                    article_title = strip_markdown(article_title)
+                    meta_description = strip_markdown(meta_description)
                     
                     # Ensure meta_description is populated as fallback
                     if not meta_description:
