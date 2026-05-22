@@ -3,8 +3,9 @@ import json
 import re
 from datetime import datetime, timedelta
 import sys
+import os
 
-sys.path.append(r"c:\Users\amirs\.gemini\antigravity\scratch\blogger-news-bot")
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 from blogger_poster import BloggerPoster
 
 def fetch_and_calculate_stats():

@@ -4,7 +4,6 @@
 
 - Python 3.10+
 - حساب Google با دسترسی به Blogger
-- (اختیاری) ربات تلگرام برای بررسی اخبار
 
 ---
 
@@ -12,15 +11,14 @@
 
 ```
 blogger-news-bot/
-├── main.py              # اسکریپت اصلی
-├── config.py            # تنظیمات
-├── news_fetcher.py      # دریافت اخبار
-├── ai_processor.py      # پردازش با AI
+├── main.py              # اسکریپت اصلی اجرای ربات
+├── config.py            # تنظیمات و منابع خبری
+├── news_fetcher.py      # دریافت اخبار از RSS و وب‌سایت‌ها
+├── ai_processor.py      # پردازش و بازنویسی خبرها با هوش مصنوعی (Gemini)
 ├── blogger_poster.py    # ارسال به Blogger
-├── telegram_reviewer.py # بررسی با تلگرام
-├── requirements.txt     # وابستگی‌ها
-├── .env                 # متغیرهای محیطی
-└── credentials.json     # اعتبارنامه Google
+├── requirements.txt     # وابستگی‌ها و پیش‌نیازهای پایتون
+├── .env                 # متغیرهای محیطی و سکرت‌ها
+└── credentials.json     # اعتبارنامه Google API
 ```
 
 ---
@@ -53,15 +51,7 @@ pip install -r requirements.txt
 2. API Key بسازید
 3. کلید را در فایل `.env` قرار دهید
 
-### مرحله ۴: تنظیم تلگرام (اختیاری)
-
-1. در تلگرام به [@BotFather](https://t.me/BotFather) پیام دهید
-2. با دستور `/newbot` یک ربات بسازید
-3. توکن ربات را کپی کنید
-4. Chat ID خود را از [@userinfobot](https://t.me/userinfobot) بگیرید
-5. هر دو را در `.env` قرار دهید
-
-### مرحله ۵: ایجاد فایل .env
+### مرحله ۴: ایجاد فایل .env
 
 ```bash
 cp .env.example .env
@@ -73,8 +63,6 @@ cp .env.example .env
 BLOG_ID= ..........
 GOOGLE_CREDENTIALS_FILE=credentials.json
 GEMINI_API_KEY=your_key_here
-TELEGRAM_BOT_TOKEN=your_bot_token
-TELEGRAM_ADMIN_CHAT_ID=your_chat_id
 CHECK_INTERVAL_HOURS=5
 MAX_NEWS_PER_CHECK=10
 ```
@@ -94,18 +82,6 @@ python main.py --once
 ```bash
 python main.py
 ```
-
----
-
-## 📱 نحوه بررسی اخبار
-
-اگر تلگرام تنظیم شده باشد:
-
-1. ربات اخبار جدید را به شما در تلگرام ارسال می‌کند
-2. هر خبر با دو دکمه می‌آید:
-   - **✅ تأیید و انتشار**: خبر در وبلاگ منتشر می‌شود
-   - **❌ رد کردن**: خبر حذف می‌شود
-3. همچنین لینک ویرایش در Blogger موجود است
 
 ---
 
@@ -137,7 +113,7 @@ python main.py
 ### خطای اعتبارنامه Google
 
 - مطمئن شوید `credentials.json` در پوشه پروژه است
-- فایل `token.pickle` را حذف و دوباره اجرا کنید
+- فایل `token.pickle` یا `token_auth_fixed.pickle` را حذف و دوباره اجرا کنید
 
 ### خطای Gemini API
 

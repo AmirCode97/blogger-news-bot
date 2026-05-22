@@ -56,7 +56,6 @@ from config import (
 from news_fetcher import NewsFetcher
 from ai_processor import AIProcessor
 from blogger_poster import BloggerPoster
-from telegram_reviewer import TelegramReviewer
 from duplicate_detector import DuplicateDetector
 
 class BloggerNewsBot:
@@ -65,8 +64,6 @@ class BloggerNewsBot:
         self.duplicate_detector = DuplicateDetector()  # Advanced duplicate detection
         self.ai = None
         self.blogger = None
-        self.telegram = None
-        self.use_telegram_review = False
         self.resolved_images = {}
         
         print("[INFO] Initializing Blogger News Bot...")
@@ -101,14 +98,6 @@ class BloggerNewsBot:
             except Exception as e:
                 print(f"[ERROR] Blogger initialization failed: {e}")
 
-    def _init_telegram(self):
-        if self.use_telegram_review and not self.telegram:
-            try:
-                self.telegram = TelegramReviewer()
-                print("[OK] Telegram Reviewer initialized")
-            except Exception as e:
-                print(f"[ERROR] Telegram initialization failed: {e}")
-
     def fetch_and_process_news(self):
         print("\n" + "="*60)
         print(f"Starting news fetch at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -122,7 +111,7 @@ class BloggerNewsBot:
         
         self._init_ai()
         self._init_blogger()
-        self._init_telegram()
+        
         
         published_count = 0
         posted_titles = []

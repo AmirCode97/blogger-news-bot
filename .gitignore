@@ -2,6 +2,7 @@
 .env
 credentials.json*
 credentials_backup.json
+proxies.json
 token_auth_fixed.pickle
 *.pickle
 *.pem

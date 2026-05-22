@@ -15,13 +15,9 @@ GOOGLE_CREDENTIALS_FILE = os.getenv("GOOGLE_CREDENTIALS_FILE", "credentials.json
 # ==================== Gemini AI ====================
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
-# ==================== Telegram (for review) ====================
-TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "")
-
 # ==================== News Settings ====================
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "6"))
-MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))  # Total: 5+7+7+7+5=31
+MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))
 
 # ==================== Proxy Settings ====================
 # برای دور زدن محدودیت‌های Cloudflare
@@ -29,18 +25,31 @@ USE_PROXY = os.getenv("USE_PROXY", "true").lower() == "true"
 PROXY_URL = os.getenv("PROXY_URL", "")  # Example: http://user:pass@proxy:port
 
 # لیست پروکسی‌های Residential (فرمت: http://user:pass@ip:port)
-FREE_PROXIES = [
-    "http://xvgyvcip:icfmhmtsfla6@142.111.48.253:7030",
-    "http://xvgyvcip:icfmhmtsfla6@23.95.150.145:6114",
-    "http://xvgyvcip:icfmhmtsfla6@198.23.239.134:6540",
-    "http://xvgyvcip:icfmhmtsfla6@107.172.163.27:6543",
-    "http://xvgyvcip:icfmhmtsfla6@198.105.121.200:6462",
-    "http://xvgyvcip:icfmhmtsfla6@64.137.96.74:6641",
-    "http://xvgyvcip:icfmhmtsfla6@84.247.60.125:6095",
-    "http://xvgyvcip:icfmhmtsfla6@216.10.27.159:6837",
-    "http://xvgyvcip:icfmhmtsfla6@23.26.71.145:5628",
-    "http://xvgyvcip:icfmhmtsfla6@23.27.208.120:5830",
-]
+# برای امنیت بیشتر، این لیست از فایل محلی proxies.json یا متغیر محیطی بارگذاری می‌شود تا روی گیت‌هاب عمومی قرار نگیرد.
+import json
+FREE_PROXIES = []
+
+# ۱. تلاش برای بارگذاری از متغیر محیطی
+residential_env = os.getenv("RESIDENTIAL_PROXIES", "")
+if residential_env:
+    try:
+        if residential_env.startswith("["):
+            FREE_PROXIES = json.loads(residential_env)
+        else:
+            FREE_PROXIES = [p.strip() for p in residential_env.split(",") if p.strip()]
+    except Exception as e:
+        print(f"[WARNING] Loading proxies from env failed: {e}")
+
+# ۲. تلاش برای بارگذاری از فایل محلی proxies.json (در صورتی که وجود داشته باشد)
+proxies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "proxies.json")
+if os.path.exists(proxies_file):
+    try:
+        with open(proxies_file, "r", encoding="utf-8") as f:
+            local_proxies = json.load(f)
+            if isinstance(local_proxies, list) and local_proxies:
+                FREE_PROXIES = local_proxies
+    except Exception as e:
+        print(f"[WARNING] Loading proxies from proxies.json failed: {e}")
 
 # ==================== News Sources ====================
 # منابع خبری - شامل ایران اینترنشنال و سایت‌های حقوق بشری
@@ -57,38 +66,7 @@ NEWS_SOURCES = [
         "priority": 1,
         "max_items": 5,
     },
-    # ==================== ایران اینترنشنال - گزارش ویژه (تحلیلی) ====================
-    # غیرفعال - خبرها از RSS فید اصلی می‌آیند
-    {
-        "name": "ایران اینترنشنال - گزارش ویژه",
-        "url": "https://www.iranintl.com/special-report",
-        "type": "scrape",
-        "language": "fa",
-        "enabled": False,  # غیرفعال - RSS فید اصلی تمامی اخبار را شامل می‌شود
-        "category": "گزارش ویژه",
-        "priority": 1,
-        "max_items": 3,
-        "selectors": {}
-    },
-    # ==================== رادیو فردا - غیرفعال ====================
-    {
-        "name": "رادیو فردا",
-        "url": "https://www.radiofarda.com/",
-        "enabled": False,
-        "type": "scrape",
-        "language": "fa",
-        "category": "حقوق بشر",
-        "max_items": 5,
-        "selectors": {}
-    },
-    # ==================== سایت‌های حقوق بشری (غیرفعال شده‌اند) ====================
-    {
-        "name": "کانون دفاع از حقوق بشر در ایران (بشریت)",
-        "url": "https://bashariyat.org/",
-        "enabled": False,  # غیرفعال طبق درخواست
-        "type": "scrape",
-        "max_items": 3,
-    },
+    # ==================== سایت‌های حقوق بشری فعال ====================
     {
         "name": "کانون حقوق بشر ایران",
         "url": "https://iranhrs.org/",
@@ -121,14 +99,6 @@ NEWS_SOURCES = [
             "title": "h2 a, h3 a, .entry-title a",
             "description": ".entry-summary, .excerpt"
         }
-    },
-    # ==================== مرکز اسناد حقوق بشر ایران - غیرفعال ====================
-    {
-        "name": "مرکز اسناد حقوق بشر ایران",
-        "url": "https://persian.iranhumanrights.org/",
-        "enabled": False,  # غیرفعال طبق درخواست
-        "type": "scrape",
-        "max_items": 5,
     },
     # ==================== ناظران حقوق بشر ایران - 5 خبر ====================
     {
