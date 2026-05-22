@@ -67,6 +67,7 @@ jobs:
         env:
           PYTHONUNBUFFERED: 1
           BLOGGER_TOKEN_BASE64: ${{ secrets.BLOGGER_TOKEN_BASE64 }}
+          AI_SYSTEM_PROMPT: ${{ secrets.AI_SYSTEM_PROMPT }}
 
       - name: Save news cache
         uses: actions/cache/save@v4
