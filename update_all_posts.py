@@ -161,11 +161,16 @@ def clean_html_content(content):
             
         # Remove any divs representing source box or tag cloud if bs4 couldn't catch them as footer
         for div in soup.find_all('div'):
+            if div.attrs is None:
+                continue
             style_attr = div.get('style', '')
+            class_attr = div.get('class', [])
             # Check for background:#161616 or background:#1a1a1a or border-left:3px or contains "منبع خبر"
             if 'border-right:3px' in style_attr or 'border-left:3px' in style_attr or 'منبع خبر' in div.get_text():
                 div.decompose()
             elif 'برچسب‌های مرتبط' in div.get_text() and ('border-top' in style_attr or 'margin-top' in style_attr):
+                div.decompose()
+            elif 'related-posts-widget' in class_attr or ('مطالب مرتبط' in div.get_text() and 'border' in style_attr):
                 div.decompose()
                 
         # Extract main image if any (inside figure or img)
@@ -282,7 +287,7 @@ def build_related_posts_widget(related_posts, current_label):
         </div>
         
         <!-- 3-Column Layout -->
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:15px;">
             {"".join(cards_html)}
         </div>
     </div>
