@@ -32,7 +32,11 @@ class AIProcessor:
             new_title = title
             if "===TITLE===" in ai_text:
                 try:
-                    title_part = ai_text.split("===TITLE===")[1].split("===PERSIAN===")[0]
+                    title_part = ai_text.split("===TITLE===")[1]
+                    # Terminate title extraction at the first encountered next section marker
+                    for next_marker in ["===METADESCRIPTION===", "===PERSIAN===", "===TAGS===", "===ENGLISH===", "===GERMAN==="]:
+                        if next_marker in title_part:
+                            title_part = title_part.split(next_marker)[0]
                     new_title = title_part.strip()
                 except:
                     pass
