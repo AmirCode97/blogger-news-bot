@@ -233,19 +233,20 @@ class BloggerNewsBot:
                 worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
                 prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
                 
-                # برچسب «کارگران» فقط برای اخبار هرانا اعمال شود
-                is_herana = 'هرانا' in source_name
+                # Check for Worker-related news across all sources
                 if any(kw in search_text for kw in worker_keywords):
-                    if is_herana:
-                        post_labels.append('کارگران')
+                    post_labels.append('کارگران')
+                
+                # Check for Prisoner/Execution-related news across all sources
+                if any(kw in search_text for kw in prisoner_keywords):
+                    post_labels.append('وضعیت زندانیان')
+                
+                # Fallback to category based on source or general human rights if no specific matches
+                if not post_labels:
+                    if 'ایران اینترنشنال' in source_name:
+                        post_labels.append('بین‌الملل')
                     else:
                         post_labels.append('حقوق بشر')
-                elif any(kw in search_text for kw in prisoner_keywords):
-                    post_labels.append('وضعیت زندانیان')
-                elif 'ایران اینترنشنال' in source_name:
-                    post_labels.append('بین‌الملل')
-                else:
-                    post_labels.append('حقوق بشر')
                 
                 post_labels = list(set(post_labels))
                 
