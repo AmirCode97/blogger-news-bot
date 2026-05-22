@@ -589,10 +589,76 @@ class BloggerNewsBot:
                 schema_script = f'<script type="application/ld+json">{schema_json}</script>'
 
                 # Generate internal category SEO links
+                labels_to_use = post_labels if post_labels else ["حقوق بشر"]
                 tag_links = []
-                for label in post_labels:
+                for label in labels_to_use:
                     tag_links.append(f'<a href="/search/label/{quote(label)}" style="color:#c0392b;text-decoration:none;margin-left:12px;font-weight:bold;transition:color 0.2s;" onmouseover="this.style.color=\'#e74c3c\'" onmouseout="this.style.color=\'#c0392b\'">#{label}</a>')
                 tags_html = " ".join(tag_links)
+
+                # Generate "مطالب مرتبط" (Related Posts) widget dynamically for new post
+                related_widget_html = ""
+                try:
+                    from update_all_posts import extract_first_image, get_persian_date, build_related_posts_widget
+                    
+                    # Fetch recent posts to find matches
+                    response = self.blogger.service.posts().list(
+                        blogId=self.blogger.blog_id,
+                        maxResults=50
+                    ).execute()
+                    items = response.get('items', [])
+                    
+                    candidates = []
+                    for it in items:
+                        lbls = it.get('labels', [])
+                        overlap = len(set(post_labels).intersection(set(lbls)))
+                        candidates.append((overlap, it))
+                        
+                    # Sort by overlap, then publish date
+                    candidates.sort(key=lambda x: (x[0], x[1].get('published', '')), reverse=True)
+                    
+                    selected_posts = []
+                    for score, it in candidates:
+                        it_lbls = it.get('labels', [])
+                        it_lbl = it_lbls[0] if it_lbls else "حقوق بشر"
+                        
+                        it_img = extract_first_image(it.get('content', ''), it_lbl, self.resolved_images)
+                        it_date = get_persian_date(it.get('published', ''))
+                        
+                        selected_posts.append({
+                            'title': it['title'],
+                            'url': it.get('url', ''),
+                            'label': it_lbl,
+                            'image': it_img,
+                            'date': it_date
+                        })
+                        if len(selected_posts) == 3:
+                            break
+                            
+                    # Fill up to 3 if needed
+                    while len(selected_posts) < 3 and items:
+                        for it in items:
+                            if it.get('url') in [p['url'] for p in selected_posts]:
+                                continue
+                            it_lbls = it.get('labels', [])
+                            it_lbl = it_lbls[0] if it_lbls else "حقوق بشر"
+                            it_img = extract_first_image(it.get('content', ''), it_lbl, self.resolved_images)
+                            it_date = get_persian_date(it.get('published', ''))
+                            selected_posts.append({
+                                'title': it['title'],
+                                'url': it.get('url', ''),
+                                'label': it_lbl,
+                                'image': it_img,
+                                'date': it_date
+                            })
+                            if len(selected_posts) == 3:
+                                break
+                        break
+                        
+                    if len(selected_posts) >= 3:
+                        current_post_label = post_labels[0] if post_labels else "حقوق بشر"
+                        related_widget_html = build_related_posts_widget(selected_posts, current_post_label)
+                except Exception as e:
+                    print(f"  [ERROR] Building related posts widget: {e}")
 
                 html_content = f"""
                 <style>.post-featured-image, .post-thumbnail {{ display: none !important; }}</style>
@@ -611,6 +677,9 @@ class BloggerNewsBot:
                         {description_html}
                     </div>
                 </article>
+                
+                <!-- Related Posts Section -->
+                {related_widget_html}
                 
                 <!-- SEO Internal Link Tag Cloud & Source Box -->
                 <footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;direction:rtl;text-align:right;">
