@@ -185,6 +185,21 @@ class NewsFetcher:
                             image_url = enc.get('url')
                             break
 
+                # Extract image from description/summary HTML (common in Iranian RSS feeds like hra-news, iranhr)
+                if not image_url:
+                    raw_desc_html = entry.get('summary', entry.get('description', ''))
+                    if raw_desc_html:
+                        try:
+                            desc_soup = BeautifulSoup(raw_desc_html, 'html.parser')
+                            img_tag = desc_soup.find('img')
+                            if img_tag:
+                                src = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('data-lazy-src')
+                                if src and src.startswith('http') and 'logo' not in src.lower() and 'icon' not in src.lower():
+                                    image_url = src
+                                    safe_print(f"  [RSS-HTML] Found image in description: {src[:60]}")
+                        except Exception as _e:
+                            pass
+
                 news_items.append({
                     'id': news_id,
                     'title': title,
@@ -270,13 +285,15 @@ class NewsFetcher:
             safe_print(f"  [Error] Scrape: {e}")
         return news_items
 
-    def fetch_all_news(self, max_items: int = 10) -> List[Dict]:
+    def fetch_all_news(self, max_items: int = 20) -> List[Dict]:
         all_news = []
+        
         for source in NEWS_SOURCES:
-            if not source.get('enabled', True): continue
-            if source.get('type') == 'rss':
+            source_type = source.get('type', 'rss')
+            
+            if source_type == 'rss':
                 all_news.extend(self.fetch_from_rss(source))
-            else:
+            elif source_type == 'scrape':
                 all_news.extend(self.fetch_from_scrape(source))
         return all_news[:max_items]
 
@@ -599,132 +616,87 @@ class NewsFetcher:
         """
         Fetch a page using Playwright headless browser.
         Used for JS-rendered SPA sites like iranintl.com.
-        Returns dict with 'image' and 'content' keys, or None on failure.
+        Returns dict with 'content' and 'image' keys, or None on failure.
         """
         if not HAS_PLAYWRIGHT:
             return None
         
-        safe_print(f"  [PW] Opening headless browser for {url[:60]}...")
+        result = {'content': '', 'image': None}
         
         try:
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=True)
+                browser = p.chromium.launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox'])
                 context = browser.new_context(
                     user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                    viewport={'width': 1280, 'height': 720}
+                    locale='fa-IR'
                 )
                 page = context.new_page()
                 
-                # Navigate and wait for network to settle
-                page.goto(url, wait_until='networkidle', timeout=timeout)
+                safe_print(f"  [PW] Loading {url[:60]}...")
+                page.goto(url, wait_until='domcontentloaded', timeout=timeout)
                 
-                # Wait a bit for any remaining JS rendering
+                # Wait for content to load
+                try:
+                    page.wait_for_selector('article, .article-body, [class*="article"], [class*="content"]', timeout=8000)
+                except:
+                    pass
+                
+                # Extra wait for dynamic content
                 page.wait_for_timeout(2000)
                 
-                result = {}
-                
-                # Extract og:image from rendered page
-                og_image = page.evaluate('''
-                    () => {
-                        const meta = document.querySelector('meta[property="og:image"]');
-                        return meta ? meta.getAttribute('content') : null;
+                # Extract content
+                content = page.evaluate("""() => {
+                    // Try to find article body
+                    const selectors = [
+                        '[class*="ArticleBody"]',
+                        '[class*="article-body"]',
+                        '[class*="story-body"]',
+                        'article',
+                        '[class*="content"]',
+                    ];
+                    
+                    for (const sel of selectors) {
+                        const el = document.querySelector(sel);
+                        if (el && el.innerText && el.innerText.length > 200) {
+                            return el.innerText.trim();
+                        }
                     }
-                ''')
-                if og_image and not any(bad in og_image.lower() for bad in ['logo', 'placeholder', '.svg', 'icon', 'spacer']):
-                    result['image'] = og_image
-                    safe_print(f"  [PW] og:image found: {og_image[:80]}")
+                    return document.body ? document.body.innerText.trim() : '';
+                }""")
                 
-                # Try to find article image from rendered DOM
-                if not result.get('image'):
-                    article_image = page.evaluate('''
-                        () => {
-                            // Try common article image selectors
-                            const selectors = [
-                                'article img[src]',
-                                '.article-image img[src]',
-                                '.post-image img[src]',
-                                '.featured-image img[src]',
-                                'picture img[src]',
-                                'main img[src]'
-                            ];
-                            for (const sel of selectors) {
-                                const img = document.querySelector(sel);
-                                if (img) {
-                                    const src = img.src || img.getAttribute('src');
-                                    if (src && !src.includes('logo') && !src.includes('icon') && !src.includes('avatar')) {
-                                        return src;
-                                    }
-                                }
-                            }
-                            return null;
+                # Extract image
+                image = page.evaluate("""() => {
+                    // Try og:image meta tag first
+                    const ogImg = document.querySelector('meta[property="og:image"]');
+                    if (ogImg) return ogImg.getAttribute('content');
+                    
+                    // Try article featured image
+                    const selectors = [
+                        '[class*="featured"] img',
+                        '[class*="hero"] img', 
+                        'article img',
+                    ];
+                    for (const sel of selectors) {
+                        const img = document.querySelector(sel);
+                        if (img && img.src && img.src.startsWith('http')) {
+                            return img.src;
                         }
-                    ''')
-                    if article_image and not any(bad in article_image.lower() for bad in ['placeholder', '.svg', 'logo', 'spacer']):
-                        result['image'] = article_image
-                        safe_print(f"  [PW] Article image found: {article_image[:80]}")
-                
-                # Extract article content
-                article_content = page.evaluate('''
-                    () => {
-                        // Strategy 1: Get only <p> text from article content area (excludes header/tools/audio)
-                        const contentDiv = document.querySelector('[class*="ArticleLayout"][class*="content"]')
-                            || document.querySelector('article [class*="content"]');
-                        if (contentDiv) {
-                            const ps = contentDiv.querySelectorAll('p');
-                            if (ps.length > 0) {
-                                const texts = [];
-                                ps.forEach(p => {
-                                    const t = p.innerText.trim();
-                                    if (t.length > 20) texts.push(t);
-                                });
-                                if (texts.length > 0) return texts.join('\n\n');
-                            }
-                        }
-                        
-                        // Strategy 2: Get all <p> from article, skip header elements
-                        const article = document.querySelector('article');
-                        if (article) {
-                            // Remove header and tools sections before extracting
-                            const clone = article.cloneNode(true);
-                            clone.querySelectorAll('header, [class*="tools"], [class*="share"], [class*="audio"], nav, footer').forEach(el => el.remove());
-                            const ps = clone.querySelectorAll('p');
-                            if (ps.length > 0) {
-                                const texts = [];
-                                ps.forEach(p => {
-                                    const t = p.innerText.trim();
-                                    if (t.length > 20) texts.push(t);
-                                });
-                                if (texts.length > 0) return texts.join('\n\n');
-                            }
-                        }
-                        
-                        // Strategy 3: Fallback to generic selectors
-                        const selectors = ['.article-body', '.post-content', 'main'];
-                        for (const sel of selectors) {
-                            const el = document.querySelector(sel);
-                            if (el && el.innerText.length > 100) {
-                                return el.innerText.substring(0, 2000);
-                            }
-                        }
-                        return null;
                     }
-                ''')
-                if article_content:
-                    result['content'] = article_content
+                    return null;
+                }""")
+                
+                result['content'] = content or ''
+                result['image'] = image
                 
                 browser.close()
                 
-                if result:
-                    safe_print(f"  [PW] Success!")
-                    return result
+                if result['content']:
+                    safe_print(f"  [PW] Success: {len(result['content'])} chars")
                 else:
                     safe_print(f"  [PW] No content extracted")
-                    return None
-                
+                    
         except Exception as e:
             safe_print(f"  [PW] Error: {e}")
             return None
-
-
-import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+        
+        return result if result['content'] else None
