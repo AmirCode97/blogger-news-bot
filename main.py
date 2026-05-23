@@ -1,4 +1,4 @@
-
+﻿
 import os
 import sys
 
@@ -53,6 +53,19 @@ def proxy_external_image(url):
     # wsrv.nl is a free, fast global image cache proxy unblocked in Iran
     return f"https://wsrv.nl/?url={quote(url)}"
 
+def validate_image_url(url: str, timeout: int = 6) -> bool:
+    if not url:
+        return False
+    if "jsdelivr.net" in url:
+        return True
+    try:
+        from urllib.parse import quote as _quote
+        check_url = f"https://wsrv.nl/?url={_quote(url)}" if "wsrv.nl" not in url else url
+        resp = requests.head(check_url, timeout=timeout, allow_redirects=True)
+        return resp.status_code == 200
+    except Exception:
+        return False
+
 def strip_markdown(text):
     """Remove all Markdown formatting symbols from text while preserving the actual content."""
     if not text:
@@ -91,65 +104,65 @@ def strip_ai_noise(text):
         return text
     # Patterns that indicate AI analysis/commentary (not actual news content)
     noise_patterns = [
-        r'^.*بسیار عالی.*$',
-        r'^.*با توجه به نقش.*$',
-        r'^.*پیشنهادات بازنویسی.*$',
-        r'^.*سناریوی \d.*$',
-        r'^.*عنوان پیشنهادی.*$',
-        r'^.*گزینه [الفب].*$',
-        r'^.*چرا\?\!?\?.*$',
-        r'^.*نکات سئو.*$',
-        r'^.*محتوای پیشنهادی.*$',
-        r'^.*بهینه‌سازی برای جستجو.*$',
-        r'^.*لینک‌سازی داخلی.*$',
-        r'^.*عنوان اصلی \(پیشنهادی.*$',
-        r'^.*تاکید بر فوریت.*$',
-        r'^.*تاکید بر گستردگی.*$',
-        r'^.*ساختار پاراگراف.*$',
-        r'^.*کلمات کلیدی در عنوان.*$',
-        r'^.*قالب‌بندی:.*$',
-        r'^.*خوانایی:.*$',
+        r'^.*Ø¨Ø³ÛŒØ§Ø± Ø¹Ø§Ù„ÛŒ.*$',
+        r'^.*Ø¨Ø§ ØªÙˆØ¬Ù‡ Ø¨Ù‡ Ù†Ù‚Ø´.*$',
+        r'^.*Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯Ø§Øª Ø¨Ø§Ø²Ù†ÙˆÛŒØ³ÛŒ.*$',
+        r'^.*Ø³Ù†Ø§Ø±ÛŒÙˆÛŒ \d.*$',
+        r'^.*Ø¹Ù†ÙˆØ§Ù† Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ÛŒ.*$',
+        r'^.*Ú¯Ø²ÛŒÙ†Ù‡ [Ø§Ù„ÙØ¨].*$',
+        r'^.*Ú†Ø±Ø§\?\!?\?.*$',
+        r'^.*Ù†Ú©Ø§Øª Ø³Ø¦Ùˆ.*$',
+        r'^.*Ù…Ø­ØªÙˆØ§ÛŒ Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ÛŒ.*$',
+        r'^.*Ø¨Ù‡ÛŒÙ†Ù‡â€ŒØ³Ø§Ø²ÛŒ Ø¨Ø±Ø§ÛŒ Ø¬Ø³ØªØ¬Ùˆ.*$',
+        r'^.*Ù„ÛŒÙ†Ú©â€ŒØ³Ø§Ø²ÛŒ Ø¯Ø§Ø®Ù„ÛŒ.*$',
+        r'^.*Ø¹Ù†ÙˆØ§Ù† Ø§ØµÙ„ÛŒ \(Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ÛŒ.*$',
+        r'^.*ØªØ§Ú©ÛŒØ¯ Ø¨Ø± ÙÙˆØ±ÛŒØª.*$',
+        r'^.*ØªØ§Ú©ÛŒØ¯ Ø¨Ø± Ú¯Ø³ØªØ±Ø¯Ú¯ÛŒ.*$',
+        r'^.*Ø³Ø§Ø®ØªØ§Ø± Ù¾Ø§Ø±Ø§Ú¯Ø±Ø§Ù.*$',
+        r'^.*Ú©Ù„Ù…Ø§Øª Ú©Ù„ÛŒØ¯ÛŒ Ø¯Ø± Ø¹Ù†ÙˆØ§Ù†.*$',
+        r'^.*Ù‚Ø§Ù„Ø¨â€ŒØ¨Ù†Ø¯ÛŒ:.*$',
+        r'^.*Ø®ÙˆØ§Ù†Ø§ÛŒÛŒ:.*$',
         r'^.*first appeared on.*$',
         r'^.*The post.*appeared.*$',
-        r'^.*بازنویسی می‌کنم.*$',
-        r'^.*تمرکز بر سردبیری.*$',
-        r'^.*مناسب برای تیتر.*$',
-        r'^.*بار دراماتیک.*$',
-        r'^.*مخاطب را به خواندن.*$',
-        r'^.*عنوان:\s*$',
-        r'^.*محتوا:\s*$',
-        r'^.*پیوند اول:.*$',
-        r'^.*اطلاعات تکمیلی:\s*$',
-        r'^.*توضیحات\s*\(Meta Description\).*$',
-        r'^.*در صورتی که خبرگزاری.*$',
-        r'^.*تاریخ انتشار.*در انتهای متن.*$',
-        r'^.*درج واضح منبع.*$',
-        r'^.*استفاده از لیست.*$',
-        r'^.*استفاده از جملات کوتاه.*$',
-        r'^.*عنوان \(Title\).*$',
-        r'^.*عنوان خبری و مستقیم.*$',
-        r'^.*محتوای بازنویسی شده.*$',
-        r'^.*هشدار شدید حقوق بشر.*$',
-        r'^.*عنوان اصلی \(پیشنهادی.*$',
-        r'^.*چرا\?\?.*$',
-        r'^.*گستردگی را نشان.*$',
-        r'^.*احساس فوریت و اهمیت.*$',
-        r'^.*کلمات کلیدی قوی.*$',
-        r'^.*موتورهای جستجو.*مفید.*$',
-        r'^.*کمک می‌کند تا اطلاعات.*$',
-        r'^.*حفظ اعتبار.*$',
-        r'^.*سئو بسیار مهم.*$',
-        r'^.*در یک سناریوی واقعی.*$',
-        r'^.*رعایت شده.*$',
-        r'^.*خبرگزاری در ابتدای.*$',
-        r'^.*اضافه کردن نام.*$',
-        r'^.*توضیح:.*در خروجی بالا.*$',
-        r'^.*در پاراگراف اول پوشش.*$',
-        r'^.*صفحه به صورت ضمنی.*$',
-        r'^.*منابع معتبر.*دیده می‌شود.*$',
-        r'^.*جذابیت یا اطلاعاتی ندارد.*$',
-        r'^.*عبارت به طور معمول.*$',
-        r'^.*حاوی کلمات کلیدی اصلی.*$',
+        r'^.*Ø¨Ø§Ø²Ù†ÙˆÛŒØ³ÛŒ Ù…ÛŒâ€ŒÚ©Ù†Ù….*$',
+        r'^.*ØªÙ…Ø±Ú©Ø² Ø¨Ø± Ø³Ø±Ø¯Ø¨ÛŒØ±ÛŒ.*$',
+        r'^.*Ù…Ù†Ø§Ø³Ø¨ Ø¨Ø±Ø§ÛŒ ØªÛŒØªØ±.*$',
+        r'^.*Ø¨Ø§Ø± Ø¯Ø±Ø§Ù…Ø§ØªÛŒÚ©.*$',
+        r'^.*Ù…Ø®Ø§Ø·Ø¨ Ø±Ø§ Ø¨Ù‡ Ø®ÙˆØ§Ù†Ø¯Ù†.*$',
+        r'^.*Ø¹Ù†ÙˆØ§Ù†:\s*$',
+        r'^.*Ù…Ø­ØªÙˆØ§:\s*$',
+        r'^.*Ù¾ÛŒÙˆÙ†Ø¯ Ø§ÙˆÙ„:.*$',
+        r'^.*Ø§Ø·Ù„Ø§Ø¹Ø§Øª ØªÚ©Ù…ÛŒÙ„ÛŒ:\s*$',
+        r'^.*ØªÙˆØ¶ÛŒØ­Ø§Øª\s*\(Meta Description\).*$',
+        r'^.*Ø¯Ø± ØµÙˆØ±ØªÛŒ Ú©Ù‡ Ø®Ø¨Ø±Ú¯Ø²Ø§Ø±ÛŒ.*$',
+        r'^.*ØªØ§Ø±ÛŒØ® Ø§Ù†ØªØ´Ø§Ø±.*Ø¯Ø± Ø§Ù†ØªÙ‡Ø§ÛŒ Ù…ØªÙ†.*$',
+        r'^.*Ø¯Ø±Ø¬ ÙˆØ§Ø¶Ø­ Ù…Ù†Ø¨Ø¹.*$',
+        r'^.*Ø§Ø³ØªÙØ§Ø¯Ù‡ Ø§Ø² Ù„ÛŒØ³Øª.*$',
+        r'^.*Ø§Ø³ØªÙØ§Ø¯Ù‡ Ø§Ø² Ø¬Ù…Ù„Ø§Øª Ú©ÙˆØªØ§Ù‡.*$',
+        r'^.*Ø¹Ù†ÙˆØ§Ù† \(Title\).*$',
+        r'^.*Ø¹Ù†ÙˆØ§Ù† Ø®Ø¨Ø±ÛŒ Ùˆ Ù…Ø³ØªÙ‚ÛŒÙ….*$',
+        r'^.*Ù…Ø­ØªÙˆØ§ÛŒ Ø¨Ø§Ø²Ù†ÙˆÛŒØ³ÛŒ Ø´Ø¯Ù‡.*$',
+        r'^.*Ù‡Ø´Ø¯Ø§Ø± Ø´Ø¯ÛŒØ¯ Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±.*$',
+        r'^.*Ø¹Ù†ÙˆØ§Ù† Ø§ØµÙ„ÛŒ \(Ù¾ÛŒØ´Ù†Ù‡Ø§Ø¯ÛŒ.*$',
+        r'^.*Ú†Ø±Ø§\?\?.*$',
+        r'^.*Ú¯Ø³ØªØ±Ø¯Ú¯ÛŒ Ø±Ø§ Ù†Ø´Ø§Ù†.*$',
+        r'^.*Ø§Ø­Ø³Ø§Ø³ ÙÙˆØ±ÛŒØª Ùˆ Ø§Ù‡Ù…ÛŒØª.*$',
+        r'^.*Ú©Ù„Ù…Ø§Øª Ú©Ù„ÛŒØ¯ÛŒ Ù‚ÙˆÛŒ.*$',
+        r'^.*Ù…ÙˆØªÙˆØ±Ù‡Ø§ÛŒ Ø¬Ø³ØªØ¬Ùˆ.*Ù…ÙÛŒØ¯.*$',
+        r'^.*Ú©Ù…Ú© Ù…ÛŒâ€ŒÚ©Ù†Ø¯ ØªØ§ Ø§Ø·Ù„Ø§Ø¹Ø§Øª.*$',
+        r'^.*Ø­ÙØ¸ Ø§Ø¹ØªØ¨Ø§Ø±.*$',
+        r'^.*Ø³Ø¦Ùˆ Ø¨Ø³ÛŒØ§Ø± Ù…Ù‡Ù….*$',
+        r'^.*Ø¯Ø± ÛŒÚ© Ø³Ù†Ø§Ø±ÛŒÙˆÛŒ ÙˆØ§Ù‚Ø¹ÛŒ.*$',
+        r'^.*Ø±Ø¹Ø§ÛŒØª Ø´Ø¯Ù‡.*$',
+        r'^.*Ø®Ø¨Ø±Ú¯Ø²Ø§Ø±ÛŒ Ø¯Ø± Ø§Ø¨ØªØ¯Ø§ÛŒ.*$',
+        r'^.*Ø§Ø¶Ø§ÙÙ‡ Ú©Ø±Ø¯Ù† Ù†Ø§Ù….*$',
+        r'^.*ØªÙˆØ¶ÛŒØ­:.*Ø¯Ø± Ø®Ø±ÙˆØ¬ÛŒ Ø¨Ø§Ù„Ø§.*$',
+        r'^.*Ø¯Ø± Ù¾Ø§Ø±Ø§Ú¯Ø±Ø§Ù Ø§ÙˆÙ„ Ù¾ÙˆØ´Ø´.*$',
+        r'^.*ØµÙØ­Ù‡ Ø¨Ù‡ ØµÙˆØ±Øª Ø¶Ù…Ù†ÛŒ.*$',
+        r'^.*Ù…Ù†Ø§Ø¨Ø¹ Ù…Ø¹ØªØ¨Ø±.*Ø¯ÛŒØ¯Ù‡ Ù…ÛŒâ€ŒØ´ÙˆØ¯.*$',
+        r'^.*Ø¬Ø°Ø§Ø¨ÛŒØª ÛŒØ§ Ø§Ø·Ù„Ø§Ø¹Ø§ØªÛŒ Ù†Ø¯Ø§Ø±Ø¯.*$',
+        r'^.*Ø¹Ø¨Ø§Ø±Øª Ø¨Ù‡ Ø·ÙˆØ± Ù…Ø¹Ù…ÙˆÙ„.*$',
+        r'^.*Ø­Ø§ÙˆÛŒ Ú©Ù„Ù…Ø§Øª Ú©Ù„ÛŒØ¯ÛŒ Ø§ØµÙ„ÛŒ.*$',
     ]
     lines = text.split('\n')
     clean_lines = []
@@ -281,7 +294,7 @@ class BloggerNewsBot:
                 # If still no content, use AI to GENERATE content from title
                 if not description or len(description) < 50:
                     print(f"  [Warning] No content found, asking AI to generate from title...")
-                    description = f"[این خبر نیاز به تحلیل دارد: {article_title}]"
+                    description = f"[Ø§ÛŒÙ† Ø®Ø¨Ø± Ù†ÛŒØ§Ø² Ø¨Ù‡ ØªØ­Ù„ÛŒÙ„ Ø¯Ø§Ø±Ø¯: {article_title}]"
 
                 # Call AI for Multi-language processing
                 # This also fixes content if it was minimal
@@ -357,44 +370,44 @@ class BloggerNewsBot:
                 # 1. Smart Label Classification
                 # ==========================================
                 post_labels = []
-                worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
-                prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
+                worker_keywords = ['Ú©Ø§Ø±Ú¯Ø±', 'Ú©Ø§Ø±Ú¯Ø±Ø§Ù†', 'Ø§Ø¹ØªØµØ§Ø¨', 'Ø­Ù‚ÙˆÙ‚ Ù…Ø¹ÙˆÙ‚Ù‡', 'Ø³Ù†Ø¯ÛŒÚ©Ø§', 'Ú©ÙˆÙ„Ø¨Ø±', 'Ø³ÙˆØ®Øªâ€ŒØ¨Ø±', 'Ø§Ø®Ø±Ø§Ø¬', 'Ø¨Ø§Ø²Ù†Ø´Ø³ØªÚ¯Ø§Ù†', 'Ø­Ø¯Ø§Ù‚Ù„ Ø¯Ø³ØªÙ…Ø²Ø¯', 'Ø­ÙˆØ§Ø¯Ø« Ú©Ø§Ø±']
+                prisoner_keywords = ['Ø²Ù†Ø¯Ø§Ù†', 'Ø¨Ø§Ø²Ø¯Ø§Ø´Øª', 'Ø§ÙˆÛŒÙ†', 'Ø§Ø¹Ø¯Ø§Ù…', 'Ø­Ø¨Ø³', 'ÙˆØ«ÛŒÙ‚Ù‡', 'Ø³Ù„ÙˆÙ„ Ø§Ù†ÙØ±Ø§Ø¯ÛŒ', 'Ø§Ø¹ØªØµØ§Ø¨ ØºØ°Ø§', 'Ø´Ú©Ù†Ø¬Ù‡', 'Ø¨Ù†Ø¯ Ù†Ø³ÙˆØ§Ù†', 'Ø²Ù†Ø¯Ø§Ù†ÛŒ Ø³ÛŒØ§Ø³ÛŒ']
                 
                 # Check for Worker-related news across all sources
                 if any(kw in search_text for kw in worker_keywords):
-                    post_labels.append('کارگران')
+                    post_labels.append('Ú©Ø§Ø±Ú¯Ø±Ø§Ù†')
                 
                 # Check for Prisoner/Execution-related news across all sources
                 if any(kw in search_text for kw in prisoner_keywords):
-                    post_labels.append('وضعیت زندانیان')
+                    post_labels.append('ÙˆØ¶Ø¹ÛŒØª Ø²Ù†Ø¯Ø§Ù†ÛŒØ§Ù†')
                 
                 # Fallback to category based on source or general human rights if no specific matches
                 if not post_labels:
-                    if 'ایران اینترنشنال' in source_name:
-                        post_labels.append('بین‌الملل')
+                    if 'Ø§ÛŒØ±Ø§Ù† Ø§ÛŒÙ†ØªØ±Ù†Ø´Ù†Ø§Ù„' in source_name:
+                        post_labels.append('Ø¨ÛŒÙ†â€ŒØ§Ù„Ù…Ù„Ù„')
                     else:
-                        post_labels.append('حقوق بشر')
+                        post_labels.append('Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±')
                 
                 post_labels = list(set(post_labels))
                 
                 # ==========================================
                 # 2. Cinematic Image Override for Workers
                 # ==========================================
-                if 'کارگران' in post_labels:
+                if 'Ú©Ø§Ø±Ú¯Ø±Ø§Ù†' in post_labels:
                     import random
                     
-                    # دسته‌بندی عکس‌ها بر اساس موضوع خبر
+                    # Ø¯Ø³ØªÙ‡â€ŒØ¨Ù†Ø¯ÛŒ Ø¹Ú©Ø³â€ŒÙ‡Ø§ Ø¨Ø± Ø§Ø³Ø§Ø³ Ù…ÙˆØ¶ÙˆØ¹ Ø®Ø¨Ø±
                     worker_image_categories = {
-                        'protest': {  # تجمع و اعتراض صنفی
-                            'keywords': ['تجمع', 'اعتراض', 'تحصن', 'اعتصاب', 'صنفی', 'راهپیمایی', 'تظاهرات'],
+                        'protest': {  # ØªØ¬Ù…Ø¹ Ùˆ Ø§Ø¹ØªØ±Ø§Ø¶ ØµÙ†ÙÛŒ
+                            'keywords': ['ØªØ¬Ù…Ø¹', 'Ø§Ø¹ØªØ±Ø§Ø¶', 'ØªØ­ØµÙ†', 'Ø§Ø¹ØªØµØ§Ø¨', 'ØµÙ†ÙÛŒ', 'Ø±Ø§Ù‡Ù¾ÛŒÙ…Ø§ÛŒÛŒ', 'ØªØ¸Ø§Ù‡Ø±Ø§Øª'],
                             'images': [
                                 "xvVwjvWLG5ADOxW4EIgY",
                                 "7kyrBNbl4c2KS8vircgB",
                                 "3XhhBrieVpJFtVtLookz",
                             ]
                         },
-                        'safety': {  # فقدان ایمنی کار
-                            'keywords': ['ایمنی', 'حادثه', 'حوادث کار', 'سقوط', 'انفجار', 'آتش‌سوزی'],
+                        'safety': {  # ÙÙ‚Ø¯Ø§Ù† Ø§ÛŒÙ…Ù†ÛŒ Ú©Ø§Ø±
+                            'keywords': ['Ø§ÛŒÙ…Ù†ÛŒ', 'Ø­Ø§Ø¯Ø«Ù‡', 'Ø­ÙˆØ§Ø¯Ø« Ú©Ø§Ø±', 'Ø³Ù‚ÙˆØ·', 'Ø§Ù†ÙØ¬Ø§Ø±', 'Ø¢ØªØ´â€ŒØ³ÙˆØ²ÛŒ'],
                             'images': [
                                 "dxiHs3AT6IjhOmWZTBaR",
                                 "tFZVcFQcUPRmG9hAknot",
@@ -409,8 +422,8 @@ class BloggerNewsBot:
                                 "fKwKc5NHmDRZbalTqqgT",
                             ]
                         },
-                        'wages': {  # معوقات مزدی / مطالبات مزدی / مشکلات بیمه
-                            'keywords': ['معوقات', 'مزدی', 'دستمزد', 'حقوق', 'بیمه', 'معیشت', 'مطالبات', 'حق‌بیمه'],
+                        'wages': {  # Ù…Ø¹ÙˆÙ‚Ø§Øª Ù…Ø²Ø¯ÛŒ / Ù…Ø·Ø§Ù„Ø¨Ø§Øª Ù…Ø²Ø¯ÛŒ / Ù…Ø´Ú©Ù„Ø§Øª Ø¨ÛŒÙ…Ù‡
+                            'keywords': ['Ù…Ø¹ÙˆÙ‚Ø§Øª', 'Ù…Ø²Ø¯ÛŒ', 'Ø¯Ø³ØªÙ…Ø²Ø¯', 'Ø­Ù‚ÙˆÙ‚', 'Ø¨ÛŒÙ…Ù‡', 'Ù…Ø¹ÛŒØ´Øª', 'Ù…Ø·Ø§Ù„Ø¨Ø§Øª', 'Ø­Ù‚â€ŒØ¨ÛŒÙ…Ù‡'],
                             'images': [
                                 "rnZiSzeEEjpFAtw5Ozvw",
                                 "Fyv9ksReWCkwEan3OozA",
@@ -430,8 +443,8 @@ class BloggerNewsBot:
                                 "7oesnmsu0RfrE2W7Lk0C",
                             ]
                         },
-                        'unemployment': {  # بیکاری و تعدیل
-                            'keywords': ['بیکاری', 'تعدیل', 'اخراج', 'بازنشسته', 'بازنشستگان', 'تعطیل'],
+                        'unemployment': {  # Ø¨ÛŒÚ©Ø§Ø±ÛŒ Ùˆ ØªØ¹Ø¯ÛŒÙ„
+                            'keywords': ['Ø¨ÛŒÚ©Ø§Ø±ÛŒ', 'ØªØ¹Ø¯ÛŒÙ„', 'Ø§Ø®Ø±Ø§Ø¬', 'Ø¨Ø§Ø²Ù†Ø´Ø³ØªÙ‡', 'Ø¨Ø§Ø²Ù†Ø´Ø³ØªÚ¯Ø§Ù†', 'ØªØ¹Ø·ÛŒÙ„'],
                             'images': [
                                 "Fyv9ksReWCkwEan3OozA",
                                 "1f0FOBPjZ2bBjqiprIkp",
@@ -445,16 +458,16 @@ class BloggerNewsBot:
                                 "43j4MvIyLLHNRaUR4xyK",
                             ]
                         },
-                        'statistics': {  # آمار و گزارش
-                            'keywords': ['آمار', 'گزارش', 'بررسی', 'وضعیت'],
+                        'statistics': {  # Ø¢Ù…Ø§Ø± Ùˆ Ú¯Ø²Ø§Ø±Ø´
+                            'keywords': ['Ø¢Ù…Ø§Ø±', 'Ú¯Ø²Ø§Ø±Ø´', 'Ø¨Ø±Ø±Ø³ÛŒ', 'ÙˆØ¶Ø¹ÛŒØª'],
                             'images': [
                                 "HHk1ato9bgvQfZFgfsFF",
                                 "7oesnmsu0RfrE2W7Lk0C",
                                 "K6pWnYcCIIlNtoh4cDKF",
                             ]
                         },
-                        'injury': {  # مصدومیت و مرگ کارگر
-                            'keywords': ['مصدومیت', 'مرگ', 'جان باختن', 'فوت', 'کشته', 'مجروح', 'زخمی'],
+                        'injury': {  # Ù…ØµØ¯ÙˆÙ…ÛŒØª Ùˆ Ù…Ø±Ú¯ Ú©Ø§Ø±Ú¯Ø±
+                            'keywords': ['Ù…ØµØ¯ÙˆÙ…ÛŒØª', 'Ù…Ø±Ú¯', 'Ø¬Ø§Ù† Ø¨Ø§Ø®ØªÙ†', 'ÙÙˆØª', 'Ú©Ø´ØªÙ‡', 'Ù…Ø¬Ø±ÙˆØ­', 'Ø²Ø®Ù…ÛŒ'],
                             'images': [
                                 "FexfZ6Z9FojX7y6kMfRH",
                                 "lbyYxUafXnxPCDT1DTul",
@@ -468,7 +481,7 @@ class BloggerNewsBot:
                                 "gEuvCQ8HVFQPT74zJSaH",
                             ]
                         },
-                        'construction': {  # ساختمانی و عمرانی (پیش‌فرض)
+                        'construction': {  # Ø³Ø§Ø®ØªÙ…Ø§Ù†ÛŒ Ùˆ Ø¹Ù…Ø±Ø§Ù†ÛŒ (Ù¾ÛŒØ´â€ŒÙØ±Ø¶)
                             'keywords': [],
                             'images': [
                                 "zwDqgNNNtfGzNZod4M2M",
@@ -480,8 +493,8 @@ class BloggerNewsBot:
                         },
                     }
                     
-                    # تشخیص هوشمند موضوع خبر
-                    selected_category = 'construction'  # پیش‌فرض
+                    # ØªØ´Ø®ÛŒØµ Ù‡ÙˆØ´Ù…Ù†Ø¯ Ù…ÙˆØ¶ÙˆØ¹ Ø®Ø¨Ø±
+                    selected_category = 'construction'  # Ù¾ÛŒØ´â€ŒÙØ±Ø¶
                     for cat_name, cat_data in worker_image_categories.items():
                         if any(kw in search_text for kw in cat_data['keywords']):
                             selected_category = cat_name
@@ -490,7 +503,7 @@ class BloggerNewsBot:
                     selected_id = random.choice(worker_image_categories[selected_category]['images'])
                     filename = self.resolved_images.get(selected_id, f"{selected_id}.png")
                     main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
-                    print(f"  [Image Override] Topic: {selected_category} → stock photo selected: {main_image}")
+                    print(f"  [Image Override] Topic: {selected_category} â†’ stock photo selected: {main_image}")
 
                 # ==========================================
                 # 2b. Category Fallbacks for other labels if no image is found
@@ -500,17 +513,17 @@ class BloggerNewsBot:
                     print(f"  [Image Fallback] No image found. Selecting category-specific stock photo...")
                     
                     category_fallbacks = {
-                        'وضعیت زندانیان': [
+                        'ÙˆØ¶Ø¹ÛŒØª Ø²Ù†Ø¯Ø§Ù†ÛŒØ§Ù†': [
                             "FexfZ6Z9FojX7y6kMfRH", "lbyYxUafXnxPCDT1DTul", "opBNOv604Cccl4DLBh33",
                             "djBWFeRxBpG2ZR4NgCR1", "z5zgF2E9yC3E3EHwViDu", "P67wCQolqce71iGfEw0g",
                             "bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO",
                             "gEuvCQ8HVFQPT74zJSaH"
                         ],
-                        'حقوق بشر': [
+                        'Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±': [
                             "xvVwjvWLG5ADOxW4EIgY", "7kyrBNbl4c2KS8vircgB", "3XhhBrieVpJFtVtLookz",
                             "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
                         ],
-                        'بین‌الملل': [
+                        'Ø¨ÛŒÙ†â€ŒØ§Ù„Ù…Ù„Ù„': [
                             "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
                         ]
                     }
@@ -589,13 +602,13 @@ class BloggerNewsBot:
                 schema_script = f'<script type="application/ld+json">{schema_json}</script>'
 
                 # Generate internal category SEO links
-                labels_to_use = post_labels if post_labels else ["حقوق بشر"]
+                labels_to_use = post_labels if post_labels else ["Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±"]
                 tag_links = []
                 for label in labels_to_use:
                     tag_links.append(f'<a href="/search/label/{quote(label)}" style="color:#c0392b;text-decoration:none;margin-left:12px;font-weight:bold;transition:color 0.2s;" onmouseover="this.style.color=\'#e74c3c\'" onmouseout="this.style.color=\'#c0392b\'">#{label}</a>')
                 tags_html = " ".join(tag_links)
 
-                # Generate "مطالب مرتبط" (Related Posts) widget dynamically for new post
+                # Generate "Ù…Ø·Ø§Ù„Ø¨ Ù…Ø±ØªØ¨Ø·" (Related Posts) widget dynamically for new post
                 related_widget_html = ""
                 try:
                     from update_all_posts import extract_first_image, get_persian_date, build_related_posts_widget
@@ -619,7 +632,7 @@ class BloggerNewsBot:
                     selected_posts = []
                     for score, it in candidates:
                         it_lbls = it.get('labels', [])
-                        it_lbl = it_lbls[0] if it_lbls else "حقوق بشر"
+                        it_lbl = it_lbls[0] if it_lbls else "Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±"
                         
                         it_img = extract_first_image(it.get('content', ''), it_lbl, self.resolved_images)
                         it_date = get_persian_date(it.get('published', ''))
@@ -640,7 +653,7 @@ class BloggerNewsBot:
                             if it.get('url') in [p['url'] for p in selected_posts]:
                                 continue
                             it_lbls = it.get('labels', [])
-                            it_lbl = it_lbls[0] if it_lbls else "حقوق بشر"
+                            it_lbl = it_lbls[0] if it_lbls else "Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±"
                             it_img = extract_first_image(it.get('content', ''), it_lbl, self.resolved_images)
                             it_date = get_persian_date(it.get('published', ''))
                             selected_posts.append({
@@ -655,7 +668,7 @@ class BloggerNewsBot:
                         break
                         
                     if len(selected_posts) >= 3:
-                        current_post_label = post_labels[0] if post_labels else "حقوق بشر"
+                        current_post_label = post_labels[0] if post_labels else "Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±"
                         related_widget_html = build_related_posts_widget(selected_posts, current_post_label)
                 except Exception as e:
                     print(f"  [ERROR] Building related posts widget: {e}")
@@ -683,11 +696,11 @@ class BloggerNewsBot:
                 <!-- SEO Internal Link Tag Cloud & Source Box -->
                 <footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;direction:rtl;text-align:right;">
                     <div style="font-size:14px;color:#888;margin-bottom:10px;">
-                        <span style="color:#aaa;margin-left:8px;font-weight:bold;">برچسب‌های مرتبط:</span>
+                        <span style="color:#aaa;margin-left:8px;font-weight:bold;">Ø¨Ø±Ú†Ø³Ø¨â€ŒÙ‡Ø§ÛŒ Ù…Ø±ØªØ¨Ø·:</span>
                         {tags_html}
                     </div>
                     <div style="background:#161616;padding:10px 20px;border-radius:8px;border-right:3px solid #c0392b;font-weight:bold;color:#ddd;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,0.4);margin-bottom:10px;">
-                        <span style="color:#c0392b;margin-left:8px;">منبع خبر:</span> iranpolnews
+                        <span style="color:#c0392b;margin-left:8px;">Ù…Ù†Ø¨Ø¹ Ø®Ø¨Ø±:</span> iranpolnews
                     </div>
                 </footer>
                 """
@@ -761,3 +774,5 @@ def main():
 if __name__ == "__main__":
     import sys
     main()
+
+
