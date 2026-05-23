@@ -1,4 +1,42 @@
-﻿
+
+import os
+import sys
+
+# Reconfigure standard output and error streams to UTF-8 to prevent 'charmap' encoding errors on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
+import re
+import time
+import schedule
+from datetime import datetime, timedelta
+
+def deduplicate_text(text):
+    """Detect and remove duplicated text content.
+    If the text contains the same content repeated twice, keep only the first occurrence."""
+    if not text or len(text) < 50:
+        return text
+    
+    paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+    unique_paragraphs = []
+    seen = set()
+    
+    for p in paragraphs:
+        # Simplify paragraph for comparison
+        clean_p = re.sub(r'[^\w\s]', '', p).strip()
+        words = clean_p.split()
+        
+        # We need at least 5 words to consider it a deduplicable sentence
+        if len(words) < 5:
+            unique_paragraphs.append(p)
+            continue
+            
+        fingerprint = " ".join(words[:40]) # check up to 40 words
+        
+        if fingerprint not in seen:
+            seen.add(fingerprint)
 import os
 import sys
 
@@ -43,20 +81,65 @@ def deduplicate_text(text):
 
     return "\n\n".join(unique_paragraphs)
 
-def proxy_external_image(url):
+def download_and_optimize_image(url: str) -> str:
+    """
+    Downloads an image from the given URL, resizes it, converts to WebP,
+    saves it to the local 'images' directory, and returns the raw GitHub URL.
+    """
     if not url:
         return ""
-    # Already on CDN or data URL or empty
-    if "jsdelivr.net" in url or url.startswith("data:"):
+    if "jsdelivr.net" in url or "raw.githubusercontent.com" in url or url.startswith("data:"):
         return url
-    from urllib.parse import quote
-    # wsrv.nl is a free, fast global image cache proxy unblocked in Iran
-    return f"https://wsrv.nl/?url={quote(url)}"
+        
+    try:
+        import os
+        import hashlib
+        
+        # Generate a unique filename based on the URL hash
+        url_hash = hashlib.md5(url.encode('utf-8')).hexdigest()[:16]
+        filename = f"{url_hash}.webp"
+        filepath = os.path.join("images", filename)
+        
+        # If already downloaded, return the raw GitHub URL
+        github_cdn_url = f"https://raw.githubusercontent.com/AmirCode97/blogger-news-bot/main/images/{filename}"
+        if os.path.exists(filepath):
+            return github_cdn_url
+            
+        import requests
+        from PIL import Image
+        from io import BytesIO
+        
+        print(f"  [Image Download] Fetching {url[:60]}...")
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Referer': 'https://www.google.com/'
+        }
+        resp = requests.get(url, headers=headers, timeout=15)
+        resp.raise_for_status()
+        
+        img = Image.open(BytesIO(resp.content))
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
+            
+        if img.width > 800:
+            ratio = 800.0 / float(img.width)
+            new_height = int(float(img.height) * float(ratio))
+            img = img.resize((800, new_height), Image.Resampling.LANCZOS)
+            
+        os.makedirs("images", exist_ok=True)
+        img.save(filepath, format="WEBP", quality=75)
+        print(f"  [Image Saved] Saved optimized image to {filepath}")
+        
+        return github_cdn_url
+    except Exception as e:
+        print(f"  [Image Error] Failed to download/optimize image: {e}")
+        from urllib.parse import quote
+        return f"https://wsrv.nl/?url={quote(url)}"
 
 def validate_image_url(url: str, timeout: int = 6) -> bool:
     if not url:
         return False
-    if "jsdelivr.net" in url:
+    if "jsdelivr.net" in url or "raw.githubusercontent.com" in url:
         return True
     try:
         from urllib.parse import quote as _quote
@@ -364,50 +447,51 @@ class BloggerNewsBot:
                 print(f"  [Content] {len(description)} characters")
                 
                 source_name = item.get('source', 'Source')
+
                 search_text = (article_title + " " + description).lower()
                 
                 # ==========================================
                 # 1. Smart Label Classification
                 # ==========================================
                 post_labels = []
-                worker_keywords = ['Ú©Ø§Ø±Ú¯Ø±', 'Ú©Ø§Ø±Ú¯Ø±Ø§Ù†', 'Ø§Ø¹ØªØµØ§Ø¨', 'Ø­Ù‚ÙˆÙ‚ Ù…Ø¹ÙˆÙ‚Ù‡', 'Ø³Ù†Ø¯ÛŒÚ©Ø§', 'Ú©ÙˆÙ„Ø¨Ø±', 'Ø³ÙˆØ®Øªâ€ŒØ¨Ø±', 'Ø§Ø®Ø±Ø§Ø¬', 'Ø¨Ø§Ø²Ù†Ø´Ø³ØªÚ¯Ø§Ù†', 'Ø­Ø¯Ø§Ù‚Ù„ Ø¯Ø³ØªÙ…Ø²Ø¯', 'Ø­ÙˆØ§Ø¯Ø« Ú©Ø§Ø±']
-                prisoner_keywords = ['Ø²Ù†Ø¯Ø§Ù†', 'Ø¨Ø§Ø²Ø¯Ø§Ø´Øª', 'Ø§ÙˆÛŒÙ†', 'Ø§Ø¹Ø¯Ø§Ù…', 'Ø­Ø¨Ø³', 'ÙˆØ«ÛŒÙ‚Ù‡', 'Ø³Ù„ÙˆÙ„ Ø§Ù†ÙØ±Ø§Ø¯ÛŒ', 'Ø§Ø¹ØªØµØ§Ø¨ ØºØ°Ø§', 'Ø´Ú©Ù†Ø¬Ù‡', 'Ø¨Ù†Ø¯ Ù†Ø³ÙˆØ§Ù†', 'Ø²Ù†Ø¯Ø§Ù†ÛŒ Ø³ÛŒØ§Ø³ÛŒ']
+                worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
+                prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
                 
                 # Check for Worker-related news across all sources
                 if any(kw in search_text for kw in worker_keywords):
-                    post_labels.append('Ú©Ø§Ø±Ú¯Ø±Ø§Ù†')
+                    post_labels.append('کارگران')
                 
                 # Check for Prisoner/Execution-related news across all sources
                 if any(kw in search_text for kw in prisoner_keywords):
-                    post_labels.append('ÙˆØ¶Ø¹ÛŒØª Ø²Ù†Ø¯Ø§Ù†ÛŒØ§Ù†')
+                    post_labels.append('وضعیت زندانیان')
                 
                 # Fallback to category based on source or general human rights if no specific matches
                 if not post_labels:
-                    if 'Ø§ÛŒØ±Ø§Ù† Ø§ÛŒÙ†ØªØ±Ù†Ø´Ù†Ø§Ù„' in source_name:
-                        post_labels.append('Ø¨ÛŒÙ†â€ŒØ§Ù„Ù…Ù„Ù„')
+                    if 'ایران اینترنشنال' in source_name:
+                        post_labels.append('بین‌الملل')
                     else:
-                        post_labels.append('Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±')
+                        post_labels.append('حقوق بشر')
                 
                 post_labels = list(set(post_labels))
                 
                 # ==========================================
                 # 2. Cinematic Image Override for Workers
                 # ==========================================
-                if 'Ú©Ø§Ø±Ú¯Ø±Ø§Ù†' in post_labels:
+                if 'کارگران' in post_labels:
                     import random
                     
-                    # Ø¯Ø³ØªÙ‡â€ŒØ¨Ù†Ø¯ÛŒ Ø¹Ú©Ø³â€ŒÙ‡Ø§ Ø¨Ø± Ø§Ø³Ø§Ø³ Ù…ÙˆØ¶ÙˆØ¹ Ø®Ø¨Ø±
+                    # دسته‌بندی عکس‌ها بر اساس موضوع خبر
                     worker_image_categories = {
-                        'protest': {  # ØªØ¬Ù…Ø¹ Ùˆ Ø§Ø¹ØªØ±Ø§Ø¶ ØµÙ†ÙÛŒ
-                            'keywords': ['ØªØ¬Ù…Ø¹', 'Ø§Ø¹ØªØ±Ø§Ø¶', 'ØªØ­ØµÙ†', 'Ø§Ø¹ØªØµØ§Ø¨', 'ØµÙ†ÙÛŒ', 'Ø±Ø§Ù‡Ù¾ÛŒÙ…Ø§ÛŒÛŒ', 'ØªØ¸Ø§Ù‡Ø±Ø§Øª'],
+                        'protest': {  # تجمع و اعتراض صنفی
+                            'keywords': ['تجمع', 'اعتراض', 'تحصن', 'اعتصاب', 'صنفی', 'راهپیمایی', 'تظاهرات'],
                             'images': [
                                 "xvVwjvWLG5ADOxW4EIgY",
                                 "7kyrBNbl4c2KS8vircgB",
                                 "3XhhBrieVpJFtVtLookz",
                             ]
                         },
-                        'safety': {  # ÙÙ‚Ø¯Ø§Ù† Ø§ÛŒÙ…Ù†ÛŒ Ú©Ø§Ø±
-                            'keywords': ['Ø§ÛŒÙ…Ù†ÛŒ', 'Ø­Ø§Ø¯Ø«Ù‡', 'Ø­ÙˆØ§Ø¯Ø« Ú©Ø§Ø±', 'Ø³Ù‚ÙˆØ·', 'Ø§Ù†ÙØ¬Ø§Ø±', 'Ø¢ØªØ´â€ŒØ³ÙˆØ²ÛŒ'],
+                        'safety': {  # فقدان ایمنی کار
+                            'keywords': ['ایمنی', 'حادثه', 'حوادث کار', 'سقوط', 'انفجار', 'آتش‌سوزی'],
                             'images': [
                                 "dxiHs3AT6IjhOmWZTBaR",
                                 "tFZVcFQcUPRmG9hAknot",
@@ -422,8 +506,8 @@ class BloggerNewsBot:
                                 "fKwKc5NHmDRZbalTqqgT",
                             ]
                         },
-                        'wages': {  # Ù…Ø¹ÙˆÙ‚Ø§Øª Ù…Ø²Ø¯ÛŒ / Ù…Ø·Ø§Ù„Ø¨Ø§Øª Ù…Ø²Ø¯ÛŒ / Ù…Ø´Ú©Ù„Ø§Øª Ø¨ÛŒÙ…Ù‡
-                            'keywords': ['Ù…Ø¹ÙˆÙ‚Ø§Øª', 'Ù…Ø²Ø¯ÛŒ', 'Ø¯Ø³ØªÙ…Ø²Ø¯', 'Ø­Ù‚ÙˆÙ‚', 'Ø¨ÛŒÙ…Ù‡', 'Ù…Ø¹ÛŒØ´Øª', 'Ù…Ø·Ø§Ù„Ø¨Ø§Øª', 'Ø­Ù‚â€ŒØ¨ÛŒÙ…Ù‡'],
+                        'wages': {  # معوقات مزدی / مطالبات مزدی / مشکلات بیمه
+                            'keywords': ['معوقات', 'مزدی', 'دستمزد', 'حقوق', 'بیمه', 'معیشت', 'مطالبات', 'حق‌بیمه'],
                             'images': [
                                 "rnZiSzeEEjpFAtw5Ozvw",
                                 "Fyv9ksReWCkwEan3OozA",
@@ -443,8 +527,8 @@ class BloggerNewsBot:
                                 "7oesnmsu0RfrE2W7Lk0C",
                             ]
                         },
-                        'unemployment': {  # Ø¨ÛŒÚ©Ø§Ø±ÛŒ Ùˆ ØªØ¹Ø¯ÛŒÙ„
-                            'keywords': ['Ø¨ÛŒÚ©Ø§Ø±ÛŒ', 'ØªØ¹Ø¯ÛŒÙ„', 'Ø§Ø®Ø±Ø§Ø¬', 'Ø¨Ø§Ø²Ù†Ø´Ø³ØªÙ‡', 'Ø¨Ø§Ø²Ù†Ø´Ø³ØªÚ¯Ø§Ù†', 'ØªØ¹Ø·ÛŒÙ„'],
+                        'unemployment': {  # بیکاری و تعدیل
+                            'keywords': ['بیکاری', 'تعدیل', 'اخراج', 'بازنشسته', 'بازنشستگان', 'تعطیل'],
                             'images': [
                                 "Fyv9ksReWCkwEan3OozA",
                                 "1f0FOBPjZ2bBjqiprIkp",
@@ -458,16 +542,16 @@ class BloggerNewsBot:
                                 "43j4MvIyLLHNRaUR4xyK",
                             ]
                         },
-                        'statistics': {  # Ø¢Ù…Ø§Ø± Ùˆ Ú¯Ø²Ø§Ø±Ø´
-                            'keywords': ['Ø¢Ù…Ø§Ø±', 'Ú¯Ø²Ø§Ø±Ø´', 'Ø¨Ø±Ø±Ø³ÛŒ', 'ÙˆØ¶Ø¹ÛŒØª'],
+                        'statistics': {  # آمار و گزارش
+                            'keywords': ['آمار', 'گزارش', 'بررسی', 'وضعیت'],
                             'images': [
                                 "HHk1ato9bgvQfZFgfsFF",
                                 "7oesnmsu0RfrE2W7Lk0C",
                                 "K6pWnYcCIIlNtoh4cDKF",
                             ]
                         },
-                        'injury': {  # Ù…ØµØ¯ÙˆÙ…ÛŒØª Ùˆ Ù…Ø±Ú¯ Ú©Ø§Ø±Ú¯Ø±
-                            'keywords': ['Ù…ØµØ¯ÙˆÙ…ÛŒØª', 'Ù…Ø±Ú¯', 'Ø¬Ø§Ù† Ø¨Ø§Ø®ØªÙ†', 'ÙÙˆØª', 'Ú©Ø´ØªÙ‡', 'Ù…Ø¬Ø±ÙˆØ­', 'Ø²Ø®Ù…ÛŒ'],
+                        'injury': {  # مصدومیت و مرگ کارگر
+                            'keywords': ['مصدومیت', 'مرگ', 'جان باختن', 'فوت', 'کشته', 'مجروح', 'زخمی'],
                             'images': [
                                 "FexfZ6Z9FojX7y6kMfRH",
                                 "lbyYxUafXnxPCDT1DTul",
@@ -481,7 +565,7 @@ class BloggerNewsBot:
                                 "gEuvCQ8HVFQPT74zJSaH",
                             ]
                         },
-                        'construction': {  # Ø³Ø§Ø®ØªÙ…Ø§Ù†ÛŒ Ùˆ Ø¹Ù…Ø±Ø§Ù†ÛŒ (Ù¾ÛŒØ´â€ŒÙØ±Ø¶)
+                        'construction': {  # ساختمانی و عمرانی (پیش‌فرض)
                             'keywords': [],
                             'images': [
                                 "zwDqgNNNtfGzNZod4M2M",
@@ -493,8 +577,8 @@ class BloggerNewsBot:
                         },
                     }
                     
-                    # ØªØ´Ø®ÛŒØµ Ù‡ÙˆØ´Ù…Ù†Ø¯ Ù…ÙˆØ¶ÙˆØ¹ Ø®Ø¨Ø±
-                    selected_category = 'construction'  # Ù¾ÛŒØ´â€ŒÙØ±Ø¶
+                    # تشخیص هوشمند موضوع خبر
+                    selected_category = 'construction'  # پیش‌فرض
                     for cat_name, cat_data in worker_image_categories.items():
                         if any(kw in search_text for kw in cat_data['keywords']):
                             selected_category = cat_name
@@ -502,57 +586,17 @@ class BloggerNewsBot:
                     
                     selected_id = random.choice(worker_image_categories[selected_category]['images'])
                     filename = self.resolved_images.get(selected_id, f"{selected_id}.png")
-                    main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
-                    print(f"  [Image Override] Topic: {selected_category} â†’ stock photo selected: {main_image}")
+                    main_image = f"https://raw.githubusercontent.com/AmirCode97/blogger-news-bot/main/images/{filename}"
+                    print(f"  [Image Override] Topic: {selected_category} → stock photo selected: {main_image}")
 
-                # ==========================================
-                # 2b. Category Fallbacks for other labels if no image is found
-                # ==========================================
-                if not main_image:
-                    import random
-                    print(f"  [Image Fallback] No image found. Selecting category-specific stock photo...")
-                    
-                    category_fallbacks = {
-                        'ÙˆØ¶Ø¹ÛŒØª Ø²Ù†Ø¯Ø§Ù†ÛŒØ§Ù†': [
-                            "FexfZ6Z9FojX7y6kMfRH", "lbyYxUafXnxPCDT1DTul", "opBNOv604Cccl4DLBh33",
-                            "djBWFeRxBpG2ZR4NgCR1", "z5zgF2E9yC3E3EHwViDu", "P67wCQolqce71iGfEw0g",
-                            "bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO",
-                            "gEuvCQ8HVFQPT74zJSaH"
-                        ],
-                        'Ø­Ù‚ÙˆÙ‚ Ø¨Ø´Ø±': [
-                            "xvVwjvWLG5ADOxW4EIgY", "7kyrBNbl4c2KS8vircgB", "3XhhBrieVpJFtVtLookz",
-                            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
-                        ],
-                        'Ø¨ÛŒÙ†â€ŒØ§Ù„Ù…Ù„Ù„': [
-                            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
-                        ]
-                    }
-                    
-                    fallback_id = None
-                    for label in post_labels:
-                        if label in category_fallbacks:
-                            fallback_id = random.choice(category_fallbacks[label])
-                            print(f"  [Image Fallback] Category '{label}' -> Selected ID: {fallback_id}")
-                            break
-                            
-                    if not fallback_id and self.resolved_images:
-                        fallback_id = random.choice(list(self.resolved_images.keys()))
-                        print(f"  [Image Fallback] Generic fallback -> Selected ID: {fallback_id}")
-                        
-                    if fallback_id:
-                        filename = self.resolved_images.get(fallback_id, f"{fallback_id}.png")
-                        if filename.endswith(".jpg") or filename.endswith(".png"):
-                            pass
-                        else:
-                            filename = f"{filename}.png"
-                        main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
-
+                
+                
                 # ==========================================
                 # 3. Build HTML (with unblocked image proxy & deep SEO)
                 # ==========================================
                 image_html = ""
                 if main_image:
-                    proxied_image = proxy_external_image(main_image)
+                    proxied_image = download_and_optimize_image(main_image)
                     print(f"  [Image] {proxied_image[:60]}...")
                     # Image SEO: Alt tags, title tags, loading="lazy", decoding="async", and semantic figure markup
                     image_html = f'''<figure style="margin:0 0 25px 0;text-align:center;">
