@@ -492,6 +492,10 @@ def update_posts(dry_run=False, limit=150):
         </footer>
         """
         
+        # NOTE: The Blogger template already has a built-in related-posts section
+        # (div.rp-section#related-posts) that dynamically loads via JS/Blogger Feed API.
+        # We do NOT inject our own widget to avoid duplicates on the page.
+        
         # Assemble complete post HTML
         new_html = f"""
         <style>.post-featured-image, .post-thumbnail {{ display: none !important; }}</style>
@@ -511,9 +515,6 @@ def update_posts(dry_run=False, limit=150):
             </div>
         </article>
         
-        <!-- Related Posts Section -->
-        {related_widget_html}
-        
         <!-- Clean SEO Footer -->
         {single_footer_html}
         """
@@ -531,6 +532,12 @@ def update_posts(dry_run=False, limit=150):
                 print("\n[DRY-RUN] Processed 3 sample posts. Stopping dry-run.")
                 break
         else:
+            # Check if the new HTML is exactly the same as the existing content
+            # We strip both to ignore trailing newlines or whitespace differences at the very ends
+            if new_html.strip() == post.get('content', '').strip():
+                print(f"  [SKIP] Post already has the latest correct layout and HTML. Skipping API call.")
+                continue
+
             # Update post on Blogger
             try:
                 body = {

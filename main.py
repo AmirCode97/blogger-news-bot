@@ -678,8 +678,7 @@ class BloggerNewsBot:
                     </div>
                 </article>
                 
-                <!-- Related Posts Section -->
-                {related_widget_html}
+                <!-- NOTE: Related posts are handled by the Blogger template's built-in rp-section widget -->
                 
                 <!-- SEO Internal Link Tag Cloud & Source Box -->
                 <footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;direction:rtl;text-align:right;">
