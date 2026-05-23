@@ -603,8 +603,8 @@ class BloggerNewsBot:
     <img src="{proxied_image}" alt="{article_title}" title="{article_title}" loading="lazy" decoding="async" style="width:100%;max-width:800px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.4);" />
     <figcaption style="display:none;">{article_title}</figcaption>
 </figure>'''
-                else:
-                    print(f"  [Warning] No image found for this article")
+else:
+    print(f"  [Warning] No image found for this article")
                 
                 # Convert text paragraphs into semantic <p> tags for better SEO crawling
                 formatted_paragraphs = []
