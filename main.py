@@ -52,6 +52,25 @@ def proxy_external_image(url):
     from urllib.parse import quote
     # wsrv.nl is a free, fast global image cache proxy unblocked in Iran
     return f"https://wsrv.nl/?url={quote(url)}"
+    
+    def validate_image_url(url: str, timeout: int = 6) -> bool:
+    """
+    Verify image URL is actually accessible before publishing.
+    Returns True if the image can be fetched, False otherwise.
+    jsdelivr CDN URLs are trusted directly without a network check.
+    """
+    if not url:
+        return False
+    # Trust our own CDN stock images directly
+    if "jsdelivr.net" in url:
+        return True
+    try:
+        from urllib.parse import quote as _quote
+        check_url = f"https://wsrv.nl/?url={_quote(url)}" if "wsrv.nl" not in url else url
+        resp = requests.head(check_url, timeout=timeout, allow_redirects=True)
+        return resp.status_code == 200
+    except Exception:
+        return False
 
 def strip_markdown(text):
     """Remove all Markdown formatting symbols from text while preserving the actual content."""
@@ -538,16 +557,29 @@ class BloggerNewsBot:
                 # 3. Build HTML (with unblocked image proxy & deep SEO)
                 # ==========================================
                 image_html = ""
-                if main_image:
-                    proxied_image = proxy_external_image(main_image)
-                    print(f"  [Image] {proxied_image[:60]}...")
-                    # Image SEO: Alt tags, title tags, loading="lazy", decoding="async", and semantic figure markup
-                    image_html = f'''<figure style="margin:0 0 25px 0;text-align:center;">
+if main_image:
+    # Validate image is actually accessible before publishing
+    if not validate_image_url(main_image):
+        print(f"  [Warning] Image URL not accessible, trying fallback stock photo...")
+        import random as _rand
+        if self.resolved_images:
+            fallback_id = _rand.choice(list(self.resolved_images.keys()))
+            filename = self.resolved_images.get(fallback_id, f"{fallback_id}.png")
+            main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
+            print(f"  [Image Fallback] Switched to stock: {main_image[:60]}")
+        else:
+            main_image = None
+
+if main_image:
+    proxied_image = proxy_external_image(main_image)
+    print(f"  [Image] {proxied_image[:60]}...")
+    # Image SEO: Alt tags, title tags, loading="lazy", decoding="async", and semantic figure markup
+    image_html = f'''<figure style="margin:0 0 25px 0;text-align:center;">
     <img src="{proxied_image}" alt="{article_title}" title="{article_title}" loading="lazy" decoding="async" style="width:100%;max-width:800px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.4);" />
     <figcaption style="display:none;">{article_title}</figcaption>
 </figure>'''
-                else:
-                    print(f"  [Warning] No image found for this article")
+else:
+    print(f"  [Warning] No image found for this article")
                 
                 # Convert text paragraphs into semantic <p> tags for better SEO crawling
                 formatted_paragraphs = []
