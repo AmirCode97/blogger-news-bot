@@ -111,10 +111,26 @@ def download_and_optimize_image(url: str) -> str:
         
         print(f"  [Image Download] Fetching {url[:60]}...")
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-            'Referer': 'https://www.google.com/'
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+            'Referer': 'https://www.google.com/',
+            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'Accept-Language': 'fa,en-US;q=0.9,en;q=0.8'
         }
-        resp = requests.get(url, headers=headers, timeout=15)
+        
+        # Bypassing Cloudflare/anti-bot blocks using cloudscraper if available
+        try:
+            import cloudscraper
+            scraper = cloudscraper.create_scraper(
+                browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False}
+            )
+            resp = scraper.get(url, timeout=15)
+            if resp.status_code == 403:
+                # Fallback to standard requests if cloudscraper failed
+                resp = requests.get(url, headers=headers, timeout=15)
+        except Exception as e:
+            print(f"  [Cloudscraper Note] Fallback to requests: {e}")
+            resp = requests.get(url, headers=headers, timeout=15)
+            
         resp.raise_for_status()
         
         img = Image.open(BytesIO(resp.content))
@@ -603,8 +619,8 @@ class BloggerNewsBot:
     <img src="{proxied_image}" alt="{article_title}" title="{article_title}" loading="lazy" decoding="async" style="width:100%;max-width:800px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.4);" />
     <figcaption style="display:none;">{article_title}</figcaption>
 </figure>'''
-else:
-    print(f"  [Warning] No image found for this article")
+                else:
+                    print(f"  [Warning] No image found for this article")
                 
                 # Convert text paragraphs into semantic <p> tags for better SEO crawling
                 formatted_paragraphs = []
