@@ -492,8 +492,7 @@ class BloggerNewsBot:
                 # ==========================================
                 # 2. Cinematic Image Override for Workers
                 # ==========================================
-                if 'کارگران' in post_labels:
-                    import random
+                if 'کارگران' in post_labels and not main_image:
                     
                     # دسته‌بندی عکس‌ها بر اساس موضوع خبر
                     worker_image_categories = {
