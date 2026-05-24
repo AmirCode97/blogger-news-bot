@@ -46,6 +46,32 @@ def safe_print(text):
     except:
         print(text.encode('utf-8', errors='replace').decode('utf-8'))
 
+def _best_image_from_srcset(srcset_str: str) -> str:
+    """Parse srcset attribute and return the URL with highest resolution."""
+    if not srcset_str:
+        return ""
+    best_url = ""
+    best_width = 0
+    for part in srcset_str.split(','):
+        part = part.strip()
+        if not part:
+            continue
+        tokens = part.split()
+        if len(tokens) >= 2:
+            url = tokens[0]
+            try:
+                width = int(tokens[1].lower().replace('w', '').replace('x', ''))
+            except:
+                width = 0
+            if width > best_width:
+                best_width = width
+                best_url = url
+        elif len(tokens) == 1:
+            if not best_url:
+                best_url = tokens[0]
+    return best_url
+
+
 class NewsFetcher:
     def __init__(self):
         self.cache_file = "news_cache.json"
@@ -193,7 +219,7 @@ class NewsFetcher:
                             desc_soup = BeautifulSoup(raw_desc_html, 'html.parser')
                             img_tag = desc_soup.find('img')
                             if img_tag:
-                                src = img_tag.get('src') or img_tag.get('data-src') or img_tag.get('data-lazy-src')
+                                src = _best_image_from_srcset(img_tag.get('srcset', '')) or img_tag.get('src') or img_tag.get('data-src') or img_tag.get('data-lazy-src')
                                 if src and src.startswith('http') and 'logo' not in src.lower() and 'icon' not in src.lower():
                                     image_url = src
                                     safe_print(f"  [RSS-HTML] Found image in description: {src[:60]}")
@@ -267,7 +293,7 @@ class NewsFetcher:
                 image_url = None
                 img = art.find('img')
                 if img:
-                    src = img.get('src') or img.get('data-src') or img.get('data-lazy-src')
+                    src = _best_image_from_srcset(img.get('srcset', '')) or img.get('src') or img.get('data-src') or img.get('data-lazy-src')
                     if src: 
                         image_url = urljoin(source['url'], src)
 
@@ -373,7 +399,7 @@ class NewsFetcher:
                 if main_img_div:
                     img_tag = main_img_div.find('img') if main_img_div.name == 'div' else main_img_div
                     if img_tag:
-                        src = img_tag.get('src') or img_tag.get('data-src')
+                        src = _best_image_from_srcset(img_tag.get('srcset', '')) or img_tag.get('src') or img_tag.get('data-src')
                         if src:
                             main_image = urljoin(url, src)
                             # Fix http:// to https://
@@ -430,7 +456,7 @@ class NewsFetcher:
                     if thumb_div:
                         wp_img = thumb_div.find('img')
                 if wp_img:
-                    src = wp_img.get('src') or wp_img.get('data-src') or wp_img.get('data-lazy-src')
+                    src = _best_image_from_srcset(wp_img.get('srcset', '')) or wp_img.get('src') or wp_img.get('data-src') or wp_img.get('data-lazy-src')
                     if src:
                         main_image = urljoin(url, src)
                         safe_print(f"  [HumanRightsInIR] Image: {main_image[:80]}")
@@ -548,7 +574,7 @@ class NewsFetcher:
         content_area = soup.find('article') or soup.find('div', class_=re.compile(r'content|entry|post'))
         if content_area:
             for img in content_area.find_all('img'):
-                src = img.get('src') or img.get('data-src') or img.get('data-lazy-src')
+                src = _best_image_from_srcset(img.get('srcset', '')) or img.get('src') or img.get('data-src') or img.get('data-lazy-src')
                 if not src:
                     continue
                 # Skip tiny icons, avatars, logos
