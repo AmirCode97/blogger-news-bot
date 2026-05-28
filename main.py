@@ -759,10 +759,7 @@ class BloggerNewsBot:
                 
                 <!-- Semantic Article Body -->
                 <article style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:'Vazir',sans-serif;">
-                    <!-- SEO Meta Lead Paragraph -->
-                    <p style="font-weight:bold;font-size:18px;color:#eee;border-bottom:1px solid #333;padding-bottom:15px;margin-bottom:20px;">
-                        {meta_description}
-                    </p>
+
                     
                     <!-- Article Content -->
                     <div>
