@@ -45,74 +45,17 @@ def deduplicate_text(text):
 
 def download_and_optimize_image(url: str) -> str:
     """
-    Downloads an image from the given URL, resizes it, converts to WebP,
-    saves it to the local 'images' directory, and returns the raw GitHub URL.
+    Returns a fast CDN proxied image URL from wsrv.nl instead of downloading locally.
+    This prevents storing images in GitHub while maintaining high performance.
     """
     if not url:
         return ""
     if "jsdelivr.net" in url or "raw.githubusercontent.com" in url or url.startswith("data:"):
         return url
         
-    try:
-        import os
-        import hashlib
-        
-        # Generate a unique filename based on the URL hash
-        url_hash = hashlib.md5(url.encode('utf-8')).hexdigest()[:16]
-        filename = f"{url_hash}.webp"
-        filepath = os.path.join("images", filename)
-        
-        # If already downloaded, return the raw GitHub URL
-        github_cdn_url = f"https://raw.githubusercontent.com/AmirCode97/blogger-news-bot/main/images/{filename}"
-        if os.path.exists(filepath):
-            return github_cdn_url
-            
-        import requests
-        from PIL import Image
-        from io import BytesIO
-        
-        print(f"  [Image Download] Fetching {url[:60]}...")
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-            'Referer': 'https://www.google.com/',
-            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
-            'Accept-Language': 'fa,en-US;q=0.9,en;q=0.8'
-        }
-        
-        # Bypassing Cloudflare/anti-bot blocks using cloudscraper if available
-        try:
-            import cloudscraper
-            scraper = cloudscraper.create_scraper(
-                browser={'browser': 'chrome', 'platform': 'windows', 'mobile': False}
-            )
-            resp = scraper.get(url, timeout=15)
-            if resp.status_code == 403:
-                # Fallback to standard requests if cloudscraper failed
-                resp = requests.get(url, headers=headers, timeout=15)
-        except Exception as e:
-            print(f"  [Cloudscraper Note] Fallback to requests: {e}")
-            resp = requests.get(url, headers=headers, timeout=15)
-            
-        resp.raise_for_status()
-        
-        img = Image.open(BytesIO(resp.content))
-        if img.mode != 'RGB':
-            img = img.convert('RGB')
-            
-        if img.width > 800:
-            ratio = 800.0 / float(img.width)
-            new_height = int(float(img.height) * float(ratio))
-            img = img.resize((800, new_height), Image.Resampling.LANCZOS)
-            
-        os.makedirs("images", exist_ok=True)
-        img.save(filepath, format="WEBP", quality=75)
-        print(f"  [Image Saved] Saved optimized image to {filepath}")
-        
-        return github_cdn_url
-    except Exception as e:
-        print(f"  [Image Error] Failed to download/optimize image: {e}")
-        from urllib.parse import quote
-        return f"https://wsrv.nl/?url={quote(url)}"
+    from urllib.parse import quote
+    # w=800 sets max width, output=webp forces webp conversion, q=75 sets quality
+    return f"https://wsrv.nl/?url={quote(url)}&w=800&output=webp&q=75"
 
 
 
