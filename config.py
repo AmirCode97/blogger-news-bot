@@ -21,6 +21,7 @@ MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))
 
 # ==================== Proxy Settings ====================
 # برای دور زدن محدودیت‌های Cloudflare
+SCRAPERAPI_KEY = os.getenv("SCRAPERAPI_KEY", "")
 USE_PROXY = os.getenv("USE_PROXY", "true").lower() == "true"
 PROXY_URL = os.getenv("PROXY_URL", "")  # Example: http://user:pass@proxy:port
 
