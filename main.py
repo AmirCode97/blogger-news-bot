@@ -226,9 +226,18 @@ class BloggerNewsBot:
         print(f"[INFO] Blog ID: {BLOG_ID}")
         print(f"[INFO] Check interval: Every {CHECK_INTERVAL_HOURS} hours")
         
-        # Use direct Blogger hosted stock images mappings
-        self.resolved_images = BLOGGER_STOCK_IMAGES
-        print(f"[OK] Loaded {len(self.resolved_images)} Blogger stock images.")
+        # Load resolved stock images mappings
+        try:
+            import json
+            resolved_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resolved_images.json")
+            if os.path.exists(resolved_path):
+                with open(resolved_path, "r", encoding="utf-8") as f:
+                    self.resolved_images = json.load(f)
+                print(f"[OK] Loaded {len(self.resolved_images)} resolved stock images.")
+            else:
+                print("[WARNING] resolved_images.json not found!")
+        except Exception as e:
+            print(f"[ERROR] Loading resolved_images.json: {e}")
 
         print(f"[INFO] Duplicate cache: {self.duplicate_detector.get_stats()}")
 
@@ -411,33 +420,98 @@ class BloggerNewsBot:
                     
                     # دسته‌بندی عکس‌ها بر اساس موضوع خبر
                     worker_image_categories = {
-                        'protest': {
+                        'protest': {  # تجمع و اعتراض صنفی
                             'keywords': ['تجمع', 'اعتراض', 'تحصن', 'اعتصاب', 'صنفی', 'راهپیمایی', 'تظاهرات'],
-                            'images': ["3XhhBrieVpJFtVtLookz"]
+                            'images': [
+                                "xvVwjvWLG5ADOxW4EIgY",
+                                "7kyrBNbl4c2KS8vircgB",
+                                "3XhhBrieVpJFtVtLookz",
+                            ]
                         },
-                        'safety': {
+                        'safety': {  # فقدان ایمنی کار
                             'keywords': ['ایمنی', 'حادثه', 'حوادث کار', 'سقوط', 'انفجار', 'آتش‌سوزی'],
-                            'images': ["fTPZtAObAols1lEMuvse"]
+                            'images': [
+                                "dxiHs3AT6IjhOmWZTBaR",
+                                "tFZVcFQcUPRmG9hAknot",
+                                "NXgu2fiLV7oKWSt5JUuh",
+                                "JjVnVdCMXy6iolMIDaZj",
+                                "MjllixzobHAV3Nth51Wr",
+                                "TVA9RuHRUvcGXteJcBHv",
+                                "fTPZtAObAols1lEMuvse",
+                                "L4vX7v7jBCOfJznZRiTh",
+                                "lw6Ipz4OXADzZDLf4GzL",
+                                "5X4QQndDLzDs02bYOhWp",
+                                "fKwKc5NHmDRZbalTqqgT",
+                            ]
                         },
-                        'wages': {
+                        'wages': {  # معوقات مزدی / مطالبات مزدی / مشکلات بیمه
                             'keywords': ['معوقات', 'مزدی', 'دستمزد', 'حقوق', 'بیمه', 'معیشت', 'مطالبات', 'حق‌بیمه'],
-                            'images': ["4LsX7qJLZi06uBnW8ONx", "43j4MvIyLLHNRaUR4xyK", "bwStazSQyv0rHfPwsKqS"]
+                            'images': [
+                                "rnZiSzeEEjpFAtw5Ozvw",
+                                "Fyv9ksReWCkwEan3OozA",
+                                "xvVwjvWLG5ADOxW4EIgY",
+                                "1f0FOBPjZ2bBjqiprIkp",
+                                "HHk1ato9bgvQfZFgfsFF",
+                                "5jbEVltP8kfK9yrSj9NP",
+                                "GQY4znGiq9XsHgqIL0Jv",
+                                "aCSKcmmHHvwJNibT0POX",
+                                "RbTWgy4tmbXxofhEYD3j",
+                                "3XhhBrieVpJFtVtLookz",
+                                "K6pWnYcCIIlNtoh4cDKF",
+                                "h0D5PmQziVoH8bwSfVJn",
+                                "bwStazSQyv0rHfPwsKqS",
+                                "4LsX7qJLZi06uBnW8ONx",
+                                "43j4MvIyLLHNRaUR4xyK",
+                                "7oesnmsu0RfrE2W7Lk0C",
+                            ]
                         },
-                        'unemployment': {
+                        'unemployment': {  # بیکاری و تعدیل
                             'keywords': ['بیکاری', 'تعدیل', 'اخراج', 'بازنشسته', 'بازنشستگان', 'تعطیل'],
-                            'images': ["4LsX7qJLZi06uBnW8ONx", "43j4MvIyLLHNRaUR4xyK"]
+                            'images': [
+                                "Fyv9ksReWCkwEan3OozA",
+                                "1f0FOBPjZ2bBjqiprIkp",
+                                "gom8LzRHEvtsHkKDgoAh",
+                                "LCNF3R3yiHWI23eZ2pRX",
+                                "LOeqev3kgW0RAOCaII2l",
+                                "aCSKcmmHHvwJNibT0POX",
+                                "RbTWgy4tmbXxofhEYD3j",
+                                "johotPThTTQum2OKM2Xr",
+                                "4LsX7qJLZi06uBnW8ONx",
+                                "43j4MvIyLLHNRaUR4xyK",
+                            ]
                         },
-                        'statistics': {
+                        'statistics': {  # آمار و گزارش
                             'keywords': ['آمار', 'گزارش', 'بررسی', 'وضعیت'],
-                            'images': ["K6pWnYcCIIlNtoh4cDKF"]
+                            'images': [
+                                "HHk1ato9bgvQfZFgfsFF",
+                                "7oesnmsu0RfrE2W7Lk0C",
+                                "K6pWnYcCIIlNtoh4cDKF",
+                            ]
                         },
-                        'injury': {
+                        'injury': {  # مصدومیت و مرگ کارگر
                             'keywords': ['مصدومیت', 'مرگ', 'جان باختن', 'فوت', 'کشته', 'مجروح', 'زخمی'],
-                            'images': ["bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO"]
+                            'images': [
+                                "FexfZ6Z9FojX7y6kMfRH",
+                                "lbyYxUafXnxPCDT1DTul",
+                                "opBNOv604Cccl4DLBh33",
+                                "djBWFeRxBpG2ZR4NgCR1",
+                                "z5zgF2E9yC3E3EHwViDu",
+                                "P67wCQolqce71iGfEw0g",
+                                "bMWHv8lA1GzcwnImumn7",
+                                "p54CDjq7NrukeAnOYpIq",
+                                "T4C2bHaksBsaY3DOLobO",
+                                "gEuvCQ8HVFQPT74zJSaH",
+                            ]
                         },
-                        'construction': {
+                        'construction': {  # ساختمانی و عمرانی (پیش‌فرض)
                             'keywords': [],
-                            'images': ["h0D5PmQziVoH8bwSfVJn"]
+                            'images': [
+                                "zwDqgNNNtfGzNZod4M2M",
+                                "lbyYxUafXnxPCDT1DTul",
+                                "fKwKc5NHmDRZbalTqqgT",
+                                "gom8LzRHEvtsHkKDgoAh",
+                                "dxiHs3AT6IjhOmWZTBaR",
+                            ]
                         },
                     }
                     
@@ -449,7 +523,8 @@ class BloggerNewsBot:
                             break
                     
                     selected_id = random.choice(worker_image_categories[selected_category]['images'])
-                    main_image = self.resolved_images.get(selected_id)
+                    filename = self.resolved_images.get(selected_id, f"{selected_id}.png")
+                    main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
                     print(f"  [Image Override] Topic: {selected_category} → stock photo selected: {main_image}")
 
                 # ==========================================
@@ -460,9 +535,19 @@ class BloggerNewsBot:
                     print(f"  [Image Fallback] No image found. Selecting category-specific stock photo...")
                     
                     category_fallbacks = {
-                        'وضعیت زندانیان': ["bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO"],
-                        'حقوق بشر': ["3XhhBrieVpJFtVtLookz", "K6pWnYcCIIlNtoh4cDKF"],
-                        'بین‌الملل': ["K6pWnYcCIIlNtoh4cDKF"]
+                        'وضعیت زندانیان': [
+                            "FexfZ6Z9FojX7y6kMfRH", "lbyYxUafXnxPCDT1DTul", "opBNOv604Cccl4DLBh33",
+                            "djBWFeRxBpG2ZR4NgCR1", "z5zgF2E9yC3E3EHwViDu", "P67wCQolqce71iGfEw0g",
+                            "bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO",
+                            "gEuvCQ8HVFQPT74zJSaH"
+                        ],
+                        'حقوق بشر': [
+                            "xvVwjvWLG5ADOxW4EIgY", "7kyrBNbl4c2KS8vircgB", "3XhhBrieVpJFtVtLookz",
+                            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
+                        ],
+                        'بین‌الملل': [
+                            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
+                        ]
                     }
                     
                     fallback_id = None
@@ -477,7 +562,12 @@ class BloggerNewsBot:
                         print(f"  [Image Fallback] Generic fallback -> Selected ID: {fallback_id}")
                         
                     if fallback_id:
-                        main_image = self.resolved_images.get(fallback_id)"
+                        filename = self.resolved_images.get(fallback_id, f"{fallback_id}.png")
+                        if filename.endswith(".jpg") or filename.endswith(".png"):
+                            pass
+                        else:
+                            filename = f"{filename}.png"
+                        main_image = f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
 
                 # ==========================================
                 # 3. Build HTML (with unblocked image proxy & deep SEO)
