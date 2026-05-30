@@ -102,38 +102,39 @@ def extract_first_image(content, label, resolved_images):
         
     return get_fallback_image(label, resolved_images)
 
-
-BLOGGER_STOCK_IMAGES = {
-    "3XhhBrieVpJFtVtLookz": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjXs7Rr_lIoLkhtvXAkTM3iNzA3HqTWvXsTm50jzHwJJD6EWoynvn4pN9NX18wUbIUlZ2VIQ7rgXNzEEuvOpfCfXhYdDLe0o0ylK37rZUE-4ka1HCxr1Ips1N-OSTSd9hTb4uAHHmg2h8-HV-nhJCiiD-gFmoDl4XbFE9CanDkI-bx3hCR3nBnBOPGV3lU5/s1200/3XhhBrieVpJFtVtLookz.jpg",
-    "4LsX7qJLZi06uBnW8ONx": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEjqc8d2smdC9GAbeTPQrG7AvBVg0MGlN2hhzRiKiVr4eyARtPhDSMyyQHUg3v2hJiB5lMTZrNgLDlnObOFdjR4pRHKaV9A7DMlPtRwWDmU7eUiEH8MVVFjTSsYyU4Y4Ug8AtM-ZdkzFIMQZPHrXMoaouQZoRWd_ckXAauvRZUrkUdtqmlkqZf3dhIA7Qnty/s1200/4LsX7qJLZi06uBnW8ONx.png",
-    "43j4MvIyLLHNRaUR4xyK": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEg5zXnDWrUHUj9ch7WiJa65oESzZa5ibhsXoKnNtjFqrA6D97-USQRsSaUVEd3QkXO-x0ICUDBmujSWm1fanca-qGPxzKtn8uQJRl9vkeOp9f7gejZvikIcycmlD7W3xoJhaWjSpBBNG0BOq4PX25Jj3FPwn7oVi_NkOK3QutQErCL4fiq4G9rA7SvTxSdy/s1200/43j4MvIyLLHNRaUR4xyK.png",
-    "bMWHv8lA1GzcwnImumn7": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4O7sj-0CRivOX9omV1LkFTd9y9qZeyDi_jShCPn0Owep1Q2lguZdJNp7j9gwui9yhEFXhyXTwWh52LYep0L4kNMy2ycSUSYDeW1_7Je26PYgbxJfzAWoDKpQwgQHehgiA09za96U2AnLBnTfzXvhc9IzuesFm0o3r75qnXQyfHZEH_hl2M5o5M5hX1Oxd/s1200/bMWHv8lA1GzcwnImumn7.png",
-    "bwStazSQyv0rHfPwsKqS": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhRMSTKt8_I6Zgvdoq7uuiKZ9RZU3d4L7fTBFavjiRVGMqztgdfXHfhrR6muorDRWyqasassEhbT211CbRfsT4fLy1iPe7w3qalfWOsSxNWrGqrFybEYN-W_rVSzURL8qIn_jBnVHAl9by_g7SzFIPOd3CFVjLpNJgOP2fIjrDAPLXKLkLi8bdBCF9DGZAb/s1200/bwStazSQyv0rHfPwsKqS.png",
-    "fTPZtAObAols1lEMuvse": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhE5JIcdtphZgw5KW-ABUbeBK3fZr0cbfodMvqOkFXMNoIvllDiYz-VGUR1UiY7kQw4_I6OZr0T-o9lHUYK73IV7Z51azGLgejdmno-9_4z8Z_GDMtFZQUSEUjdaiGHEhWpcyOWe3oMW-_sF-oAYor7Rn7gvilkg30HtyO5e3Mnc5ELrDhSNV0e_1uqSp2b/s1200/fTPZtAObAols1lEMuvse.png",
-    "h0D5PmQziVoH8bwSfVJn": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhVR7B_zksIcEWSDBIyIM8ZuuTSKHeOQl5WdL53HYSlb5wtI_su1FytB090SMUiJGD71pSb4wySTFHlB08d7H5AnsmsrNiJstJx5FFYJtp4X4DjTy6f3tUsA5GmYp3RjcVIaiQhq7NEG1cOdyMzHIfujtYZJcwBe_lPb9GALxdnIRrWnZ1shVfuj7VxGMFc/s1200/h0D5PmQziVoH8bwSfVJn.png",
-    "K6pWnYcCIIlNtoh4cDKF": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgkh7n_GTfCARZe6vTSPhvureJwTUvoXwXrOucxqKWmu-9b0geE0OZ9H89XwhH9i7w2ybPJ5yGIhtwGzJ0KnjCJa-NAYkObDU299oGQbdvi7VQIYsZYQjZvJAt59XrUAVGYxZszdkCBBcRKNaKBzkLqxFv-gpAovQKe2LYiUeqFwaNL7N5vnKrrztHxgWZo/s1200/K6pWnYcCIIlNtoh4cDKF.png",
-    "p54CDjq7NrukeAnOYpIq": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgdyuk1Au7bEdZ6MSTGAH21rNQG4ZSNl8euVrITDA1rAHgdnZsZtlyZvef8pYI3Lyo-Wj1PKgCswprHZv2gHmK99B39rG3CQYqMZnoDxDKyxWZ6r4-ykkwg84GHbQGRXY9LqBW466izAJfmUjlo37BtubACBtyEJl_ZdQYPf8V-1hbwi_-d95H-hTrqHZt1/s1200/p54CDjq7NrukeAnOYpIq.png",
-    "T4C2bHaksBsaY3DOLobO": "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgXpBZDhHEN51ZR2RhkIe9Sg9k5JBLSYNb1dJfxwvODQ5qf3aU3QEgy3NRjhznnxpbiCN7UxhEswr1NjwTFIS7N9_UYXGfowa5VvX5AW4TIOvRoehtZ9hQOy49sBgU9HXzvEnwFuWIaHxkPe0ML70JcNCHoscvwssgUvSTr-iZfV7Ll0ymdLf5tHujxIa1q/s1200/T4C2bHaksBsaY3DOLobO.png"
-}
-
-
 def get_fallback_image(label, resolved_images):
     import random
     category_fallbacks = {
-        'وضعیت زندانیان': ["bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO"],
-        'حقوق بشر': ["3XhhBrieVpJFtVtLookz", "K6pWnYcCIIlNtoh4cDKF"],
-        'بین‌الملل': ["K6pWnYcCIIlNtoh4cDKF"],
-        'کارگران': ["4LsX7qJLZi06uBnW8ONx", "43j4MvIyLLHNRaUR4xyK", "bwStazSQyv0rHfPwsKqS"]
+        'وضعیت زندانیان': [
+            "FexfZ6Z9FojX7y6kMfRH", "lbyYxUafXnxPCDT1DTul", "opBNOv604Cccl4DLBh33",
+            "djBWFeRxBpG2ZR4NgCR1", "z5zgF2E9yC3E3EHwViDu", "P67wCQolqce71iGfEw0g",
+            "bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO",
+            "gEuvCQ8HVFQPT74zJSaH"
+        ],
+        'حقوق بشر': [
+            "xvVwjvWLG5ADOxW4EIgY", "7kyrBNbl4c2KS8vircgB", "3XhhBrieVpJFtVtLookz",
+            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
+        ],
+        'بین‌الملل': [
+            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
+        ],
+        'کارگران': [
+            "rnZiSzeEEjpFAtw5Ozvw", "Fyv9ksReWCkwEan3OozA", "xvVwjvWLG5ADOxW4EIgY",
+            "1f0FOBPjZ2bBjqiprIkp", "HHk1ato9bgvQfZFgfsFF", "5jbEVltP8kfK9yrSj9NP"
+        ]
     }
     
     fallback_id = None
     if label in category_fallbacks:
         fallback_id = random.choice(category_fallbacks[label])
-    else:
-        fallback_id = random.choice(list(BLOGGER_STOCK_IMAGES.keys()))
+    elif resolved_images:
+        fallback_id = random.choice(list(resolved_images.keys()))
         
     if fallback_id:
-        return BLOGGER_STOCK_IMAGES.get(fallback_id)
+        filename = resolved_images.get(fallback_id, f"{fallback_id}.png")
+        if not (filename.endswith(".jpg") or filename.endswith(".png")):
+            filename = f"{filename}.png"
+        return f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
     
     return "https://wsrv.nl/?url=https%3A//images.unsplash.com/photo-1504917595217-d4dc5ebe6122"
 
@@ -302,7 +303,15 @@ def update_posts(dry_run=False, limit=150):
     print(f"[OK] Connected to Blogger. Blog ID: {poster.blog_id}")
     
     # Load resolved stock images mapping
-    resolved_images = BLOGGER_STOCK_IMAGES
+    resolved_images = {}
+    try:
+        resolved_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resolved_images.json")
+        if os.path.exists(resolved_path):
+            with open(resolved_path, "r", encoding="utf-8") as f:
+                resolved_images = json.load(f)
+            print(f"[OK] Loaded {len(resolved_images)} resolved stock images.")
+    except Exception as e:
+        print(f"[WARNING] Error loading resolved_images.json: {e}")
 
     # Step 1: Fetch ALL posts on the blog to index them
     print("\nFetching all posts to build index...")
@@ -443,7 +452,7 @@ def update_posts(dry_run=False, limit=150):
                 "name": "iranpolnews",
                 "logo": {
                     "@type": "ImageObject",
-                    "url": BLOGGER_STOCK_IMAGES.get("K6pWnYcCIIlNtoh4cDKF", "https://wsrv.nl/?url=https%3A//images.unsplash.com/photo-1504917595217-d4dc5ebe6122")
+                    "url": "https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/HHk1ato9bgvQfZFgfsFF.png"
                 }
             },
             "description": lead_paragraph[:160] + "..." if len(lead_paragraph) > 160 else lead_paragraph
