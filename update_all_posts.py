@@ -3,8 +3,12 @@ import os
 import re
 import json
 import time
+import socket
 from urllib.parse import quote
 from datetime import datetime
+
+# Prevent the script from hanging indefinitely if Google's API drops the connection
+socket.setdefaulttimeout(30)
 
 # Adjust path to import custom modules
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -95,48 +99,21 @@ def extract_first_image(content, label, resolved_images):
     match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', content)
     if match:
         img_url = match.group(1)
-        # Ensure wsrv is applied if it's an external image
-        if img_url.startswith("http") and "wsrv.nl" not in img_url and "jsdelivr.net" not in img_url:
-            img_url = f"https://wsrv.nl/?url={quote(img_url)}"
+        # Prevent double proxying if it's already a wsrv.nl or googleusercontent link
+        if "wsrv.nl" in img_url or "googleusercontent" in img_url or "wp.com" in img_url:
+            return img_url
+        
+        # Proxy standard external images with wsrv.nl instead of googleusercontent
+        if img_url.startswith("http"):
+            return f"https://wsrv.nl/?url={quote(img_url)}&w=600&output=webp&q=75"
         return img_url
         
     return get_fallback_image(label, resolved_images)
 
 def get_fallback_image(label, resolved_images):
-    import random
-    category_fallbacks = {
-        'وضعیت زندانیان': [
-            "FexfZ6Z9FojX7y6kMfRH", "lbyYxUafXnxPCDT1DTul", "opBNOv604Cccl4DLBh33",
-            "djBWFeRxBpG2ZR4NgCR1", "z5zgF2E9yC3E3EHwViDu", "P67wCQolqce71iGfEw0g",
-            "bMWHv8lA1GzcwnImumn7", "p54CDjq7NrukeAnOYpIq", "T4C2bHaksBsaY3DOLobO",
-            "gEuvCQ8HVFQPT74zJSaH"
-        ],
-        'حقوق بشر': [
-            "xvVwjvWLG5ADOxW4EIgY", "7kyrBNbl4c2KS8vircgB", "3XhhBrieVpJFtVtLookz",
-            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
-        ],
-        'بین‌الملل': [
-            "HHk1ato9bgvQfZFgfsFF", "7oesnmsu0RfrE2W7Lk0C", "K6pWnYcCIIlNtoh4cDKF"
-        ],
-        'کارگران': [
-            "rnZiSzeEEjpFAtw5Ozvw", "Fyv9ksReWCkwEan3OozA", "xvVwjvWLG5ADOxW4EIgY",
-            "1f0FOBPjZ2bBjqiprIkp", "HHk1ato9bgvQfZFgfsFF", "5jbEVltP8kfK9yrSj9NP"
-        ]
-    }
-    
-    fallback_id = None
-    if label in category_fallbacks:
-        fallback_id = random.choice(category_fallbacks[label])
-    elif resolved_images:
-        fallback_id = random.choice(list(resolved_images.keys()))
-        
-    if fallback_id:
-        filename = resolved_images.get(fallback_id, f"{fallback_id}.png")
-        if not (filename.endswith(".jpg") or filename.endswith(".png")):
-            filename = f"{filename}.png"
-        return f"https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/{filename}"
-    
-    return "https://wsrv.nl/?url=https%3A//images.unsplash.com/photo-1504917595217-d4dc5ebe6122"
+    # Disable stock images as per user preference
+    return ""
+
 
 def clean_html_content(content):
     """Remove extra/duplicated tags (like multiple footers, multiple styles, multiple JSON-LDs)
@@ -188,10 +165,14 @@ def clean_html_content(content):
         # Reconstruct clean text paragraphs
         paragraphs = []
         for p in soup.find_all('p'):
+            style_attr = p.get('style', '')
+            
+            # Identify the SEO lead paragraph from previous versions and skip it entirely
+            if 'border-bottom:1px solid #333' in style_attr and 'font-weight:bold' in style_attr:
+                continue
+                
             text = p.get_text().strip()
             if text:
-                # Avoid keeping previous meta-description as lead paragraph if it's already inside article
-                # (but typically we can just keep paragraphs)
                 paragraphs.append(text)
                 
         # In case there were no <p> tags, split by newline and get text
@@ -214,8 +195,13 @@ def clean_html_content(content):
         
         # Extract paragraphs
         paragraphs = []
-        for p in re.findall(r'<p.*?>(.*?)</p>', clean, flags=re.DOTALL):
-            p_text = re.sub(r'<.*?>', '', p).strip()
+        for p_match in re.finditer(r'<p(.*?)>(.*?)</p>', clean, flags=re.DOTALL | re.IGNORECASE):
+            attrs = p_match.group(1).lower()
+            p_content = p_match.group(2)
+            if 'border-bottom' in attrs and 'font-weight:bold' in attrs:
+                continue
+            
+            p_text = re.sub(r'<.*?>', '', p_content).strip()
             if p_text:
                 paragraphs.append(p_text)
                 
@@ -318,8 +304,8 @@ def update_posts(dry_run=False, limit=150):
     all_posts = []
     next_page_token = None
     
-    # Only fetch up to 300 posts to build a rich recent index and avoid memory/time overhead
-    max_index_fetch = 300
+    # Fetch up to 10000 posts to build a rich recent index and cover everything
+    max_index_fetch = 10000
     while len(all_posts) < max_index_fetch:
         try:
             response = poster.service.posts().list(
@@ -373,14 +359,15 @@ def update_posts(dry_run=False, limit=150):
         print(f"\n[{idx+1}/{min(len(all_posts), limit) if not dry_run else 3}] Processing: {post['title'][:50]} (ID: {post['id']})")
         
         # Determine 3 related posts based on labels
-        current_labels = set(post['labels'])
+        current_labels = set(post['labels']) if post['labels'] else {post['label']}
         related_candidates = []
         
         for cand in all_posts:
             if cand['id'] == post['id']:
                 continue
             # Calculate overlapping labels
-            overlap = len(current_labels.intersection(set(cand['labels'])))
+            cand_labels = set(cand['labels']) if cand['labels'] else {cand['label']}
+            overlap = len(current_labels.intersection(cand_labels))
             related_candidates.append((overlap, cand))
             
         # Sort related candidates: highest label overlap first, then newest published date
@@ -427,11 +414,17 @@ def update_posts(dry_run=False, limit=150):
             main_image = post['image']
             
         # Format the lead paragraph and body
-        lead_paragraph = paragraphs[0]
-        body_paragraphs = paragraphs[1:]
+        # Remove title if it got inserted at the top by AI
+        if paragraphs:
+            p0 = paragraphs[0].replace('**', '').replace('تیتر:', '').replace('عنوان:', '').strip()
+            title = post['title'].strip()
+            if title in p0 or p0 in title:
+                paragraphs = paragraphs[1:]
+                
+        lead_paragraph = paragraphs[0] if paragraphs else ""
         
         description_html = ""
-        for p in body_paragraphs:
+        for p in paragraphs:
             description_html += f'<p style="margin-bottom:18px;">{p}</p>\n'
             
         # Build JSON-LD SEO Schema
@@ -504,16 +497,15 @@ def update_posts(dry_run=False, limit=150):
         
         <!-- Semantic Article Body -->
         <article style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:'Vazir',sans-serif;">
-            <!-- SEO Meta Lead Paragraph -->
-            <p style="font-weight:bold;font-size:18px;color:#eee;border-bottom:1px solid #333;padding-bottom:15px;margin-bottom:20px;">
-                {lead_paragraph}
-            </p>
             
             <!-- Article Content -->
             <div>
                 {description_html}
             </div>
         </article>
+        
+        <!-- Related Posts Widget -->
+        {related_widget_html}
         
         <!-- Clean SEO Footer -->
         {single_footer_html}

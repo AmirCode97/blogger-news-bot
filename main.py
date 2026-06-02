@@ -586,10 +586,18 @@ class BloggerNewsBot:
                 
                 # Convert text paragraphs into semantic <p> tags for better SEO crawling
                 formatted_paragraphs = []
-                for p in description.split("\n"):
-                    clean_p = p.strip()
-                    if clean_p:
-                        formatted_paragraphs.append(f'<p style="margin-bottom:18px;">{clean_p}</p>')
+                lines = [p.strip() for p in description.split("\n") if p.strip()]
+                
+                if lines:
+                    first_line_clean = lines[0].replace('**', '').replace('تیتر:', '').replace('عنوان:', '').strip()
+                    article_title_clean = article_title.strip()
+                    if article_title_clean in first_line_clean or first_line_clean in article_title_clean:
+                        lines = lines[1:]
+                        
+                for p in lines:
+                    if p != "محتوا:" and not p.startswith("عنوان:") and not p.startswith("تیتر:"):
+                        formatted_paragraphs.append(f'<p style="margin-bottom:18px;">{p}</p>')
+                        
                 description_html = "\n".join(formatted_paragraphs)
 
                 # Generate Google Rich Snippet (Schema.org JSON-LD Structured Data)
@@ -642,10 +650,12 @@ class BloggerNewsBot:
                     ).execute()
                     items = response.get('items', [])
                     
+                    current_lbls = set(post_labels) if post_labels else {"حقوق بشر"}
                     candidates = []
                     for it in items:
                         lbls = it.get('labels', [])
-                        overlap = len(set(post_labels).intersection(set(lbls)))
+                        it_lbl_set = set(lbls) if lbls else {"حقوق بشر"}
+                        overlap = len(current_lbls.intersection(it_lbl_set))
                         candidates.append((overlap, it))
                         
                     # Sort by overlap, then publish date
@@ -710,7 +720,8 @@ class BloggerNewsBot:
                     </div>
                 </article>
                 
-                <!-- NOTE: Related posts are handled by the Blogger template's built-in rp-section widget -->
+                <!-- Related Posts Widget -->
+                {related_widget_html}
                 
                 <!-- SEO Internal Link Tag Cloud & Source Box -->
                 <footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;direction:rtl;text-align:right;">
