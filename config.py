@@ -96,9 +96,10 @@ NEWS_SOURCES = [
         "priority": 1,
         "max_items": 5,
         "selectors": {
-            "articles": "article",
+            "articles": "div.post-item",
             "title": "h2 a, h3 a, .entry-title a",
-            "description": ".entry-summary, .excerpt"
+            "description": ".entry-summary, .excerpt",
+            "image": "img.wp-post-image"
         }
     },
     # ==================== ناظران حقوق بشر ایران - 5 خبر ====================

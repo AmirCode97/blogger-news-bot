@@ -432,6 +432,45 @@ class NewsFetcher:
                 if main_image:
                     safe_print(f"  [IranHR] Image found: {main_image[:80]}")
             
+            # ==== HRA News / Harana (hra-news.org) ====
+            elif 'hra-news.org' in url:
+                # Content extraction from entry-content
+                content_div = soup.find('div', class_='entry-content') or soup.find('div', class_='post-content')
+                if content_div:
+                    for p in content_div.find_all(['p', 'h2', 'h3']):
+                        text = p.get_text().strip()
+                        if len(text) > 50 and 'cookie' not in text.lower() and 'اشتراک' not in text:
+                            if text not in paragraphs:
+                                paragraphs.append(text)
+                
+                # Image: og:image = BEST quality (full-size original, uncropped)
+                # IMPORTANT: Do NOT use wp-post-image here — on hra-news.org it's a 
+                # sidebar/author image (e.g. unknown_person1.jpg), NOT the article image!
+                og_img = soup.find('meta', property='og:image')
+                if og_img:
+                    og_url = og_img.get('content', '')
+                    # Filter out generic placeholders
+                    if og_url and 'logo' not in og_url.lower() and 'icon' not in og_url.lower():
+                        main_image = og_url
+                        safe_print(f"  [HRA-News] og:image (best quality): {main_image[:80]}")
+                
+                # Fallback: first large image inside entry-content
+                if not main_image and content_div:
+                    for img in content_div.find_all('img'):
+                        src = _best_image_from_srcset(img.get('srcset', '')) or img.get('src') or img.get('data-src')
+                        if not src:
+                            continue
+                        src_lower = src.lower()
+                        # Skip logos, icons, small avatars, unknown_person placeholder
+                        if any(skip in src_lower for skip in ['logo', 'icon', 'avatar', 'unknown_person', 'gravatar']):
+                            continue
+                        main_image = urljoin(url, src)
+                        safe_print(f"  [HRA-News] content image: {main_image[:80]}")
+                        break
+                
+                if main_image:
+                    safe_print(f"  [HRA-News] Final image: {main_image[:80]}")
+
             # ==== Iran HRS / Iran-HRM ====
             elif 'iranhrs.org' in url or 'iran-hrm.com' in url:
                 # Try entry-content first
