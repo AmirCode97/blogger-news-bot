@@ -55,7 +55,7 @@ if os.path.exists(proxies_file):
 # ==================== News Sources ====================
 # منابع خبری - شامل ایران اینترنشنال و سایت‌های حقوق بشری
 NEWS_SOURCES = [
-    # ==================== ایران اینترنشنال (بین‌الملل) - 10 خبر ====================
+    # ==================== ایران اینترنشنال (بین‌الملل) - 5 خبر ====================
     {
         "name": "ایران اینترنشنال",
         "url": "https://www.iranintl.com/",
@@ -67,16 +67,16 @@ NEWS_SOURCES = [
         "priority": 1,
         "max_items": 5,
     },
-    # ==================== سایت‌های حقوق بشری فعال ====================
+    # ==================== کانون حقوق بشر ایران (بخش حقوق بشر در ایران) ====================
     {
         "name": "کانون حقوق بشر ایران",
-        "url": "https://iranhrs.org/",
+        "url": "https://iranhrs.org/category/%d8%ad%d9%82%d9%88%d9%82-%d8%a8%d8%b4%d8%b1-%d8%af%d8%b1-%d8%a7%db%8c%d8%b1%d8%a7%d9%86/",
         "type": "scrape",
         "language": "fa",
-        "enabled": True,  # فعال - 5 خبر
+        "enabled": True,
         "category": "حقوق بشر",
         "max_items": 7,
-        "use_proxy": True, # استفاده از پروکسی برای اطمینان
+        "use_proxy": True,
         "selectors": {
             "articles": "article",
             "title": "h2 a, h3 a",
@@ -85,7 +85,7 @@ NEWS_SOURCES = [
             "image": "img"
         }
     },
-    # ==================== خبرگزاری هرانا (بخش کارگران) ====================
+    # ==================== خبرگزاری هرانا (بخش کارگران) - بدون محدودیت ====================
     {
         "name": "هرانا - کارگران",
         "url": "https://www.hra-news.org/category/labor/",
@@ -94,7 +94,6 @@ NEWS_SOURCES = [
         "language": "fa",
         "category": "کارگران",
         "priority": 1,
-        "max_items": 5,
         "selectors": {
             "articles": "div.post-item",
             "title": "h2 a, h3 a, .entry-title a",
@@ -102,11 +101,23 @@ NEWS_SOURCES = [
             "image": "img.wp-post-image"
         }
     },
-    # ==================== حقوق بشر در ایران (HumanRightsInIR) - WordPress RSS ====================
+    # ==================== حقوق بشر در ایران - بازداشت/بلاتکلیفی ====================
     {
-        "name": "حقوق بشر در ایران",
-        "url": "https://humanrightsinir.org/",
-        "rss_url": "https://humanrightsinir.org/feed/",
+        "name": "حقوق بشر در ایران - بازداشت",
+        "url": "https://humanrightsinir.org/category/%d8%a8%d8%a7%d8%b2%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d9%84%d8%a7%d8%aa%da%a9%d9%84%db%8c%d9%81%db%8c/",
+        "rss_url": "https://humanrightsinir.org/category/%d8%a8%d8%a7%d8%b2%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d9%84%d8%a7%d8%aa%da%a9%d9%84%db%8c%d9%81%db%8c/feed/",
+        "type": "rss",
+        "language": "fa",
+        "enabled": True,
+        "category": "وضعیت زندانیان",
+        "priority": 1,
+        "max_items": 5,
+    },
+    # ==================== حقوق بشر در ایران - محاکمه / صدور حکم ====================
+    {
+        "name": "حقوق بشر در ایران - محاکمه",
+        "url": "https://humanrightsinir.org/category/%d9%85%d8%ad%d8%a7%da%a9%d9%85%d9%87-%d8%b5%d8%af%d9%88%d8%b1-%d8%ad%da%a9%d9%85/",
+        "rss_url": "https://humanrightsinir.org/category/%d9%85%d8%ad%d8%a7%da%a9%d9%85%d9%87-%d8%b5%d8%af%d9%88%d8%b1-%d8%ad%da%a9%d9%85/feed/",
         "type": "rss",
         "language": "fa",
         "enabled": True,
@@ -115,6 +126,7 @@ NEWS_SOURCES = [
         "max_items": 5,
     },
 ]
+
 
 # ==================== Content Filter Keywords ====================
 # کلمات کلیدی برای فیلتر اخبار مرتبط
