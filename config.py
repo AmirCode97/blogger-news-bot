@@ -102,36 +102,6 @@ NEWS_SOURCES = [
             "image": "img.wp-post-image"
         }
     },
-    # ==================== ناظران حقوق بشر ایران - 5 خبر ====================
-    {
-        "name": "ناظران حقوق بشر ایران",
-        "url": "https://fa.iran-hrm.com/",
-        "type": "scrape",
-        "language": "fa",
-        "enabled": True, # فعال
-        "category": "حقوق بشر",
-        "priority": 2,
-        "max_items": 7,
-        "selectors": {
-            "articles": "article",
-            "title": ".jeg_post_title a, h3.jeg_post_title a, h2 a, h3 a, h4 a",
-            "link": ".jeg_post_title a, h3.jeg_post_title a, h2 a, h3 a, h4 a",
-            "description": ".entry-content p, p",
-            "image": "img"
-        }
-    },
-    # ==================== سازمان حقوق بشر ایران (IranHR) - RSS Atom ====================
-    {
-        "name": "سازمان حقوق بشر ایران",
-        "url": "https://iranhr.net/fa/rss/",
-        "rss_url": "https://iranhr.net/fa/rss/",
-        "type": "rss",
-        "language": "fa",
-        "enabled": True,
-        "category": "حقوق بشر",
-        "priority": 1,
-        "max_items": 7,
-    },
     # ==================== حقوق بشر در ایران (HumanRightsInIR) - WordPress RSS ====================
     {
         "name": "حقوق بشر در ایران",
