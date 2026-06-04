@@ -25,7 +25,6 @@ USE_PROXY = os.getenv("USE_PROXY", "true").lower() == "true"
 PROXY_URL = os.getenv("PROXY_URL", "")  # Example: http://user:pass@proxy:port
 
 # لیست پروکسی‌های Residential (فرمت: http://user:pass@ip:port)
-# برای امنیت بیشتر، این لیست از فایل محلی proxies.json یا متغیر محیطی بارگذاری می‌شود تا روی گیت‌هاب عمومی قرار نگیرد.
 import json
 FREE_PROXIES = []
 
@@ -40,7 +39,7 @@ if residential_env:
     except Exception as e:
         print(f"[WARNING] Loading proxies from env failed: {e}")
 
-# ۲. تلاش برای بارگذاری از فایل محلی proxies.json (در صورتی که وجود داشته باشد)
+# ۲. تلاش برای بارگذاری از فایل محلی proxies.json
 proxies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "proxies.json")
 if os.path.exists(proxies_file):
     try:
@@ -52,7 +51,6 @@ if os.path.exists(proxies_file):
         print(f"[WARNING] Loading proxies from proxies.json failed: {e}")
 
 # ==================== News Sources ====================
-# منابع خبری - شامل ایران اینترنشنال و سایت‌های حقوق بشری
 NEWS_SOURCES = [
     # ==================== ایران اینترنشنال (بین‌الملل) - 5 خبر ====================
     {
@@ -66,7 +64,7 @@ NEWS_SOURCES = [
         "priority": 1,
         "max_items": 5,
     },
-    # ==================== کانون حقوق بشر ایران (بخش حقوق بشر در ایران) ====================
+    # ==================== کانون حقوق بشر ایران ====================
     {
         "name": "کانون حقوق بشر ایران",
         "url": "https://iranhrs.org/category/%d8%ad%d9%82%d9%88%d9%82-%d8%a8%d8%b4%d8%b1-%d8%af%d8%b1-%d8%a7%db%8c%d8%b1%d8%a7%d9%86/",
@@ -84,7 +82,7 @@ NEWS_SOURCES = [
             "image": "img"
         }
     },
-    # ==================== خبرگزاری هرانا (بخش کارگران) - بدون محدودیت ====================
+    # ==================== هرانا - کارگران ====================
     {
         "name": "هرانا - کارگران",
         "url": "https://www.hra-news.org/category/labor/",
@@ -100,41 +98,54 @@ NEWS_SOURCES = [
             "image": "img.wp-post-image"
         }
     },
-    # ==================== حقوق بشر در ایران - بازداشت/بلاتکلیفی ====================
+    # ==================== حقوق بشر در ایران - بازداشت ====================
+    # تغییر از RSS به scrape: RSS روی GitHub Actions بلاک می‌شد
     {
         "name": "حقوق بشر در ایران - بازداشت",
-        "url": "https://humanrightsinir.org/category/%d8%a8%d8%a7%d8%b2%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d9%84%d8%a7%d8%aa%da%a9%d9%84%db%8c%d9%81%db%8c/",
-        "rss_url": "https://humanrightsinir.org/category/%d8%a8%d8%a7%d8%b2%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d9%84%d8%a7%d8%aa%da%a9%d9%84%db%8c%d9%81%db%8c/feed/",
-        "type": "rss",
+        "url": "https://humanrightsinir.org/category/arrest-and-ignorance/",
+        "type": "scrape",
         "language": "fa",
         "enabled": True,
         "category": "وضعیت زندانیان",
         "priority": 1,
         "max_items": 5,
+        "selectors": {
+            "articles": "article, .post, .type-post",
+            "title": "h2 a, h3 a, .entry-title a, a[rel='bookmark']",
+            "link": "h2 a, h3 a, .entry-title a, a[rel='bookmark']",
+            "description": "p, .entry-summary, .post-excerpt",
+            "image": "img"
+        }
     },
-    # ==================== حقوق بشر در ایران - محاکمه / صدور حکم ====================
+    # ==================== حقوق بشر در ایران - محاکمه ====================
+    # تغییر از RSS به scrape: RSS روی GitHub Actions بلاک می‌شد
     {
         "name": "حقوق بشر در ایران - محاکمه",
         "url": "https://humanrightsinir.org/category/%d9%85%d8%ad%d8%a7%da%a9%d9%85%d9%87-%d8%b5%d8%af%d9%88%d8%b1-%d8%ad%da%a9%d9%85/",
-        "rss_url": "https://humanrightsinir.org/category/%d9%85%d8%ad%d8%a7%da%a9%d9%85%d9%87-%d8%b5%d8%af%d9%88%d8%b1-%d8%ad%da%a9%d9%85/feed/",
-        "type": "rss",
+        "type": "scrape",
         "language": "fa",
         "enabled": True,
         "category": "حقوق بشر",
         "priority": 2,
         "max_items": 5,
+        "selectors": {
+            "articles": "article, .post, .type-post",
+            "title": "h2 a, h3 a, .entry-title a, a[rel='bookmark']",
+            "link": "h2 a, h3 a, .entry-title a, a[rel='bookmark']",
+            "description": "p, .entry-summary, .post-excerpt",
+            "image": "img"
+        }
     },
 ]
 
 
 # ==================== Content Filter Keywords ====================
-# کلمات کلیدی برای فیلتر اخبار مرتبط
 FILTER_KEYWORDS = [
     # فارسی
     "ایران", "تهران", "حقوق بشر", "اعتراض", "زندانی سیاسی",
-    "جمهوری اسلامی", "رژیم", "سپاه",
+    "جمهوری اسلامی", "رژیم", "سپاه", "خامنه‌ای", "رئیسی",
     "تحریم", "هسته‌ای", "اتمی", "برجام", "آزادی بیان",
-    "زن زندگی آزادی", "اعدام", "بازداشت",
+    "زن زندگی آزادی", "مهسا امینی", "اعدام", "بازداشت",
     # انگلیسی
     "iran", "iranian", "tehran", "human rights", "protest",
     "political prisoner", "islamic republic", "regime", "irgc",
