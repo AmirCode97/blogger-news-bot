@@ -29,7 +29,7 @@ except ImportError:
     print("[WARNING] playwright not installed. Install with: pip install playwright && playwright install chromium")
 
 # Import config
-from config import NEWS_SOURCES, FILTER_KEYWORDS, USE_PROXY, PROXY_URL, FREE_PROXIES, SCRAPERAPI_KEY
+from config import NEWS_SOURCES, FILTER_KEYWORDS, USE_PROXY, PROXY_URL, FREE_PROXIES
 
 def scrub_secrets(text):
     if not isinstance(text, str):
@@ -149,19 +149,6 @@ class NewsFetcher:
         return any(domain in url for domain in cf_domains)
 
     def _make_request(self, url: str, use_proxy: bool = False, timeout: int = 30) -> Optional[requests.Response]:
-        if SCRAPERAPI_KEY and use_proxy:
-            scraper_url = f"http://api.scraperapi.com/?api_key={SCRAPERAPI_KEY}&url={url}"
-            safe_print(f"  [ScraperAPI] Fetching {url[:60]}...")
-            try:
-                # ScraperAPI handles the proxying and CF bypass
-                response = self.session.get(scraper_url, timeout=timeout+15)
-                if response.status_code == 200:
-                    return response
-                safe_print(f"  [ScraperAPI] Status {response.status_code}")
-            except Exception as e:
-                safe_print(f"  [ScraperAPI] Error: {e}")
-            # If ScraperAPI fails, we can fall back or return None
-            return None
 
         proxies = self._get_proxy() if use_proxy else None
         
