@@ -43,15 +43,15 @@ jobs:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_EXTRA_CONFIG: ${{ secrets.APP_EXTRA_CONFIG }}
         run: |
-          cat > .env << EOF
-          BLOG_ID=$BLOG_ID
-          GOOGLE_CREDENTIALS_FILE=credentials.json
-          GEMINI_API_KEY=$GEMINI_API_KEY
-          CHECK_INTERVAL_HOURS=6
-          MAX_NEWS_PER_CHECK=20
-          USE_PROXY=true
-          APP_EXTRA_CONFIG=$APP_EXTRA_CONFIG
-          EOF
+          cat > .env <<'EOF'
+BLOG_ID=$BLOG_ID
+GOOGLE_CREDENTIALS_FILE=credentials.json
+GEMINI_API_KEY=$GEMINI_API_KEY
+CHECK_INTERVAL_HOURS=6
+MAX_NEWS_PER_CHECK=20
+USE_PROXY=true
+APP_EXTRA_CONFIG=$APP_EXTRA_CONFIG
+EOF
 
       - name: Restore news cache
         continue-on-error: true
