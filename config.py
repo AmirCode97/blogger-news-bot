@@ -81,19 +81,32 @@ NEWS_SOURCES = [
         }
     },
     # ==================== هرانا - کارگران ====================
+    # ساختار واقعی صفحه:
+    #   <div class="archive-listing"> يا <main id="main">
+    #     <article class="post ...">
+    #       <h2 class="entry-title"><a href="...">تیتر</a></h2>
+    #       <div class="entry-content"><p>خلاصه...</p></div>
+    #       <img ...>
+    #     </article>
+    #   </div>
     {
         "name": "هرانا - کارگران",
         "url": "https://www.hra-news.org/category/labor/",
+        # RSS fallback اگر scrape بلاک شد
+        "rss_fallback": "https://www.hra-news.org/category/labor/feed/",
         "enabled": True,
         "type": "scrape",
         "language": "fa",
         "category": "کارگران",
         "priority": 1,
+        "max_items": 7,
         "selectors": {
-            "articles": "div.post-item",
-            "title": "h2 a, h3 a, .entry-title a",
-            "description": ".entry-summary, .excerpt",
-            "image": "img.wp-post-image"
+            # article tag is the standard WordPress loop element on hra-news.org
+            "articles": "article, .post, div.post",
+            "title": "h2.entry-title a, h2 a, h3 a, .entry-title a",
+            "link": "h2.entry-title a, h2 a, h3 a, .entry-title a",
+            "description": ".entry-summary p, .entry-content p, .excerpt p, p",
+            "image": "img.wp-post-image, .post-thumbnail img, img"
         }
     },
     # ==================== حقوق بشر در ایران - بازداشت ====================
@@ -146,11 +159,12 @@ FILTER_KEYWORDS = [
     "جمهوری اسلامی", "رژیم", "سپاه", "خامنه‌ای", "رئیسی",
     "تحریم", "هسته‌ای", "اتمی", "برجام", "آزادی بیان",
     "زن زندگی آزادی", "مهسا امینی", "اعدام", "بازداشت",
+    "کارگر", "اعتصاب", "معوقات", "تجمع اعتراضی",
     # انگلیسی
     "iran", "iranian", "tehran", "human rights", "protest",
     "political prisoner", "islamic republic", "regime", "irgc",
     "khamenei", "sanctions", "nuclear", "jcpoa", "freedom",
-    "mahsa amini", "execution", "arrest"
+    "mahsa amini", "execution", "arrest", "labor", "worker"
 ]
 
 # ==================== Gemini AI ====================
