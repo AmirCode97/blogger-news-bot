@@ -32,6 +32,7 @@ jobs:
           playwright install-deps chromium
 
       - name: Setup OpenVPN (Germany)
+        continue-on-error: true
         env:
           VPN_OVPN_CONFIG: ${{ secrets.VPN_OVPN_CONFIG }}
           VPN_USERNAME: ${{ secrets.VPN_USERNAME }}
