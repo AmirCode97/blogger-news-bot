@@ -1,4 +1,3 @@
-
 import random
 import sys
 import feedparser
@@ -144,15 +143,19 @@ class NewsFetcher:
         return None
 
     def _is_cloudflare_site(self, url: str) -> bool:
-        """Check if the URL belongs to a known Cloudflare-protected site."""
-        cf_domains = ['iranhr.net', 'hra-news.org']
+        """Check if the URL belongs to a known Cloudflare-protected or bot-blocked site."""
+        cf_domains = [
+            'iranhr.net',
+            'hra-news.org',
+            'humanrightsinir.org',   # <-- FIX: added - blocks GitHub Actions IPs
+        ]
         return any(domain in url for domain in cf_domains)
 
     def _make_request(self, url: str, use_proxy: bool = False, timeout: int = 30) -> Optional[requests.Response]:
 
         proxies = self._get_proxy() if use_proxy else None
         
-        # For Cloudflare-protected sites, use cloudscraper first
+        # For Cloudflare-protected / bot-blocked sites, use cloudscraper first
         if self._is_cloudflare_site(url) and self.cf_session:
             try:
                 safe_print(f"  [CF] Using cloudscraper for {url[:60]}...")
@@ -160,9 +163,9 @@ class NewsFetcher:
                 if response.status_code == 200:
                     return response
                 else:
-                    safe_print(f"  [CF] Status {response.status_code}")
+                    safe_print(f"  [CF] Status {response.status_code}, falling back...")
             except Exception as e:
-                safe_print(f"  [CF] Error: {e}")
+                safe_print(f"  [CF] Error: {e}, falling back...")
         
         # Try with proxy first
         if proxies:
@@ -216,7 +219,7 @@ class NewsFetcher:
                             image_url = enc.get('url')
                             break
 
-                # Extract image from description/summary HTML (common in Iranian RSS feeds like hra-news, iranhr)
+                # Extract image from description/summary HTML
                 if not image_url:
                     raw_desc_html = entry.get('summary', entry.get('description', ''))
                     if raw_desc_html:
@@ -235,7 +238,7 @@ class NewsFetcher:
                     'id': news_id,
                     'title': title,
                     'link': link,
-                    'description': description,  # IMPORTANT: Store RSS description
+                    'description': description,
                     'source': source['name'],
                     'source_category': source.get('category', 'News'),
                     'published': entry.get('published', datetime.now().isoformat()),
@@ -250,8 +253,16 @@ class NewsFetcher:
         try:
             safe_print(f"[Scrape] Fetching from {source['name']}...")
             response = self._make_request(source['url'], use_proxy=True)
-            if not response: 
-                safe_print(f"  [Error] Could not fetch {source['url']}")
+            if not response:
+                safe_print(f"  [Error r] Could not fetch {source['url']}")
+                # --- FALLBACK: try RSS feed if defined ---
+                rss_fallback = source.get('rss_fallback')
+                if rss_fallback:
+                    safe_print(f"  [Fallback] Trying RSS: {rss_fallback[:60]}...")
+                    rss_source = dict(source)
+                    rss_source['rss_url'] = rss_fallback
+                    rss_source['type'] = 'rss'
+                    return self.fetch_from_rss(rss_source)
                 return []
             
             soup = BeautifulSoup(response.content, 'html.parser')
@@ -306,7 +317,7 @@ class NewsFetcher:
                     'id': news_id,
                     'title': title,
                     'link': link,
-                    'description': description,  # Store description from listing
+                    'description': description,
                     'source': source['name'],
                     'source_category': source.get('category', 'News'),
                     'published': datetime.now().isoformat(),
@@ -343,40 +354,31 @@ class NewsFetcher:
         try:
             soup = BeautifulSoup(response.content, 'html.parser')
             
-            # =============================================
-            # SPECIAL HANDLING FOR KNOWN SOURCES
-            # =============================================
-            
             paragraphs = []
             main_image = None
             
             # ==== Iran International (SPA - needs Playwright) ====
             if 'iranintl.com' in url:
-                # First try Playwright for full JS rendering
                 if HAS_PLAYWRIGHT:
                     pw_result = self._fetch_with_playwright(url)
                     if pw_result:
                         if pw_result.get('image'):
                             main_image = pw_result['image']
                         if pw_result.get('content'):
-                            # Clean audio player / share / timestamp junk from content
                             cleaned = self._clean_iranintl_content(pw_result['content'])
                             if cleaned:
                                 paragraphs = [cleaned]
                 
-                # Fallback: try static extraction from initial HTML
                 if not main_image:
                     og_img = soup.find('meta', property='og:image')
                     if og_img:
                         main_image = og_img.get('content')
                 
                 if not paragraphs:
-                    # Get content from meta description or JSON-LD
                     meta_desc = soup.find('meta', {'name': 'description'})
                     if meta_desc:
                         paragraphs.append(meta_desc.get('content', ''))
                     
-                    # Try to get content from script tags (JSON-LD)
                     for script in soup.find_all('script', type='application/ld+json'):
                         try:
                             data = json.loads(script.string)
@@ -390,7 +392,6 @@ class NewsFetcher:
             
             # ==== IranHR.net (Cloudflare-protected) ====
             elif 'iranhr.net' in url:
-                # Content extraction
                 content_div = soup.find('div', class_='context') or soup.find('article') or soup.find('div', class_='col-md-8')
                 if content_div:
                     for p in content_div.find_all(['p', 'h2', 'h3']):
@@ -399,7 +400,6 @@ class NewsFetcher:
                             if text not in paragraphs:
                                 paragraphs.append(text)
                 
-                # Image: Try .main-image first (iranhr.net specific)
                 main_img_div = soup.find('div', class_='main-image') or soup.find('img', class_='main-image')
                 if main_img_div:
                     img_tag = main_img_div.find('img') if main_img_div.name == 'div' else main_img_div
@@ -407,16 +407,13 @@ class NewsFetcher:
                         src = _best_image_from_srcset(img_tag.get('srcset', '')) or img_tag.get('src') or img_tag.get('data-src')
                         if src:
                             main_image = urljoin(url, src)
-                            # Fix http:// to https://
                             if main_image.startswith('http://'):
                                 main_image = main_image.replace('http://', 'https://', 1)
                 
-                # Fallback: og:image
                 if not main_image:
                     og_img = soup.find('meta', property='og:image')
                     if og_img:
                         main_image = og_img.get('content', '')
-                        # iranhr.net og:image uses http://, fix to https://
                         if main_image.startswith('http://'):
                             main_image = main_image.replace('http://', 'https://', 1)
                 
@@ -425,7 +422,6 @@ class NewsFetcher:
             
             # ==== HRA News / Harana (hra-news.org) ====
             elif 'hra-news.org' in url:
-                # Content extraction from entry-content
                 content_div = soup.find('div', class_='entry-content') or soup.find('div', class_='post-content')
                 if content_div:
                     for p in content_div.find_all(['p', 'h2', 'h3']):
@@ -434,25 +430,19 @@ class NewsFetcher:
                             if text not in paragraphs:
                                 paragraphs.append(text)
                 
-                # Image: og:image = BEST quality (full-size original, uncropped)
-                # IMPORTANT: Do NOT use wp-post-image here — on hra-news.org it's a 
-                # sidebar/author image (e.g. unknown_person1.jpg), NOT the article image!
                 og_img = soup.find('meta', property='og:image')
                 if og_img:
                     og_url = og_img.get('content', '')
-                    # Filter out generic placeholders
                     if og_url and 'logo' not in og_url.lower() and 'icon' not in og_url.lower():
                         main_image = og_url
                         safe_print(f"  [HRA-News] og:image (best quality): {main_image[:80]}")
                 
-                # Fallback: first large image inside entry-content
                 if not main_image and content_div:
                     for img in content_div.find_all('img'):
                         src = _best_image_from_srcset(img.get('srcset', '')) or img.get('src') or img.get('data-src')
                         if not src:
                             continue
                         src_lower = src.lower()
-                        # Skip logos, icons, small avatars, unknown_person placeholder
                         if any(skip in src_lower for skip in ['logo', 'icon', 'avatar', 'unknown_person', 'gravatar']):
                             continue
                         main_image = urljoin(url, src)
@@ -464,7 +454,6 @@ class NewsFetcher:
 
             # ==== Iran HRS / Iran-HRM ====
             elif 'iranhrs.org' in url or 'iran-hrm.com' in url:
-                # Try entry-content first
                 content_div = soup.find('div', class_='entry-content') or soup.find('article')
                 if content_div:
                     for p in content_div.find_all(['p', 'h2', 'h3']):
@@ -473,7 +462,6 @@ class NewsFetcher:
                             if text not in paragraphs:
                                 paragraphs.append(text)
                 
-                # Image
                 og_img = soup.find('meta', property='og:image')
                 if og_img:
                     main_image = og_img.get('content')
@@ -484,7 +472,6 @@ class NewsFetcher:
             
             # ==== HumanRightsInIR.org (WordPress) ====
             elif 'humanrightsinir.org' in url:
-                # Content extraction
                 content_div = soup.find('div', class_='entry-content') or soup.find('article')
                 if content_div:
                     for p in content_div.find_all(['p']):
@@ -492,10 +479,9 @@ class NewsFetcher:
                         if len(text) > 50 and 'cookie' not in text.lower():
                             paragraphs.append(text)
                 
-                # Image: wp-post-image is the real article image, NOT og:image (which is generic logo)
+                # wp-post-image is the real article image
                 wp_img = soup.find('img', class_='wp-post-image')
                 if not wp_img:
-                    # Try thumbnail container
                     thumb_div = soup.find('div', class_=re.compile(r'thumb|featured|post-image'))
                     if thumb_div:
                         wp_img = thumb_div.find('img')
@@ -505,18 +491,15 @@ class NewsFetcher:
                         main_image = urljoin(url, src)
                         safe_print(f"  [HumanRightsInIR] Image: {main_image[:80]}")
                 
-                # Only use og:image as last resort, and skip if it's a generic logo
                 if not main_image:
                     og_img = soup.find('meta', property='og:image')
                     if og_img:
                         og_url = og_img.get('content', '')
-                        # Skip generic logos/placeholders
                         if og_url and 'cropped-' not in og_url and 'logo' not in og_url.lower():
                             main_image = og_url
             
             # ==== Generic Extraction ====
             else:
-                # Find main content area
                 content_selectors = [
                     ('article', {}),
                     ('div', {'class': 'entry-content'}),
@@ -540,7 +523,6 @@ class NewsFetcher:
                         if len(text) > 50:
                             paragraphs.append(text)
                 
-                # Image extraction
                 og_img = soup.find('meta', property='og:image')
                 if og_img:
                     main_image = og_img.get('content')
@@ -549,16 +531,12 @@ class NewsFetcher:
                     if twitter_img:
                         main_image = twitter_img.get('content')
             
-            # =============================================
-            # UNIVERSAL FALLBACK: If still no image, try harder
-            # =============================================
+            # Universal fallback image
             if not main_image:
                 main_image = self._extract_fallback_image(soup, url)
             
-            # Build full text
             full_text = "\n\n".join(paragraphs[:15]) if paragraphs else ""
             
-            # Log results
             if full_text:
                 safe_print(f"  [OK] Extracted {len(paragraphs)} paragraphs, {len(full_text)} chars")
             else:
@@ -582,23 +560,19 @@ class NewsFetcher:
     def _extract_fallback_image(self, soup, url: str) -> Optional[str]:
         """
         Universal fallback image extraction when source-specific handlers fail.
-        Tries multiple strategies in order of reliability.
         """
-        # Strategy 1: og:image
         og_img = soup.find('meta', property='og:image')
         if og_img:
             img_url = og_img.get('content', '')
             if img_url and 'logo' not in img_url.lower() and 'icon' not in img_url.lower():
                 return img_url
         
-        # Strategy 2: twitter:image
         twitter_img = soup.find('meta', {'name': 'twitter:image'})
         if twitter_img:
             img_url = twitter_img.get('content', '')
             if img_url:
                 return img_url
         
-        # Strategy 3: JSON-LD image
         for script in soup.find_all('script', type='application/ld+json'):
             try:
                 data = json.loads(script.string)
@@ -614,14 +588,12 @@ class NewsFetcher:
             except:
                 pass
         
-        # Strategy 4: First large image in article content
         content_area = soup.find('article') or soup.find('div', class_=re.compile(r'content|entry|post'))
         if content_area:
             for img in content_area.find_all('img'):
                 src = _best_image_from_srcset(img.get('srcset', '')) or img.get('src') or img.get('data-src') or img.get('data-lazy-src')
                 if not src:
                     continue
-                # Skip tiny icons, avatars, logos
                 width = img.get('width', '')
                 height = img.get('height', '')
                 if width and int(width) < 100:
@@ -638,34 +610,24 @@ class NewsFetcher:
     def _clean_iranintl_content(self, text: str) -> str:
         """
         Clean Iran International content by removing audio player,
-        share buttons, and timestamp UI text that gets scraped accidentally.
+        share buttons, and timestamp UI text.
         """
         if not text:
             return text
         
-        # Patterns to remove (audio player, share, timestamps, etc.)
         junk_patterns = [
-            # Audio player text: "پخش نسخه شنیداری" (Play audio version)
             r'پخش\s*نسخه\s*شنیداری',
-            # Share button: "اشتراک‌گذاری" or "اشتراکگذاری"
             r'اشتراک[‌\u200c]?گذاری',
-            # Timestamps: "۲۴ دقیقه پیش" or "۳ ساعت پیش" etc.
             r'[۰-۹\d]+\s*دقیقه\s*پیش',
             r'[۰-۹\d]+\s*ساعت\s*پیش',
             r'[۰-۹\d]+\s*روز\s*پیش',
-            # "لحظاتی پیش" (moments ago)
             r'لحظاتی\s*پیش',
-            # Play/pause icons or labels
             r'►\s*پخش',
             r'▶\s*پخش',
-            # "نسخه شنیداری" alone
             r'نسخه\s*شنیداری',
-            # "بازپخش" (replay)
             r'بازپخش',
-            # Bookmark / save
             r'ذخیره\s*کردن',
             r'نشان‌گذاری',
-            # Copy link
             r'کپی\s*لینک',
             r'رونوشت\s*لینک',
         ]
@@ -674,10 +636,7 @@ class NewsFetcher:
         for pattern in junk_patterns:
             cleaned = re.sub(pattern, '', cleaned)
         
-        # Remove multiple consecutive blank lines
         cleaned = re.sub(r'\n{3,}', '\n\n', cleaned)
-        
-        # Strip leading/trailing whitespace
         cleaned = cleaned.strip()
         
         return cleaned
@@ -686,7 +645,6 @@ class NewsFetcher:
         """
         Fetch a page using Playwright headless browser.
         Used for JS-rendered SPA sites like iranintl.com.
-        Returns dict with 'content' and 'image' keys, or None on failure.
         """
         if not HAS_PLAYWRIGHT:
             return None
@@ -705,18 +663,14 @@ class NewsFetcher:
                 safe_print(f"  [PW] Loading {url[:60]}...")
                 page.goto(url, wait_until='domcontentloaded', timeout=timeout)
                 
-                # Wait for content to load
                 try:
                     page.wait_for_selector('article, .article-body, [class*="article"], [class*="content"]', timeout=8000)
                 except:
                     pass
                 
-                # Extra wait for dynamic content
                 page.wait_for_timeout(2000)
                 
-                # Extract content
                 content = page.evaluate("""() => {
-                    // Try to find article body
                     const selectors = [
                         '[class*="ArticleBody"]',
                         '[class*="article-body"]',
@@ -734,13 +688,10 @@ class NewsFetcher:
                     return document.body ? document.body.innerText.trim() : '';
                 }""")
                 
-                # Extract image
                 image = page.evaluate("""() => {
-                    // Try og:image meta tag first
                     const ogImg = document.querySelector('meta[property="og:image"]');
                     if (ogImg) return ogImg.getAttribute('content');
                     
-                    // Try article featured image
                     const selectors = [
                         '[class*="featured"] img',
                         '[class*="hero"] img', 
