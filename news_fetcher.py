@@ -241,10 +241,6 @@ class NewsFetcher:
     def _fetch_hra_news_articles(self, source: dict) -> List[Dict]:
         """
         Dedicated fetcher for hra-news.org category pages.
-        hra-news.org uses a non-standard WordPress theme where articles are listed
-        as <h2 class="entry-title"> elements OUTSIDE of <article> wrappers on category pages.
-        Strategy: collect all h2.entry-title links, then build article dicts.
-        Falls back to RSS feed if fewer than 3 articles are found via scraping.
         """
         safe_print(f"[Scrape/HRA] Fetching from {source['name']}...")
         response = self._make_request(source['url'], use_proxy=True)
@@ -265,7 +261,7 @@ class NewsFetcher:
         # Strategy 1: standard WordPress article loop
         articles = soup.select('article.post, article[class*="post"], article')
 
-        # Strategy 2: h2.entry-title links directly (some HRA category pages)
+        # Strategy 2: h2.entry-title links directly
         if len(articles) < 3:
             safe_print(f"  [HRA] article selector found {len(articles)}, trying h2.entry-title strategy...")
             title_links = soup.select('h2.entry-title a, h2 a[rel="bookmark"], .entry-title a')
@@ -279,7 +275,6 @@ class NewsFetcher:
                     news_id = self._generate_news_id(title, link)
                     if self.is_duplicate(title, news_id):
                         continue
-                    # Try to find parent container for image/description
                     parent = a_tag.find_parent(['article', 'div', 'li'])
                     image_url = None
                     description = ''
@@ -563,20 +558,11 @@ class NewsFetcher:
                     if img:
                         main_image = urljoin(url, img.get('src', ''))
 
-            # ==== HumanRightsInIR.org (WordPress) ====
-            # FIX: use og:image FIRST — it gives the full untruncated URL.
-            # wp-post-image srcset URLs can be percent-encoded Persian filenames
-            # which get truncated in logging but the real issue is srcset parsing
-            # may pick a low-res variant. og:image is always the canonical full URL.
+            # ==== HumanRightsInIR.org ====
+            # FIX: Use multiple content selectors + fallback to all <p> tags on page
+            # The site uses WordPress but class names vary per article.
             elif 'humanrightsinir.org' in url:
-                content_div = soup.find('div', class_='entry-content') or soup.find('article')
-                if content_div:
-                    for p in content_div.find_all(['p']):
-                        text = p.get_text().strip()
-                        if len(text) > 50 and 'cookie' not in text.lower():
-                            paragraphs.append(text)
-
-                # Priority 1: og:image — canonical, full URL, best quality
+                # Priority 1: og:image for picture
                 og_img = soup.find('meta', property='og:image')
                 if og_img:
                     og_url = og_img.get('content', '')
@@ -584,7 +570,7 @@ class NewsFetcher:
                         main_image = og_url
                         safe_print(f"  [HumanRightsInIR] og:image: {main_image[:100]}")
 
-                # Priority 2: wp-post-image — prefer data-src (full URL, not srcset)
+                # Priority 2 image: wp-post-image
                 if not main_image:
                     wp_img = soup.find('img', class_='wp-post-image')
                     if not wp_img:
@@ -592,7 +578,6 @@ class NewsFetcher:
                         if thumb_div:
                             wp_img = thumb_div.find('img')
                     if wp_img:
-                        # data-src usually has the full clean URL without srcset truncation
                         src = (wp_img.get('data-src') or
                                wp_img.get('data-lazy-src') or
                                wp_img.get('src') or
@@ -600,6 +585,44 @@ class NewsFetcher:
                         if src:
                             main_image = urljoin(url, src)
                             safe_print(f"  [HumanRightsInIR] wp-post-image: {main_image[:100]}")
+
+                # Content extraction - try multiple selectors
+                content_div = (
+                    soup.find('div', class_='entry-content') or
+                    soup.find('div', class_='post-content') or
+                    soup.find('div', class_=re.compile(r'entry|content|article-body|post-body')) or
+                    soup.find('article') or
+                    soup.find('div', class_='single-post-content')
+                )
+
+                if content_div:
+                    for p in content_div.find_all(['p', 'h2', 'h3', 'h4']):
+                        text = p.get_text().strip()
+                        if len(text) > 40 and 'cookie' not in text.lower():
+                            paragraphs.append(text)
+                    safe_print(f"  [HumanRightsInIR] content_div found: {len(paragraphs)} paragraphs")
+                else:
+                    # Fallback: collect all <p> from body, skip nav/footer/sidebar junk
+                    safe_print(f"  [HumanRightsInIR] No content_div found, trying body-level p tags...")
+                    skip_parents = {'nav', 'footer', 'header', 'aside', 'form'}
+                    for p in soup.find_all('p'):
+                        # Skip if inside nav/footer/header/aside
+                        parent_names = {par.name for par in p.parents if par.name}
+                        if parent_names & skip_parents:
+                            continue
+                        text = p.get_text().strip()
+                        if len(text) > 60:
+                            paragraphs.append(text)
+                    safe_print(f"  [HumanRightsInIR] body fallback: {len(paragraphs)} paragraphs")
+
+                # Last resort: use meta description if still empty
+                if not paragraphs:
+                    meta_desc = soup.find('meta', {'name': 'description'}) or soup.find('meta', property='og:description')
+                    if meta_desc:
+                        desc_text = meta_desc.get('content', '').strip()
+                        if len(desc_text) > 40:
+                            paragraphs.append(desc_text)
+                            safe_print(f"  [HumanRightsInIR] using meta description as content")
 
             # ==== Generic Extraction ====
             else:
