@@ -70,6 +70,11 @@ def _best_image_from_srcset(srcset_str: str) -> str:
     return best_url
 
 
+def _is_ok_response(response) -> bool:
+    """Return True only if response is non-None and status_code == 200."""
+    return response is not None and response.status_code == 200
+
+
 class NewsFetcher:
     def __init__(self):
         self.cache_file = "news_cache.json"
@@ -173,6 +178,10 @@ class NewsFetcher:
             response = self.session.get(url, timeout=timeout, verify=False)
             if response.status_code == 200:
                 return response
+            else:
+                # Return response with status code so callers can log it,
+                # but callers MUST use _is_ok_response() to check success.
+                return response
         except: pass
 
         return None
@@ -184,8 +193,8 @@ class NewsFetcher:
             safe_print(f"[RSS] Fetching from {source['name']}...")
 
             response = self._make_request(url, use_proxy=True)
-            if not response:
-                safe_print(f"  [Error] Could not fetch RSS XML")
+            if not _is_ok_response(response):
+                safe_print(f"  [Error] Could not fetch RSS XML (status: {response.status_code if response else 'None'})")
                 return []
 
             feed = feedparser.parse(response.content)
@@ -244,8 +253,8 @@ class NewsFetcher:
         """
         safe_print(f"[Scrape/HRA] Fetching from {source['name']}...")
         response = self._make_request(source['url'], use_proxy=True)
-        if not response:
-            safe_print(f"  [HRA] Could not fetch page, trying RSS fallback...")
+        if not _is_ok_response(response):
+            safe_print(f"  [HRA] Could not fetch page (status: {response.status_code if response else 'None'}), trying RSS fallback...")
             rss_fallback = source.get('rss_fallback')
             if rss_fallback:
                 rss_source = dict(source)
@@ -358,8 +367,11 @@ class NewsFetcher:
         try:
             safe_print(f"[Scrape] Fetching from {source['name']}...")
             response = self._make_request(source['url'], use_proxy=True)
-            if not response:
-                safe_print(f"  [Error r] Could not fetch {source['url']}")
+
+            # ---- FIX: trigger RSS fallback on ANY non-200 response (incl. 403) ----
+            if not _is_ok_response(response):
+                status = response.status_code if response else 'None'
+                safe_print(f"  [Error] Could not fetch {source['url']} (status: {status})")
                 rss_fallback = source.get('rss_fallback')
                 if rss_fallback:
                     safe_print(f"  [Fallback] Trying RSS: {rss_fallback[:60]}...")
@@ -368,6 +380,7 @@ class NewsFetcher:
                     rss_source['type'] = 'rss'
                     return self.fetch_from_rss(rss_source)
                 return []
+            # -----------------------------------------------------------------------
 
             soup = BeautifulSoup(response.content, 'html.parser')
             selectors = source.get('selectors', {})
@@ -439,7 +452,7 @@ class NewsFetcher:
         safe_print(f"  [Fetch] {url[:60]}...")
 
         response = self._make_request(url, use_proxy=True)
-        if not response:
+        if not _is_ok_response(response):
             safe_print(f"  [Warning] Could not fetch article page")
             return {'success': False, 'full_content': '', 'main_image': None}
 
@@ -521,7 +534,6 @@ class NewsFetcher:
                             if text not in paragraphs:
                                 paragraphs.append(text)
 
-                # og:image gives best quality full URL
                 og_img = soup.find('meta', property='og:image')
                 if og_img:
                     og_url = og_img.get('content', '')
@@ -559,10 +571,7 @@ class NewsFetcher:
                         main_image = urljoin(url, img.get('src', ''))
 
             # ==== HumanRightsInIR.org ====
-            # FIX: Use multiple content selectors + fallback to all <p> tags on page
-            # The site uses WordPress but class names vary per article.
             elif 'humanrightsinir.org' in url:
-                # Priority 1: og:image for picture
                 og_img = soup.find('meta', property='og:image')
                 if og_img:
                     og_url = og_img.get('content', '')
@@ -570,7 +579,6 @@ class NewsFetcher:
                         main_image = og_url
                         safe_print(f"  [HumanRightsInIR] og:image: {main_image[:100]}")
 
-                # Priority 2 image: wp-post-image
                 if not main_image:
                     wp_img = soup.find('img', class_='wp-post-image')
                     if not wp_img:
@@ -586,7 +594,6 @@ class NewsFetcher:
                             main_image = urljoin(url, src)
                             safe_print(f"  [HumanRightsInIR] wp-post-image: {main_image[:100]}")
 
-                # Content extraction - try multiple selectors
                 content_div = (
                     soup.find('div', class_='entry-content') or
                     soup.find('div', class_='post-content') or
@@ -602,11 +609,9 @@ class NewsFetcher:
                             paragraphs.append(text)
                     safe_print(f"  [HumanRightsInIR] content_div found: {len(paragraphs)} paragraphs")
                 else:
-                    # Fallback: collect all <p> from body, skip nav/footer/sidebar junk
                     safe_print(f"  [HumanRightsInIR] No content_div found, trying body-level p tags...")
                     skip_parents = {'nav', 'footer', 'header', 'aside', 'form'}
                     for p in soup.find_all('p'):
-                        # Skip if inside nav/footer/header/aside
                         parent_names = {par.name for par in p.parents if par.name}
                         if parent_names & skip_parents:
                             continue
@@ -615,7 +620,6 @@ class NewsFetcher:
                             paragraphs.append(text)
                     safe_print(f"  [HumanRightsInIR] body fallback: {len(paragraphs)} paragraphs")
 
-                # Last resort: use meta description if still empty
                 if not paragraphs:
                     meta_desc = soup.find('meta', {'name': 'description'}) or soup.find('meta', property='og:description')
                     if meta_desc:
