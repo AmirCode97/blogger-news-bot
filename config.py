@@ -20,15 +20,13 @@ CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "6"))
 MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))
 
 # ==================== Proxy Settings ====================
-# برای دور زدن محدودیت‌های Cloudflare
 USE_PROXY = os.getenv("USE_PROXY", "true").lower() == "true"
 PROXY_URL = os.getenv("PROXY_URL", "")  # Example: http://user:pass@proxy:port
 
-# لیست پروکسی‌های Residential (فرمت: http://user:pass@ip:port)
 import json
 FREE_PROXIES = []
 
-# ۱. تلاش برای بارگذاری از متغیر محیطی
+# 1. Load from env var
 residential_env = os.getenv("RESIDENTIAL_PROXIES", "")
 if residential_env:
     try:
@@ -39,7 +37,7 @@ if residential_env:
     except Exception as e:
         print(f"[WARNING] Loading proxies from env failed: {e}")
 
-# ۲. تلاش برای بارگذاری از فایل محلی proxies.json
+# 2. Load from local proxies.json
 proxies_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "proxies.json")
 if os.path.exists(proxies_file):
     try:
@@ -99,10 +97,11 @@ NEWS_SOURCES = [
         }
     },
     # ==================== حقوق بشر در ایران - بازداشت ====================
-    # تغییر از RSS به scrape: RSS روی GitHub Actions بلاک می‌شد
     {
         "name": "حقوق بشر در ایران - بازداشت",
         "url": "https://humanrightsinir.org/category/arrest-and-ignorance/",
+        # RSS fallback: used automatically if scrape fails (e.g. IP block on GitHub Actions)
+        "rss_fallback": "https://humanrightsinir.org/category/arrest-and-ignorance/feed/",
         "type": "scrape",
         "language": "fa",
         "enabled": True,
@@ -118,10 +117,11 @@ NEWS_SOURCES = [
         }
     },
     # ==================== حقوق بشر در ایران - محاکمه ====================
-    # تغییر از RSS به scrape: RSS روی GitHub Actions بلاک می‌شد
     {
         "name": "حقوق بشر در ایران - محاکمه",
         "url": "https://humanrightsinir.org/category/%d9%85%d8%ad%d8%a7%da%a9%d9%85%d9%87-%d8%b5%d8%af%d9%88%d8%b1-%d8%ad%da%a9%d9%85/",
+        # RSS fallback: used automatically if scrape fails (e.g. IP block on GitHub Actions)
+        "rss_fallback": "https://humanrightsinir.org/category/%d9%85%d8%ad%d8%a7%da%a9%d9%85%d9%87-%d8%b5%d8%af%d9%88%d8%b1-%d8%ad%da%a9%d9%85/feed/",
         "type": "scrape",
         "language": "fa",
         "enabled": True,
