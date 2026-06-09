@@ -573,7 +573,7 @@ class BloggerNewsBot:
                         {tags_html}
                     </div>
                     <div style="background:#161616;padding:10px 20px;border-radius:8px;border-right:3px solid #c0392b;font-weight:bold;color:#ddd;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,0.4);margin-bottom:10px;">
-                        <span style="color:#c0392b;margin-left:8px;">منبع خبر:</span> iranpolnews
+                        <span style="color:#c0392b;margin-left:8px;">منبع خبر:</span> {source_name}
                     </div>
                 </footer>
                 
