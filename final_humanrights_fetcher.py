@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 # final_humanrights_fetcher.py
+=======
+>>>>>>> f43e3a564507e7d4c8a9500640855de15f578462
 import requests, urllib3, re, time, random
 from bs4 import BeautifulSoup
 urllib3.disable_warnings()
@@ -38,7 +41,11 @@ def make_session():
 def safe_get(url, max_retries=5):
     """در صورت 429، session رو reset می‌کنه و دوباره تلاش می‌کنه"""
     global session
+<<<<<<< HEAD
     delays = [10, 20, 30, 45, 60]  # تاخیر تصاعدی
+=======
+    delays = [10, 20, 30, 45, 60]
+>>>>>>> f43e3a564507e7d4c8a9500640855de15f578462
 
     for attempt in range(max_retries):
         try:
@@ -49,7 +56,11 @@ def safe_get(url, max_retries=5):
                 wait = delays[min(attempt, len(delays)-1)]
                 print(f"  ⏳ 429 — reset session + صبر {wait}s (تلاش {attempt+1}/{max_retries})")
                 time.sleep(wait)
+<<<<<<< HEAD
                 session = make_session()  # ← session جدید با cookie تازه
+=======
+                session = make_session()
+>>>>>>> f43e3a564507e7d4c8a9500640855de15f578462
             else:
                 print(f"  ⚠️ Status {r.status_code}")
                 return None
@@ -70,7 +81,11 @@ def best_from_srcset(srcset_str):
         if len(tokens) >= 2:
             url = tokens[0]
             try:
+<<<<<<< HEAD
                 w = int(tokens[1].replace("w",""))
+=======
+                w = int(tokens[1].replace("w", ""))
+>>>>>>> f43e3a564507e7d4c8a9500640855de15f578462
                 if w > best_w:
                     best_w, best_url = w, url
             except:
@@ -84,7 +99,11 @@ def best_from_srcset(srcset_str):
 
 # ─── گرفتن تصویر اصلی خبر ────────────────────────────────────────────────
 def get_article_image(url):
+<<<<<<< HEAD
     time.sleep(random.uniform(5, 9))  # ← delay بیشتر بین خبرها
+=======
+    time.sleep(random.uniform(5, 9))
+>>>>>>> f43e3a564507e7d4c8a9500640855de15f578462
 
     r = safe_get(url)
     if not r:
@@ -111,6 +130,7 @@ def get_article_image(url):
     article = soup.select_one("article, .entry-content, .post-content")
     if article:
         for img in article.find_all("img"):
+<<<<<<< HEAD
             src_check = img.get("src","") + "".join(img.get("class",[]))
             if any(s in src_check for s in LOGO_SKIP):
                 continue
@@ -121,6 +141,18 @@ def get_article_image(url):
                     return u
             src = img.get("src","") or img.get("data-src","")
             if src and any(e in src for e in [".jpg",".jpeg",".png",".webp"]):
+=======
+            src_check = img.get("src", "") + "".join(img.get("class", []))
+            if any(s in src_check for s in LOGO_SKIP):
+                continue
+            srcset = img.get("srcset", "")
+            if srcset:
+                u = best_from_srcset(srcset)
+                if u and any(e in u for e in [".jpg", ".jpeg", ".png", ".webp"]):
+                    return u
+            src = img.get("src", "") or img.get("data-src", "")
+            if src and any(e in src for e in [".jpg", ".jpeg", ".png", ".webp"]):
+>>>>>>> f43e3a564507e7d4c8a9500640855de15f578462
                 return re.sub(r'\?.*$', '', src)
 
     return None
@@ -181,4 +213,8 @@ if __name__ == "__main__":
     print(f"✅ جمع کل: {len(all_news)} خبر با تصویر آماده ارسال به بلاگر")
     for n in all_news:
         print(f"  • {n['title'][:55]}")
+<<<<<<< HEAD
         print(f"    🖼️  {n['image'][:80]}")
+=======
+        print(f"    🖼️  {n['image'][:80]}")
+>>>>>>> f43e3a564507e7d4c8a9500640855de15f578462
