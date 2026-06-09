@@ -278,7 +278,45 @@ def build_related_posts_widget(related_posts, current_label):
         </div>
     </div>
     """
-    return widget_html
+    
+    import base64
+    import uuid
+    # Encode HTML to base64 to hide it from RSS readers and text extractors
+    encoded_html = base64.b64encode(widget_html.encode('utf-8')).decode('utf-8')
+    uid = uuid.uuid4().hex
+    
+    js_wrapper = f"""
+    <div id="related-{uid}"></div>
+    <script>
+    (function() {{
+        var init = function() {{
+            var b64 = "{encoded_html}";
+            // Using a safe decoding method for UTF-8
+            var html = decodeURIComponent(escape(window.atob(b64)));
+            var placeholder = document.getElementById("related-{uid}");
+            if (placeholder && !placeholder.getAttribute('data-loaded')) {{
+                placeholder.setAttribute('data-loaded', 'true');
+                var wrapper = document.createElement('div');
+                wrapper.innerHTML = html;
+                
+                // Find post body to insert outside of it
+                var postBody = placeholder.closest('.post-body') || placeholder.closest('.entry-content');
+                if (postBody && postBody.parentNode) {{
+                    postBody.parentNode.insertBefore(wrapper, postBody.nextSibling);
+                }} else {{
+                    placeholder.parentNode.insertBefore(wrapper, placeholder.nextSibling);
+                }}
+            }}
+        }};
+        if (document.readyState === 'loading') {{
+            document.addEventListener('DOMContentLoaded', init);
+        }} else {{
+            init();
+        }}
+    }})();
+    </script>
+    """
+    return js_wrapper
 
 def update_posts(dry_run=False, limit=150):
     print("=" * 70)

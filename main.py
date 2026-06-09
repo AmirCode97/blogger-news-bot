@@ -566,10 +566,6 @@ class BloggerNewsBot:
                         {description_html}
                     </div>
                 </article>
-                
-                <!-- Related Posts Widget -->
-                {related_widget_html}
-                
                 <!-- SEO Internal Link Tag Cloud & Source Box -->
                 <footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;direction:rtl;text-align:right;">
                     <div style="font-size:14px;color:#888;margin-bottom:10px;">
@@ -580,6 +576,9 @@ class BloggerNewsBot:
                         <span style="color:#c0392b;margin-left:8px;">منبع خبر:</span> iranpolnews
                     </div>
                 </footer>
+                
+                <!-- Related Posts Widget -->
+                {related_widget_html}
                 """
 
                 # 4. PUBLISH
