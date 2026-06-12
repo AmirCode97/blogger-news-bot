@@ -441,6 +441,8 @@ class NewsFetcher:
     def fetch_all_news(self, max_items: int = 20) -> List[Dict]:
         all_news = []
         for source in NEWS_SOURCES:
+            if not source.get('enabled', True):
+                continue
             source_type = source.get('type', 'rss')
             if source_type == 'rss':
                 all_news.extend(self.fetch_from_rss(source))
