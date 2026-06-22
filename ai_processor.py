@@ -34,11 +34,11 @@ class AIProcessor:
                 # Process Persian news
                 processed = self._process_persian(title, description)
             
-            return processed.get('title', title), processed.get('content', description)
+            return processed.get('title', title), processed.get('english_slug', ''), processed.get('content', description)
             
         except Exception as e:
             print(f"❌ AI Processing error: {e}")
-            return title, description
+            return title, '', description
     
     def _translate_and_process(self, title: str, description: str) -> Dict:
         """Translate English news to Persian and format"""
@@ -52,12 +52,13 @@ class AIProcessor:
 لطفاً خروجی را به این فرمت JSON بده:
 {{
     "title": "عنوان فارسی جذاب",
+    "english_slug": "short-english-url-slug-with-keywords",
     "content": "متن کامل خبر به فارسی (۲-۳ پاراگراف)",
     "tags": ["تگ۱", "تگ۲", "تگ۳"]
 }}
 
 فقط JSON خالص برگردان، بدون هیچ توضیح اضافی.
-نکته مهم: از هیچ علامت نگارشی مثل ستاره (**) یا هشتگ (##) در متن استفاده نکن و نام خبرگزاری یا منبع را در متن ذکر نکن.
+نکته مهم: از هیچ علامت نگارشی مثل ستاره (**) یا هشتگ (##) در متن استفاده نکن و نام خبرگزاری یا منبع را در متن ذکر نکن. برای english_slug فقط از کلمات کلیدی انگلیسی مرتبط با خبر (حداکثر ۸ کلمه) استفاده کن و بین آن‌ها خط تیره (-) بگذار.
 """
         
         response = self.model.generate_content(prompt)
@@ -75,12 +76,13 @@ class AIProcessor:
 لطفاً خروجی را به این فرمت JSON بده:
 {{
     "title": "عنوان بهبود یافته و جذاب",
+    "english_slug": "short-english-url-slug-with-keywords",
     "content": "متن خبر به صورت روان و مناسب وبلاگ (۲-۳ پاراگراف)",
     "tags": ["تگ۱", "تگ۲", "تگ۳"]
 }}
 
 فقط JSON خالص برگردان، بدون هیچ توضیح اضافی.
-نکته بسیار مهم: از هیچ علامت نگارشی مثل ستاره (**) یا هشتگ (##) در متن استفاده نکن. همچنین به هیچ وجه نام منبع خبر یا خبرگزاری را در داخل متن نیاور!
+نکته بسیار مهم: از هیچ علامت نگارشی مثل ستاره (**) یا هشتگ (##) در متن استفاده نکن. همچنین به هیچ وجه نام منبع خبر یا خبرگزاری را در داخل متن نیاور! برای english_slug فقط از کلمات کلیدی ترجمه شده انگلیسی مرتبط با خبر (حداکثر ۸ کلمه) استفاده کن و بین آن‌ها خط تیره (-) بگذار.
 """
         
         response = self.model.generate_content(prompt)

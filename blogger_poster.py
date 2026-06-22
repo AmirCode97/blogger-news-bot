@@ -65,3 +65,13 @@ class BloggerPoster:
             self.service.posts().publish(blogId=self.blog_id, postId=post_id).execute()
             return True
         except: return False
+
+    def update_post_title(self, post_id, new_title):
+        try:
+            post_body = {'title': new_title}
+            return self.service.posts().patch(
+                blogId=self.blog_id, postId=post_id, body=post_body
+            ).execute()
+        except Exception as e:
+            print(f"[Error] Updating post title: {e}")
+            return None
