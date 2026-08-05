@@ -57,7 +57,7 @@ NEWS_SOURCES = [
         "rss_url": "https://www.iranintl.com/feed",
         "type": "rss",
         "language": "fa",
-        "enabled": True,
+        "enabled": False,
         "category": "بین‌الملل",
         "priority": 1,
         "max_items": 5,
