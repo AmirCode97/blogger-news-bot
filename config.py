@@ -68,7 +68,7 @@ NEWS_SOURCES = [
         "url": "https://iranhrs.org/category/%d8%ad%d9%82%d9%88%d9%82-%d8%a8%d8%b4%d8%b1-%d8%af%d8%b1-%d8%a7%db%8c%d8%b1%d8%a7%d9%86/",
         "type": "scrape",
         "language": "fa",
-        "enabled": False,
+        "enabled": True,
         "category": "حقوق بشر",
         "max_items": 7,
         "use_proxy": True,
