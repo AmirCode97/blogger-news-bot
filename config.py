@@ -94,7 +94,7 @@ NEWS_SOURCES = [
         "url": "https://www.hra-news.org/category/labor/",
         # RSS fallback اگر scrape بلاک شد
         "rss_fallback": "https://www.hra-news.org/category/labor/feed/",
-        "enabled": False,
+        "enabled": True,
         "type": "scrape",
         "language": "fa",
         "category": "کارگران",
