@@ -264,6 +264,16 @@ class PipelineTests(IsolatedTest):
             update.assert_called_once()
 
 class StateTests(IsolatedTest):
+    def test_blogger_list_matches_installed_api_contract(self):
+        from googleapiclient.discovery import build_from_document
+        from googleapiclient.discovery_cache import get_static_doc
+        from googleapiclient.http import HttpMockSequence
+        poster = BloggerPoster.__new__(BloggerPoster)
+        poster.blog_id = '12345'
+        poster.service = build_from_document(get_static_doc('blogger', 'v3'),
+            http=HttpMockSequence([({'status': '200'}, b'{"items": [{"id": "live-post"}]}')]))
+        self.assertEqual(poster.list_posts('2026-09-01T00:00:00Z', labels='stats')[0]['id'], 'live-post')
+
     def test_large_snapshot_restores_through_raw_content(self):
         data = {'version': 1, 'files': {'news_cache.json': {'seen_ids': ['saved'], 'seen_titles': []},
                                      'duplicate_cache.json': {'seen_urls': [], 'published_entries': []}}}
