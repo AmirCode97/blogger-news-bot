@@ -34,7 +34,8 @@ def download_and_optimize_image(url):
 def labels_for(title, body, category):
     text = title + ' ' + body
     labels = []
-    if any(w in text for w in ['کارگر', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'بازنشستگان']):
+    if any(w in text for w in ['کارگر', 'حقوق معوقه', 'سندیکا', 'بازنشستگان', 'پرستار']) or (
+            'اعتصاب' in text and 'اعتصاب غذا' not in normalize_text(text)):
         labels.append('کارگران')
     if any(w in text for w in ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'شکنجه']):
         labels.append('وضعیت زندانیان')
