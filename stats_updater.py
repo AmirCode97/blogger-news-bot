@@ -45,7 +45,8 @@ BACKGROUND = re.compile(r'پیشتر|پیش از این|قبلا|سال گذشت
 ARREST_CONTEXT = re.compile(r'محاکمه|صدور حکم|حکم اعدام|احکام|حبس|پرونده|آزادی|آزاد شد|وثیقه|سالگرد|بی خبری|وضعیت زندانی|ادامه بازداشت|تمدید بازداشت|بلاتکلیفی')
 
 def sentences(text):
-    return [normalize_text(s) for s in re.split(r'[.!؟؛\n]+', text) if s.strip()]
+    # Keep question marks so an interrogative sentence cannot become an assertion.
+    return [normalize_text(s) for s in re.findall(r'[^.!؟?؛\n]+[.!؟?؛]?', text) if s.strip()]
 
 def classify(title, body, kind):
     heading = normalize_text(title)

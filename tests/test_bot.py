@@ -264,6 +264,19 @@ class PipelineTests(IsolatedTest):
             update.assert_called_once()
 
 class StateTests(IsolatedTest):
+    def test_large_snapshot_restores_through_raw_content(self):
+        data = {'version': 1, 'files': {'news_cache.json': {'seen_ids': ['saved'], 'seen_titles': []},
+                                     'duplicate_cache.json': {'seen_urls': [], 'published_entries': []}}}
+        store = GitHubState.__new__(GitHubState)
+        store.current = Mock(return_value=Mock(status_code=200, json=lambda: {'encoding': 'none'}))
+        store.request = Mock(return_value=Mock(status_code=200, json=lambda: data))
+        store.restore()
+        self.assertEqual(json.loads(Path('news_cache.json').read_text())['seen_ids'], ['saved'])
+        self.assertEqual(store.request.call_args.kwargs['headers']['Accept'], 'application/vnd.github.raw+json')
+
+    def test_question_mark_is_not_a_reported_occurrence(self):
+        self.assertNotEqual(classify('دو نفر بازداشت شدند؟', '', 'arrests')[0], 'reported')
+
     def test_atomic_state_and_validation(self):
         data = {'version': 1, 'files': {'news_cache.json': {'seen_ids': ['a'], 'seen_titles': []},
                                      'duplicate_cache.json': {'seen_urls': [], 'published_entries': []}}}
