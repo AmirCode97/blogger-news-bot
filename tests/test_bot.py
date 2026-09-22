@@ -13,7 +13,7 @@ from ai_processor import AIProcessor, AIProcessingError
 from article_utils import atomic_json, canonical_url, parse_datetime, utc_now
 from blogger_poster import BloggerPoster
 from duplicate_detector import DuplicateDetector
-from main import BloggerNewsBot, build_post_html, deduplicate_text
+from main import BloggerNewsBot, build_post_html, deduplicate_text, labels_for
 from news_fetcher import NewsFetcher
 from state_store import GitHubState, validate_state
 from stats_updater import calculate_stats, classify, month_window, update_stats_post, STATS_TITLE
@@ -128,15 +128,47 @@ class AITests(IsolatedTest):
 
     def test_valid_rewrite_contract(self):
         ai = self.processor(json.dumps({'title': 'تجمع کارگران برای پیگیری دستمزد', 'english_slug': 'iran-workers-wages', 'content': BODY}))
+        rewrite_response = ai.session.post.return_value
+        verdict = NS(status_code=200, json=lambda: {'candidates': [{'finishReason': 'STOP',
+                     'content': {'parts': [{'text': '{"supported":true,"issues":[]}'}]}}]})
+        ai.session.post.side_effect = [rewrite_response, verdict]
         result = ai.process_news('تجمع کارگران', BODY)
         self.assertEqual(result[2], BODY)
+        self.assertEqual(ai.session.post.call_count, 2)
         self.assertEqual(ai.session.post.call_args.kwargs['json']['generationConfig']['responseMimeType'], 'application/json')
+
+    def test_unsupported_or_malformed_grounding_verdict_rejects(self):
+        for verdict in [{'supported': False, 'issues': ['invented attribution']},
+                        {'supported': True, 'issues': ['changed name']},
+                        {'supported': 'true', 'issues': []}, {'supported': True}]:
+            ai = self.processor(json.dumps(verdict))
+            with self.subTest(verdict=verdict), self.assertRaises(AIProcessingError):
+                ai._verify_grounding('تجمع کارگران', BODY, {'title': 'تجمع کارگران', 'content': BODY})
+
+    def test_failed_grounding_never_returns_rewrite(self):
+        ai = self.processor(json.dumps({'title': 'تجمع کارگران برای پیگیری دستمزد',
+                                        'english_slug': 'workers-wages', 'content': BODY}))
+        with patch.object(ai, '_verify_grounding', side_effect=AIProcessingError('unsupported')) as verify:
+            with patch('ai_processor.time.sleep'), self.assertRaises(AIProcessingError):
+                ai.process_news('تجمع کارگران', BODY)
+            self.assertEqual(verify.call_count, 3)
+
+    def test_hunger_strike_is_not_automatically_a_labor_story(self):
+        self.assertEqual(labels_for('اعتصاب غذا در زندان', 'یک زندانی اعتصاب غذا کرده است.', 'حقوق بشر'), ['وضعیت زندانیان'])
+        self.assertIn('کارگران', labels_for('اعتصاب کارگران', BODY, 'حقوق بشر'))
 
     def test_bad_json_and_types_rejected(self):
         ai = self.processor('')
         for bad in ['not JSON', '[]', '{"title":null}', json.dumps({'title': 'عنوان کافی خبر', 'english_slug': 'good-slug', 'content': []})]:
             with self.subTest(bad=bad), self.assertRaises(AIProcessingError):
                 ai._parse_ai_response(bad)
+
+    def test_unused_slug_cannot_block_a_valid_story(self):
+        ai = self.processor('')
+        for value in [None, 'نامک فارسی', 'too many words without hyphens']:
+            data = ai._parse_ai_response(json.dumps({'title': 'تجمع کارگران برای پیگیری دستمزد',
+                                                     'english_slug': value, 'content': BODY}))
+            self.assertRegex(data['english_slug'], r'^news-[0-9a-f]{12}$')
 
     def test_no_model_call_for_headline_only(self):
         ai = self.processor('')
