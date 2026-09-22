@@ -74,7 +74,7 @@ class BloggerPoster:
         token = None
         for _ in range(100):
             options = {'blogId': self.blog_id, 'maxResults': 100, 'fetchBodies': True,
-                       'status': 'live', 'orderBy': 'published'}
+                       'status': 'LIVE', 'orderBy': 'PUBLISHED'}
             if start_date:
                 options['startDate'] = start_date
             if labels:
