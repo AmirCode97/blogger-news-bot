@@ -1,660 +1,210 @@
-
-import os
+"""Scheduled source -> Gemini rewrite -> Blogger publication; old news posts are read-only."""
+import argparse
+import json
 import sys
-
-# Reconfigure standard output and error streams to UTF-8 to prevent 'charmap' encoding errors on Windows
-if hasattr(sys.stdout, 'reconfigure'):
-    sys.stdout.reconfigure(encoding='utf-8')
-if hasattr(sys.stderr, 'reconfigure'):
-    sys.stderr.reconfigure(encoding='utf-8')
-
-import re
 import time
+from datetime import timedelta
+from html import escape
+from urllib.parse import quote
+
 import schedule
-from datetime import datetime, timedelta
+from ai_processor import AIProcessor, AIProcessingError, sufficient_source
+from article_utils import atomic_json, canonical_url, normalize_text, parse_datetime, utc_now
+from blogger_poster import BloggerPoster
+from config import BLOG_ID, BLOG_URL, CHECK_INTERVAL_HOURS, MAX_NEWS_PER_CHECK, MAX_NEWS_AGE_HOURS
+from duplicate_detector import DuplicateDetector
+from news_fetcher import NewsFetcher
+from stats_updater import fetch_and_calculate_stats, update_stats_post
 
 def deduplicate_text(text):
-    """Detect and remove duplicated text content.
-    If the text contains the same content repeated twice, keep only the first occurrence."""
-    if not text or len(text) < 50:
-        return text
-    
-    paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
-    unique_paragraphs = []
-    seen = set()
-    
-    for p in paragraphs:
-        # Simplify paragraph for comparison
-        clean_p = re.sub(r'[^\w\s]', '', p).strip()
-        words = clean_p.split()
-        
-        # We need at least 5 words to consider it a deduplicable sentence
-        if len(words) < 5:
-            unique_paragraphs.append(p)
-            continue
-            
-        fingerprint = " ".join(words[:40]) # check up to 40 words
-        
-        if fingerprint not in seen:
-            seen.add(fingerprint)
-            unique_paragraphs.append(p)
-        else:
-            print(f"  [Dedup] Removed duplicated paragraph: len={len(p)}")
+    """Remove only identical full paragraphs, never just a common opening."""
+    seen, paragraphs = set(), []
+    for paragraph in text.split('\n'):
+        key = normalize_text(paragraph)
+        if key and key not in seen:
+            paragraphs.append(paragraph.strip())
+            seen.add(key)
+    return '\n\n'.join(paragraphs)
 
-    return "\n\n".join(unique_paragraphs)
+def download_and_optimize_image(url):
+    if not canonical_url(url):
+        return ''
+    return 'https://wsrv.nl/?url=' + quote(url, safe='') + '&w=800&output=webp&q=75'
 
-def download_and_optimize_image(url: str) -> str:
-    """
-    Returns a fast CDN proxied image URL from wsrv.nl instead of downloading locally.
-    This prevents storing images in GitHub while maintaining high performance.
-    """
-    if not url:
-        return ""
-    if "jsdelivr.net" in url or "raw.githubusercontent.com" in url or url.startswith("data:"):
-        return url
-        
-    from urllib.parse import quote
-    # w=800 sets max width, output=webp forces webp conversion, q=75 sets quality
-    return f"https://wsrv.nl/?url={quote(url)}&w=800&output=webp&q=75"
+def labels_for(title, body, category):
+    text = title + ' ' + body
+    labels = []
+    if any(w in text for w in ['کارگر', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'بازنشستگان']):
+        labels.append('کارگران')
+    if any(w in text for w in ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'شکنجه']):
+        labels.append('وضعیت زندانیان')
+    return labels or [category or 'حقوق بشر']
 
-
-
-def proxy_external_image(url):
-    if not url:
-        return ""
-    # Already on CDN or data URL or empty
-    if "jsdelivr.net" in url or "raw.githubusercontent.com" in url or url.startswith("data:"):
-        return url
-    from urllib.parse import quote
-    # wsrv.nl is a free, fast global image cache proxy unblocked in Iran
-    return f"https://wsrv.nl/?url={quote(url)}"
-
-def validate_image_url(url: str, timeout: int = 6) -> bool:
-    """
-    Verify image URL is actually accessible before publishing.
-    Returns True if the image can be fetched, False otherwise.
-    jsdelivr CDN and raw.githubusercontent.com URLs are trusted directly without a network check.
-    """
-    if not url:
-        return False
-    # Trust our own CDN stock images directly
-    if "jsdelivr.net" in url or "raw.githubusercontent.com" in url:
-        return True
-    try:
-        from urllib.parse import quote as _quote
-        check_url = f"https://wsrv.nl/?url={_quote(url)}" if "wsrv.nl" not in url else url
-        resp = requests.head(check_url, timeout=timeout, allow_redirects=True)
-        return resp.status_code == 200
-    except Exception:
-        return False
-
-def strip_markdown(text):
-    """Remove all Markdown formatting symbols from text while preserving the actual content."""
-    if not text:
-        return text
-    # Remove heading markers (##, ###, etc.)
-    text = re.sub(r'^#{1,6}\s*', '', text, flags=re.MULTILINE)
-    # Remove bold+italic (***text*** or ___text___)
-    text = re.sub(r'\*{3}(.+?)\*{3}', r'\1', text)
-    text = re.sub(r'_{3}(.+?)_{3}', r'\1', text)
-    # Remove bold (**text** or __text__)
-    text = re.sub(r'\*{2}(.+?)\*{2}', r'\1', text)
-    text = re.sub(r'_{2}(.+?)_{2}', r'\1', text)
-    # Remove italic (*text* or _text_) - careful not to break normal underscores
-    text = re.sub(r'(?<!\w)\*([^\*\n]+?)\*(?!\w)', r'\1', text)
-    # Remove inline code (`text`)
-    text = re.sub(r'`([^`]+?)`', r'\1', text)
-    # Remove horizontal rules (---, ***, ___)
-    text = re.sub(r'^[\-\*_]{3,}\s*$', '', text, flags=re.MULTILINE)
-    # Remove blockquote markers (> text)
-    text = re.sub(r'^>\s*', '', text, flags=re.MULTILINE)
-    # Remove bullet point markers (* item, - item) at start of lines
-    text = re.sub(r'^\s*[\*\-\+]\s+', '', text, flags=re.MULTILINE)
-    # Remove numbered list markers (1. item)
-    text = re.sub(r'^\s*\d+\.\s+', '', text, flags=re.MULTILINE)
-    # Remove any remaining standalone ** or ***
-    text = re.sub(r'\*{2,3}', '', text)
-    # Remove === markers that weren't parsed
-    text = re.sub(r'={3,}[A-Z]+={3,}', '', text)
-    # Clean up excessive whitespace
-    text = re.sub(r'\n{3,}', '\n\n', text)
-    return text.strip()
-
-def strip_ai_noise(text):
-    """Remove AI meta-commentary, analysis, and thinking-out-loud lines that should not appear in blog posts."""
-    if not text:
-        return text
-    # Patterns that indicate AI analysis/commentary (not actual news content)
-    noise_patterns = [
-        r'^.*بسیار عالی.*$',
-        r'^.*با توجه به نقش.*$',
-        r'^.*پیشنهادات بازنویسی.*$',
-        r'^.*سناریوی \d.*$',
-        r'^.*عنوان پیشنهادی.*$',
-        r'^.*گزینه [الفب].*$',
-        r'^.*چرا\?\!?\?.*$',
-        r'^.*نکات سئو.*$',
-        r'^.*محتوای پیشنهادی.*$',
-        r'^.*بهینه‌سازی برای جستجو.*$',
-        r'^.*لینک‌سازی داخلی.*$',
-        r'^.*عنوان اصلی \(پیشنهادی.*$',
-        r'^.*تاکید بر فوریت.*$',
-        r'^.*تاکید بر گستردگی.*$',
-        r'^.*ساختار پاراگراف.*$',
-        r'^.*کلمات کلیدی در عنوان.*$',
-        r'^.*قالب‌بندی:.*$',
-        r'^.*خوانایی:.*$',
-        r'^.*first appeared on.*$',
-        r'^.*The post.*appeared.*$',
-        r'^.*بازنویسی می‌کنم.*$',
-        r'^.*تمرکز بر سردبیری.*$',
-        r'^.*مناسب برای تیتر.*$',
-        r'^.*بار دراماتیک.*$',
-        r'^.*مخاطب را به خواندن.*$',
-        r'^.*عنوان:\s*$',
-        r'^.*محتوا:\s*$',
-        r'^.*پیوند اول:.*$',
-        r'^.*اطلاعات تکمیلی:\s*$',
-        r'^.*توضیحات\s*\(Meta Description\).*$',
-        r'^.*در صورتی که خبرگزاری.*$',
-        r'^.*تاریخ انتشار.*در انتهای متن.*$',
-        r'^.*درج واضح منبع.*$',
-        r'^.*استفاده از لیست.*$',
-        r'^.*استفاده از جملات کوتاه.*$',
-        r'^.*عنوان \(Title\).*$',
-        r'^.*عنوان خبری و مستقیم.*$',
-        r'^.*محتوای بازنویسی شده.*$',
-        r'^.*هشدار شدید حقوق بشر.*$',
-        r'^.*عنوان اصلی \(پیشنهادی.*$',
-        r'^.*چرا\?\?.*$',
-        r'^.*گستردگی را نشان.*$',
-        r'^.*احساس فوریت و اهمیت.*$',
-        r'^.*کلمات کلیدی قوی.*$',
-        r'^.*موتورهای جستجو.*مفید.*$',
-        r'^.*کمک می‌کند تا اطلاعات.*$',
-        r'^.*حفظ اعتبار.*$',
-        r'^.*سئو بسیار مهم.*$',
-        r'^.*در یک سناریوی واقعی.*$',
-        r'^.*رعایت شده.*$',
-        r'^.*خبرگزاری در ابتدای.*$',
-        r'^.*اضافه کردن نام.*$',
-        r'^.*توضیح:.*در خروجی بالا.*$',
-        r'^.*در پاراگراف اول پوشش.*$',
-        r'^.*صفحه به صورت ضمنی.*$',
-        r'^.*منابع معتبر.*دیده می‌شود.*$',
-        r'^.*جذابیت یا اطلاعاتی ندارد.*$',
-        r'^.*عبارت به طور معمول.*$',
-        r'^.*حاوی کلمات کلیدی اصلی.*$',
-    ]
-    lines = text.split('\n')
-    clean_lines = []
-    for line in lines:
-        stripped = line.strip()
-        if not stripped:
-            clean_lines.append(line)
-            continue
-        is_noise = False
-        for pattern in noise_patterns:
-            if re.search(pattern, stripped):
-                is_noise = True
-                break
-        if not is_noise:
-            clean_lines.append(line)
-    return '\n'.join(clean_lines)
-
-from typing import List, Dict
-
-from config import (
-    BLOG_ID, 
-    MAX_NEWS_PER_CHECK, 
-    CHECK_INTERVAL_HOURS
-)
-from news_fetcher import NewsFetcher
-from ai_processor import AIProcessor
-from blogger_poster import BloggerPoster
-from duplicate_detector import DuplicateDetector
+def build_post_html(item, title, body, image, labels, related_posts=()):
+    """Keep the dark article styling; escape all externally supplied text/attributes."""
+    published = utc_now().isoformat()
+    schema = {'@context': 'https://schema.org', '@type': 'NewsArticle', 'headline': title,
+              'datePublished': published, 'dateModified': published, 'description': body[:160],
+              'author': {'@type': 'Organization', 'name': 'iranpolnews', 'url': BLOG_URL}}
+    if image:
+        schema['image'] = [image]
+    schema_json = json.dumps(schema, ensure_ascii=False).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+    source_url = canonical_url(item['link'])
+    figure = ''
+    image_url = download_and_optimize_image(image)
+    if image_url:
+        figure = f'<figure style="margin:0 0 25px"><img src="{escape(image_url, quote=True)}" alt="{escape(title, quote=True)}" loading="lazy" decoding="async" style="width:100%;max-width:800px;border-radius:12px" /></figure>'
+    paragraphs = '\n'.join(f'<p style="margin-bottom:18px">{escape(p)}</p>'
+                           for p in deduplicate_text(body).split('\n\n') if p)
+    tags = ' '.join(f'<a href="/search/label/{quote(label)}" style="color:#c0392b;margin-left:12px">#{escape(label)}</a>' for label in labels)
+    # Use the existing renderer for related links, without running its update_posts routine.
+    related = ''
+    if len(related_posts) >= 3:
+        from update_all_posts import build_related_posts_widget, extract_first_image, get_persian_date
+        candidates = sorted(related_posts, key=lambda p: (len(set(labels).intersection(p.get('labels', []))), p.get('published', '')), reverse=True)[:3]
+        cards = [{'title': escape(p.get('title', ''), quote=True),
+                  'url': escape(canonical_url(p.get('url', '')), quote=True),
+                  'image': escape(extract_first_image(p.get('content', ''), '', {}), quote=True),
+                  'label': escape((p.get('labels') or ['حقوق بشر'])[0]),
+                  'date': get_persian_date(p.get('published', ''))} for p in candidates]
+        related = build_related_posts_widget(cards, escape(labels[0]))
+    return f'''<style>.post-featured-image,.post-thumbnail{{display:none!important}}</style>
+<script type="application/ld+json">{schema_json}</script>
+{figure}
+<article data-source-url="{escape(source_url, quote=True)}" data-source-title="{escape(item['title'], quote=True)}" data-source-published="{escape(item.get('published') or '', quote=True)}" style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:Vazir,sans-serif">
+{paragraphs}
+</article>
+<footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;direction:rtl">
+<div>{tags}</div>
+<div style="background:#161616;padding:10px 20px;border-right:3px solid #c0392b;color:#ddd">
+منبع خبر: <a href="{escape(source_url, quote=True)}" rel="noopener noreferrer" target="_blank">{escape(item['source'])}</a>
+</div></footer>
+{related}'''
 
 class BloggerNewsBot:
-    def __init__(self):
-        self.fetcher = NewsFetcher()
-        self.duplicate_detector = DuplicateDetector()  # Advanced duplicate detection
-        self.ai = None
-        self.blogger = None
-        self.resolved_images = {}
-        
-        print("[INFO] Initializing Blogger News Bot...")
-        print(f"[INFO] Blog ID: {BLOG_ID}")
-        print(f"[INFO] Check interval: Every {CHECK_INTERVAL_HOURS} hours")
-        
-        # Load resolved stock images mappings
-        try:
-            import json
-            resolved_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resolved_images.json")
-            if os.path.exists(resolved_path):
-                with open(resolved_path, "r", encoding="utf-8") as f:
-                    self.resolved_images = json.load(f)
-                print(f"[OK] Loaded {len(self.resolved_images)} resolved stock images.")
-            else:
-                print("[WARNING] resolved_images.json not found!")
-        except Exception as e:
-            print(f"[ERROR] Loading resolved_images.json: {e}")
-
-        print(f"[INFO] Duplicate cache: {self.duplicate_detector.get_stats()}")
-
-    def _init_ai(self):
-        if not self.ai:
-            self.ai = AIProcessor()
-            print("[OK] AI Processor initialized")
-
-    def _init_blogger(self):
-        if not self.blogger:
-            try:
-                self.blogger = BloggerPoster()
-                print("[OK] Blogger API initialized")
-            except Exception as e:
-                print(f"[ERROR] Blogger initialization failed: {e}")
+    def __init__(self, fetcher=None, ai=None, blogger=None, detector=None):
+        self.fetcher = fetcher or NewsFetcher()
+        self.duplicate_detector = detector or DuplicateDetector()
+        self.ai, self.blogger = ai, blogger
 
     def fetch_and_process_news(self):
-        print("\n" + "="*60)
-        print(f"Starting news fetch at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-        print("="*60)
-        
-        news_items = self.fetcher.fetch_all_news(max_items=MAX_NEWS_PER_CHECK)
-        
-        if not news_items:
-            print("[INFO] No new relevant news found")
-            return
-        
-        self._init_ai()
-        self._init_blogger()
-        
-        
-        published_count = 0
-        posted_titles = []
-        
-        for item in news_items:
-            try:
-                # 1. TIME FILTER: Skip older than 24h
-                pub_date_str = item.get('published')
-                if pub_date_str:
-                    try:
-                        pub_date = datetime.fromisoformat(pub_date_str)
-                        if datetime.now() - pub_date > timedelta(hours=24):
-                            print(f"  [Skip] News too old ({pub_date.strftime('%Y-%m-%d')}): {item['title'][:50]}")
-                            continue
-                    except:
-                        pass
-                
-                # 2. ADVANCED DUPLICATE CHECK
-                is_dup, dup_reason = self.duplicate_detector.is_duplicate(
-                    item['title'], 
-                    item.get('link', ''),
-                    item.get('description', '')
-                )
-                if is_dup:
-                    safe_title = item['title'][:40].encode(sys.stdout.encoding, errors='replace').decode(sys.stdout.encoding)
-                    print(f"  [SKIP] Duplicate: {safe_title}... ({dup_reason})")
-                    continue
-
-                safe_title = item['title'][:50].encode(sys.stdout.encoding, errors='replace').decode(sys.stdout.encoding)
-                print(f"\nProcessing: {safe_title}...")
-                
-                # Prepare content
-                article_link = item.get('link', '')
-                article_title = item['title']
-                
-                print(f"  [Fetching] Getting full content...")
-                full_article = self.fetcher.fetch_full_article(article_link, item.get('source', ''))
-                
-                # Get content from article or fallback to item description
-                description = full_article.get('full_content', '') if full_article.get('success') else ''
-                if not description:
-                    description = item.get('description', '')
-                
-                main_image = full_article.get('main_image') or item.get('image_url', '')
-                
-                # If still no content, use AI to GENERATE content from title
-                if not description or len(description) < 50:
-                    print(f"  [Warning] No content found, asking AI to generate from title...")
-                    description = f"[این خبر نیاز به تحلیل دارد: {article_title}]"
-
-                # Call AI for Multi-language processing
-                # This also fixes content if it was minimal
-                if self.ai:
-                    print(f"  [AI] Paraphrasing and generating unique title...")
-                    processed_title, english_slug, ai_response = self.ai.process_news(article_title, description)
-                    if not english_slug or len(english_slug.strip()) < 3:
-                        english_slug = "iran-news"
-
-                    
-                    # Update title to the unique one generated by AI
-                    article_title = processed_title
-                    
-                    # Parse AI response - Persian only (no translations)
-                    final_fa = description # Fallback
-                    meta_description = ""
-                    
-                    if "===PERSIAN===" in ai_response:
-                        try:
-                            persian_part = ai_response.split("===PERSIAN===")[1]
-                            # Remove other sections if present
-                            for marker in ["===TAGS===", "===METADESCRIPTION===", "===ENGLISH===", "===GERMAN==="]:
-                                if marker in persian_part:
-                                    persian_part = persian_part.split(marker)[0]
-                            final_fa = persian_part.strip()
-                        except:
-                            pass
-                    elif len(ai_response) > 100: 
-                        # If AI failed to structure but returned long text, use it
-                        final_fa = ai_response
-
-                    if "===METADESCRIPTION===" in ai_response:
-                        try:
-                            meta_part = ai_response.split("===METADESCRIPTION===")[1]
-                            for marker in ["===PERSIAN===", "===TAGS===", "===TITLE==="]:
-                                if marker in meta_part:
-                                    meta_part = meta_part.split(marker)[0]
-                            meta_description = meta_part.strip()
-                        except:
-                            pass
-                    
-                    # CLEAN AI OUTPUT: Remove Markdown symbols and AI analysis noise
-                    final_fa = strip_ai_noise(final_fa)
-                    final_fa = strip_markdown(final_fa)
-                    article_title = strip_markdown(article_title)
-                    meta_description = strip_markdown(meta_description)
-                    
-                    # Ensure meta_description is populated as fallback
-                    if not meta_description:
-                        paragraphs = [p.strip() for p in final_fa.split('\n') if p.strip()]
-                        if paragraphs:
-                            meta_description = paragraphs[0][:160]
-                            if len(paragraphs[0]) > 160:
-                                meta_description += "..."
-                        else:
-                            meta_description = final_fa[:160] + "..."
-                            
-                    description = final_fa
-                else:
-                    pass
-
-                # VALIDATE: Skip if no content was extracted
-                if not description or len(description) < 50:
-                    print(f"  [SKIP] No content extracted for this article")
-                    continue
-                
-                # DEDUPLICATION CHECK: Remove any repeated text content
-                description = deduplicate_text(description)
-                
-                print(f"  [Content] {len(description)} characters")
-                
-                source_name = item.get('source', 'Source')
-                search_text = (article_title + " " + description).lower()
-                
-                # ==========================================
-                # 1. Smart Label Classification
-                # ==========================================
-                post_labels = []
-                worker_keywords = ['کارگر', 'کارگران', 'اعتصاب', 'حقوق معوقه', 'سندیکا', 'کولبر', 'سوخت‌بر', 'اخراج', 'بازنشستگان', 'حداقل دستمزد', 'حوادث کار']
-                prisoner_keywords = ['زندان', 'بازداشت', 'اوین', 'اعدام', 'حبس', 'وثیقه', 'سلول انفرادی', 'اعتصاب غذا', 'شکنجه', 'بند نسوان', 'زندانی سیاسی']
-                
-                # Check for Worker-related news across all sources
-                if any(kw in search_text for kw in worker_keywords):
-                    post_labels.append('کارگران')
-                
-                # Check for Prisoner/Execution-related news across all sources
-                if any(kw in search_text for kw in prisoner_keywords):
-                    post_labels.append('وضعیت زندانیان')
-                
-                # Fallback to category based on source or general human rights if no specific matches
-                if not post_labels:
-                    if 'ایران اینترنشنال' in source_name:
-                        post_labels.append('بین‌الملل')
-                    else:
-                        post_labels.append('حقوق بشر')
-                
-                post_labels = list(set(post_labels))
-                
-                # Only use original news image; no fallback/stock images
-                if not main_image:
-                    print(f"  [Image] No original image found — publishing text-only.")
-
-                # ==========================================
-                # 3. Build HTML (with unblocked image proxy & deep SEO)
-                # ==========================================
-                image_html = ""
-                if main_image:
-                    proxied_image = download_and_optimize_image(main_image)
-                    print(f"  [Image] {proxied_image[:60]}...")
-                    # Image SEO: Alt tags, title tags, loading="lazy", decoding="async", and semantic figure markup
-                    image_html = f'''<figure style="margin:0 0 25px 0;text-align:center;">
-    <img src="{proxied_image}" alt="{article_title}" title="{article_title}" loading="lazy" decoding="async" style="width:100%;max-width:800px;border-radius:12px;box-shadow:0 5px 20px rgba(0,0,0,0.4);" />
-    <figcaption style="display:none;">{article_title}</figcaption>
-</figure>'''
-                else:
-                    print(f"  [Warning] No image found for this article")
-                
-                # Convert text paragraphs into semantic <p> tags for better SEO crawling
-                formatted_paragraphs = []
-                lines = [p.strip() for p in description.split("\n") if p.strip()]
-                
-                if lines:
-                    first_line_clean = lines[0].replace('**', '').replace('تیتر:', '').replace('عنوان:', '').strip()
-                    article_title_clean = article_title.strip()
-                    if article_title_clean in first_line_clean or first_line_clean in article_title_clean:
-                        lines = lines[1:]
-                        
-                for p in lines:
-                    if p != "محتوا:" and not p.startswith("عنوان:") and not p.startswith("تیتر:"):
-                        formatted_paragraphs.append(f'<p style="margin-bottom:18px;">{p}</p>')
-                        
-                description_html = "\n".join(formatted_paragraphs)
-
-                # Generate Google Rich Snippet (Schema.org JSON-LD Structured Data)
-                import json
-                from urllib.parse import quote
-                
-                # Dynamic JSON-LD preparation
-                schema_data = {
-                    "@context": "https://schema.org",
-                    "@type": "NewsArticle",
-                    "headline": article_title,
-                    "image": [main_image] if main_image else [],
-                    "datePublished": datetime.utcnow().isoformat() + "Z",
-                    "dateModified": datetime.utcnow().isoformat() + "Z",
-                    "author": {
-                        "@type": "Organization",
-                        "name": "iranpolnews",
-                        "url": "https://iranpolnews.blogspot.com"
-                    },
-                    "publisher": {
-                        "@type": "Organization",
-                        "name": "iranpolnews",
-                        "logo": {
-                            "@type": "ImageObject",
-                            "url": "https://cdn.jsdelivr.net/gh/AmirCode97/blogger-news-bot@main/images/HHk1ato9bgvQfZFgfsFF.png"
-                        }
-                    },
-                    "description": meta_description
-                }
-                
-                schema_json = json.dumps(schema_data, ensure_ascii=False)
-                schema_script = f'<script type="application/ld+json">{schema_json}</script>'
-
-                # Generate internal category SEO links
-                labels_to_use = post_labels if post_labels else ["حقوق بشر"]
-                tag_links = []
-                for label in labels_to_use:
-                    tag_links.append(f'<a href="/search/label/{quote(label)}" style="color:#c0392b;text-decoration:none;margin-left:12px;font-weight:bold;transition:color 0.2s;" onmouseover="this.style.color=\'#e74c3c\'" onmouseout="this.style.color=\'#c0392b\'">#{label}</a>')
-                tags_html = " ".join(tag_links)
-
-                # Generate "مطالب مرتبط" (Related Posts) widget dynamically for new post
-                related_widget_html = ""
-                try:
-                    from update_all_posts import extract_first_image, get_persian_date, build_related_posts_widget
-                    
-                    # Fetch recent posts to find matches
-                    response = self.blogger.service.posts().list(
-                        blogId=self.blogger.blog_id,
-                        maxResults=50
-                    ).execute()
-                    items = response.get('items', [])
-                    
-                    current_lbls = set(post_labels) if post_labels else {"حقوق بشر"}
-                    candidates = []
-                    for it in items:
-                        lbls = it.get('labels', [])
-                        it_lbl_set = set(lbls) if lbls else {"حقوق بشر"}
-                        overlap = len(current_lbls.intersection(it_lbl_set))
-                        candidates.append((overlap, it))
-                        
-                    # Sort by overlap, then publish date
-                    candidates.sort(key=lambda x: (x[0], x[1].get('published', '')), reverse=True)
-                    
-                    selected_posts = []
-                    for score, it in candidates:
-                        it_lbls = it.get('labels', [])
-                        it_lbl = it_lbls[0] if it_lbls else "حقوق بشر"
-                        
-                        it_img = extract_first_image(it.get('content', ''), it_lbl, self.resolved_images)
-                        it_date = get_persian_date(it.get('published', ''))
-                        
-                        selected_posts.append({
-                            'title': it['title'],
-                            'url': it.get('url', ''),
-                            'label': it_lbl,
-                            'image': it_img,
-                            'date': it_date
-                        })
-                        if len(selected_posts) == 3:
-                            break
-                            
-                    # Fill up to 3 if needed
-                    while len(selected_posts) < 3 and items:
-                        for it in items:
-                            if it.get('url') in [p['url'] for p in selected_posts]:
-                                continue
-                            it_lbls = it.get('labels', [])
-                            it_lbl = it_lbls[0] if it_lbls else "حقوق بشر"
-                            it_img = extract_first_image(it.get('content', ''), it_lbl, self.resolved_images)
-                            it_date = get_persian_date(it.get('published', ''))
-                            selected_posts.append({
-                                'title': it['title'],
-                                'url': it.get('url', ''),
-                                'label': it_lbl,
-                                'image': it_img,
-                                'date': it_date
-                            })
-                            if len(selected_posts) == 3:
-                                break
-                        break
-                        
-                    if len(selected_posts) >= 3:
-                        current_post_label = post_labels[0] if post_labels else "حقوق بشر"
-                        related_widget_html = build_related_posts_widget(selected_posts, current_post_label)
-                except Exception as e:
-                    print(f"  [ERROR] Building related posts widget: {e}")
-
-                html_content = f"""
-                <style>.post-featured-image, .post-thumbnail {{ display: none !important; }}</style>
-                {schema_script}
-                {image_html}
-                
-                <!-- Semantic Article Body -->
-                <article style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:'Vazir',sans-serif;">
-
-                    
-                    <!-- Article Content -->
-                    <div>
-                        {description_html}
-                    </div>
-                </article>
-                <!-- SEO Internal Link Tag Cloud & Source Box -->
-                <footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;direction:rtl;text-align:right;">
-                    <div style="font-size:14px;color:#888;margin-bottom:10px;">
-                        <span style="color:#aaa;margin-left:8px;font-weight:bold;">برچسب‌های مرتبط:</span>
-                        {tags_html}
-                    </div>
-                    <div style="background:#161616;padding:10px 20px;border-radius:8px;border-right:3px solid #c0392b;font-weight:bold;color:#ddd;font-size:13px;box-shadow:0 4px 10px rgba(0,0,0,0.4);margin-bottom:10px;">
-                        <span style="color:#c0392b;margin-left:8px;">منبع خبر:</span> {source_name}
-                    </div>
-                </footer>
-                
-                <!-- Related Posts Widget -->
-                {related_widget_html}
-                """
-
-                # 4. PUBLISH
-                if self.blogger:
-                    print(f"  [SEO] Publishing post with English URL: {english_slug if 'english_slug' in locals() else 'iran-news'}")
-                    post_result = self.blogger.create_post(
-                        title=english_slug if 'english_slug' in locals() else "iran-news",
-                        content=html_content,
-                        labels=post_labels,
-                        is_draft=False
-                    )
-                    if post_result:
-                        post_id = post_result.get('id')
-                        print("  [SEO] Updating title to Persian...")
-                        self.blogger.update_post_title(post_id, article_title)
-                        
-                        print(f"[OK] Published successfully! Post ID: {post_id}")
-                        published_count += 1
-                        
-                        # Mark as published in BOTH systems
-                        self.fetcher.mark_as_seen(article_title, item['id'])
-                        self.duplicate_detector.mark_as_published(
-                            title=article_title,
-                            url=article_link,
-                            content=description,
-                            post_id=post_result.get('id', '')
-                        )
-                        
-                        # 4. ANTI-429 DELAY
-                        print("  [Wait] 20s delay to avoid Blogger rate limits...")
-                        time.sleep(20)
-                    else:
-                        print(f"[FAILED] Could not post to Blogger")
-                
-            except Exception as e:
-                print(f"[ERROR] Processing item: {e}")
-
-        print(f"\nFinished. Published {published_count} items.")
-        
-        # Finally, update the live statistics
+        report = {'started_at': utc_now().isoformat(), 'published': 0, 'duplicates': 0,
+                  'skipped_old': 0, 'rejected': 0, 'failed': 0, 'stats_updated': False}
         try:
-            from stats_updater import fetch_and_calculate_stats, update_stats_post
-            print("\n[INFO] Running Live Stats Engine...")
-            stats_data = fetch_and_calculate_stats()
-            if stats_data and self.blogger:
-                update_stats_post(self.blogger, stats_data)
-        except Exception as e:
-            print(f"[Error] Failed to update stats: {e}")
+            items = self.fetcher.fetch_all_news(max_items=MAX_NEWS_PER_CHECK)
+            report['sources'] = self.fetcher.source_health
+            report['candidates'] = len(items)
+            if not BLOG_ID and self.blogger is None:
+                raise RuntimeError('BLOG_ID is missing')
+            self.blogger = self.blogger or BloggerPoster()
+            # Read, never edit, recent existing posts to recover from missing state/ambiguous insert.
+            recent = self.blogger.list_posts((utc_now() - timedelta(days=max(7, MAX_NEWS_AGE_HOURS / 24))).isoformat())
+            self.duplicate_detector.seed_from_posts(recent)
+            recent = [p for p in recent if 'آمار_زنده' not in p.get('labels', [])]
+            for item in items:
+                try:
+                    if self.duplicate_detector.is_duplicate(item['title'], item['link'], published=item.get('published'))[0]:
+                        report['duplicates'] += 1
+                        continue
+                    date = parse_datetime(item.get('published'))
+                    if date and utc_now() - date > timedelta(hours=MAX_NEWS_AGE_HOURS):
+                        report['skipped_old'] += 1
+                        continue
+                    full = ({'success': True, 'full_content': item['description'],
+                             'main_image': item.get('image_url'), 'published': item.get('published')}
+                            if item.get('has_full_content') and sufficient_source(item['description'])
+                            else self.fetcher.fetch_full_article(item['link'], item['source']))
+                    source_text = full.get('full_content', '') if full.get('success') else ''
+                    # A substantial source summary is allowed, but never expand a title into a story.
+                    if not sufficient_source(source_text):
+                        source_text = item.get('description', '')
+                    date = parse_datetime(full.get('published') or item.get('published'))
+                    if not date or date > utc_now() + timedelta(hours=1):
+                        report['rejected'] += 1
+                        print(f"[REJECT] Unknown/future source date: {item['link']}")
+                        continue
+                    if utc_now() - date > timedelta(hours=MAX_NEWS_AGE_HOURS):
+                        report['skipped_old'] += 1
+                        continue
+                    item['published'] = date.isoformat()
+                    if not sufficient_source(source_text):
+                        report['rejected'] += 1
+                        print(f"[REJECT] Insufficient source text: {item['link']}")
+                        continue
+                    if self.duplicate_detector.is_duplicate(item['title'], item['link'], source_text, item['published'])[0]:
+                        report['duplicates'] += 1
+                        continue
+                    self.ai = self.ai or AIProcessor()
+                    title, slug, body = self.ai.process_news(item['title'], source_text, item.get('language', 'fa'))
+                    labels = labels_for(title, body, item.get('source_category'))
+                    html = build_post_html(item, title, body, full.get('main_image') or item.get('image_url'), labels, recent)
+                    # One insert with final Persian title/content. No patching of existing news posts.
+                    result = self.blogger.create_post(title=title, content=html, labels=labels, is_draft=False)
+                    if not result or not result.get('id'):
+                        raise RuntimeError('Blogger insert failed; retry only after next-run reconciliation')
+                    report['published'] += 1
+                    self.duplicate_detector.mark_as_published(title, item['link'], source_text, result['id'],
+                                                              item['title'], item['published'])
+                    self.fetcher.mark_as_seen(item['title'], item['id'])
+                    print(f"[PUBLISHED] {result['id']}: {title}")
+                    time.sleep(20)
+                except AIProcessingError as exc:
+                    report['failed'] += 1
+                    print(f"[AI FAILED] {item['link']}: {exc}")
+                except Exception as exc:
+                    report['failed'] += 1
+                    print(f"[ITEM FAILED] {item['link']}: {type(exc).__name__}: {exc}")
+            # Update only the dedicated statistics record, including runs with no new news.
+            stats = fetch_and_calculate_stats(self.blogger)
+            update_stats_post(self.blogger, stats)
+            report['stats_updated'] = True
+        except Exception as exc:
+            report['failed'] += 1
+            print(f'[RUN FAILED] {type(exc).__name__}: {exc}')
+        report['finished_at'] = utc_now().isoformat()
+        unhealthy = [s for s in report.get('sources', []) if not s['ok']]
+        report['status'] = 'degraded' if unhealthy or report['failed'] or report['rejected'] else 'success'
+        atomic_json('run_report.json', report)
+        print('[SUMMARY] ' + json.dumps(report, ensure_ascii=False))
+        return report
 
     def run_once(self):
-        self.fetch_and_process_news()
+        return self.fetch_and_process_news()
 
     def run_scheduler(self):
-        print(f"[SCHEDULER] Bot started. Checking news every {CHECK_INTERVAL_HOURS} hours.")
-        
-        # Run immediately on start
-        self.fetch_and_process_news()
-        
-        # Schedule next runs
-        schedule.every(CHECK_INTERVAL_HOURS).hours.do(self.fetch_and_process_news)
-        
+        self.run_once()
+        schedule.every(CHECK_INTERVAL_HOURS).hours.do(self.run_once)
         while True:
             schedule.run_pending()
-            time.sleep(60)
+            time.sleep(30)
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--once', action='store_true')
+    parser.add_argument('--check-sources', action='store_true', help='Read sources only; no Gemini/Blogger writes')
+    args = parser.parse_args()
+    if args.check_sources:
+        fetcher = NewsFetcher()
+        items = fetcher.fetch_all_news()
+        samples = []
+        for source in fetcher.source_health:
+            item = next((x for x in items if x['source'] == source['source']), None)
+            if item:
+                full = fetcher.fetch_full_article(item['link'], item['source'])
+                samples.append({'source': item['source'], 'url': item['link'],
+                                'source_date': full.get('published') or item.get('published'),
+                                'full_text_chars': len(full.get('full_content', '')), 'ok': full.get('success', False)})
+        report = {'sources': fetcher.source_health, 'samples': samples, 'candidates': len(items)}
+        atomic_json('source_report.json', report)
+        print(json.dumps(report, ensure_ascii=False, indent=2))
+        return int(any(not s['ok'] for s in fetcher.source_health) or any(not s['ok'] for s in samples))
     bot = BloggerNewsBot()
-    if len(sys.argv) > 1 and sys.argv[1] == '--once':
-        bot.run_once()
-    else:
-        # Default mode: Continuous Loop
-        bot.run_scheduler()
+    if args.once:
+        return int(bot.run_once()['status'] != 'success')
+    bot.run_scheduler()
+    return 0
 
-if __name__ == "__main__":
-    import sys
-    main()
+if __name__ == '__main__':
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
+    raise SystemExit(main())

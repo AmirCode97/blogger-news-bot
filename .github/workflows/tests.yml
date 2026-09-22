@@ -1,0 +1,32 @@
+name: Bot checks
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Compile all Python files
+        run: python -m compileall -q .
+      - name: Offline regression tests
+        run: python -m unittest discover -s tests -v
+      - name: Live source diagnostics (no credentials, AI or publication)
+        run: python main.py --check-sources
+      - name: Upload source diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-diagnostics
+          path: source_report.json
+          if-no-files-found: ignore
