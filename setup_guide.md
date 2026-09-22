@@ -71,11 +71,13 @@ MAX_NEWS_PER_CHECK=10
 
 ## ▶️ اجرای ربات
 
-### اجرای یکباره (تست)
+### آزمون فقط‌خواندنی دریافت منابع
 
 ```bash
-python main.py --once
+python main.py --check-sources
 ```
+
+برای انتشار واقعی یک‌باره از python main.py --once استفاده کنید.
 
 ### اجرای زمان‌بندی شده
 

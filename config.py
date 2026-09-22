@@ -18,6 +18,9 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 # ==================== News Settings ====================
 CHECK_INTERVAL_HOURS = int(os.getenv("CHECK_INTERVAL_HOURS", "6"))
 MAX_NEWS_PER_CHECK = int(os.getenv("MAX_NEWS_PER_CHECK", "30"))
+MAX_NEWS_AGE_HOURS = int(os.getenv("MAX_NEWS_AGE_HOURS", "72"))
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite")
+BLOG_URL = os.getenv("BLOG_URL", "https://iranpolnews.blogspot.com").rstrip('/')
 
 # ==================== Proxy Settings ====================
 USE_PROXY = os.getenv("USE_PROXY", "true").lower() == "true"
@@ -65,6 +68,7 @@ NEWS_SOURCES = [
     # ==================== کانون حقوق بشر ایران ====================
     {
         "name": "کانون حقوق بشر ایران",
+        "api_url": "https://iranhrs.org/wp-json/wp/v2/posts?categories=63&per_page=30&_embed=1",
         "url": "https://iranhrs.org/category/%d8%ad%d9%82%d9%88%d9%82-%d8%a8%d8%b4%d8%b1-%d8%af%d8%b1-%d8%a7%db%8c%d8%b1%d8%a7%d9%86/",
         "type": "scrape",
         "language": "fa",
@@ -112,9 +116,9 @@ NEWS_SOURCES = [
     # ==================== حقوق بشر در ایران - بازداشت ====================
     {
         "name": "حقوق بشر در ایران - بازداشت",
-        "url": "https://humanrightsinir.org/category/arrest-and-ignorance/",
+        "url": "https://humanrightsinir.org/category/بازداشت-بلاتکلیفی/",
         # RSS fallback: used automatically if scrape fails (e.g. IP block on GitHub Actions)
-        "rss_fallback": "https://humanrightsinir.org/category/arrest-and-ignorance/feed/",
+        "rss_fallback": "https://humanrightsinir.org/category/بازداشت-بلاتکلیفی/feed/",
         "type": "scrape",
         "language": "fa",
         "enabled": True,

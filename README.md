@@ -1,114 +1,66 @@
-# Blogger News AI Bot 🤖📰
+# Blogger News Bot
 
-*English version below / نسخه فارسی در ادامه*
+ربات خبرهای منابع تعیین‌شده را دریافت می‌کند، با Gemini بازنویسی می‌کند و عنوان و متن نهایی فارسی را در Blogger منتشر می‌کند. پست‌های خبری قدیمی فقط برای جلوگیری از تکرار و محاسبهٔ آمار خوانده می‌شوند؛ ربات آن‌ها را ویرایش نمی‌کند.
 
----
+## منابع فعال
 
-## 🇬🇧 English Version
+- کانون حقوق بشر ایران: دستهٔ حقوق بشر، از WordPress API همان سایت؛ صفحهٔ دسته fallback است.
+- هرانا: RSS بخش کارگران، همراه استخراج متن کامل از ساختار فعلی مقاله.
+- حقوق بشر در ایران: RSS فارسی بازداشت/بلاتکلیفی و محاکمه/صدور حکم.
+- ایران اینترنشنال مطابق تنظیمات قبلی غیرفعال است.
 
-A smart and fully automated bot designed to fetch, process, rewrite, and publish Iranian human rights and political news on the Blogger platform.
+آدرس قدیمی arrest-and-ignorance آرشیو انگلیسی قدیمی بود؛ آدرس فارسی جایگزین آن شده است.
 
-### ✨ Introduction
-This project is a comprehensive and intelligent bot that automatically aggregates news from reliable sources, processes them using artificial intelligence (Gemini AI), and publishes them on a Blogger blog with a premium dark-themed responsive layout. It also features an advanced **Live Statistics** engine that dynamically updates real-time human rights stats in Iran.
+## اجرا
 
-### 🚀 Key Features
+Python 3.11 یا بالاتر:
 
-* **Diverse News Aggregation & Smart Extraction:** Automatically fetches news from reputable sources including *Iran International, HRA News (HRANA), IranHRS (Human Rights in Iran), Iran-HRM (Iran Human Rights Monitor), IranHR (Iran Human Rights), and Human Rights in Iran (HumanRightsInIR)*, extracting full-text and high-quality images.
-* **AI Processing & Rewriting (Gemini AI):** Rewrites news articles to be completely unique and highly SEO-optimized, avoiding duplicate content penalties on search engines.
-* **Smart Labeling & Tagging:** Automatically scans keywords and assigns relevant categories/labels (e.g., *Prisoner Status, International Reactions, Special Report, etc.*).
-* **Live Stats Engine:** Automatically parses news and reliable reference sources (like HRANA) to extract real-time human rights statistics and updates a dedicated statistics post on the blog.
-* **Advanced Duplicate Detection:** A sophisticated system checking both headlines and article bodies to prevent publishing duplicate or highly similar news.
-* **Custom Theme Integration:** Generates beautiful, responsive HTML blocks that blend perfectly with a dark-themed blog layout, including a stylized "News Source" badge.
+    pip install -r requirements.txt
+    python main.py --check-sources
+    python -m unittest discover -s tests -v
 
-### ⚙️ Installation & Requirements
+check-sources فقط منابع را می‌خواند؛ به Gemini یا Blogger چیزی ارسال نمی‌کند. گزارش در source_report.json ذخیره می‌شود.
 
-1. **Install dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+اجرای انتشار واقعی:
 
-2. **Setup environment variables:**
-   Create a `.env` file in the root directory and configure the following variables:
-   ```env
-   BLOG_ID=your_blog_id
-   GEMINI_API_KEY=your_api_key
-   ```
-   * **Important Note:** Place your Google Authentication file `credentials.json` (for Blogger API) in the root directory.
+    python main.py --once
 
-### ▶️ Usage
+اجرای مداوم:
 
-1. **Manual Run (One-time):**
-   Checks for new articles and exits immediately:
-   ```bash
-   python main.py --once
-   ```
+    python main.py
 
-2. **Continuous Loop (Background Service):**
-   Runs continuously in the background, checking sources at a scheduled interval (default: every 5 hours):
-   ```bash
-   python main.py
-   ```
+برای اجرای محلی، .env.example را به .env کپی و مقدارها را تنظیم کنید. احراز هویت اولیهٔ Blogger با credentials.json و reauth.py انجام می‌شود؛ خروجی token محرمانه است.
 
-3. **Fully Automated Deployment (GitHub Actions):**
-   The bot is pre-configured to run automatically and completely free of charge on GitHub servers (configured in `news_bot.yml`). Simply set up the following secrets in your GitHub repository (**Settings > Secrets and variables > Actions**):
-   * `BLOG_ID`
-   * `GEMINI_API_KEY`
-   * `GOOGLE_CREDENTIALS_JSON` (the raw content of your authentication JSON file)
-   * `GOOGLE_TOKEN_PICKLE` (the Base64-encoded string of your authentication token)
+## GitHub Actions
 
----
+Secrets لازم: BLOG_ID، GEMINI_API_KEY و BLOGGER_TOKEN_BASE64.
+APP_EXTRA_CONFIG برای سبک بازنویسی و PROXY_URL برای proxy اختیاری هستند.
+نام‌های GOOGLE_TOKEN_PICKLE و GOOGLE_CREDENTIALS_JSON در راهنمای قدیمی با workflow سازگار نبودند.
+در CI از token از پیش تأییدشده استفاده می‌شود؛ مرورگر تعاملی باز نمی‌شود.
 
-## 🇮🇷 نسخه فارسی (Persian Version)
+workflow هر ۶ ساعت و پس از تغییر کد عملیاتی روی main اجرا می‌شود؛ اجرای دستی نیز در Actions موجود است. اجراهای انتشار هم‌زمان نمی‌شوند. پنجرهٔ تازگی پیش‌فرض ۷۲ ساعت است تا خبرهای از‌دست‌رفتهٔ اخیر فرصت دریافت داشته باشند. دریافت مجدد یک خبر منتشرشده، پست جدید تولید نمی‌کند.
 
-ربات هوشمند و تمام‌خودکار برای دریافت، پردازش، بازنویسی و انتشار اخبار حقوق بشر و سیاسی ایران در پلتفرم بلاگر (Blogger).
+سابقهٔ انتشار در شاخهٔ اختصاصی bot-state و فایل .bot-state/state.json به‌طور بادوام نگه‌داری می‌شود. این فایل فقط شامل سابقهٔ عمومی خبرها و hashهاست، نه tokenها. GITHUB_TOKEN موجود در Actions با contents:write آن را نگه‌داری می‌کند؛ secret اضافی لازم نیست. در نخستین اجرا، news_cache قدیمی مهاجرت می‌کند. در هر اجرا پست‌های اخیر Blogger فقط خوانده می‌شوند تا پست درج‌شده پیش از قطع ارتباط دوباره ارسال نشود. شاخهٔ bot-state را حذف نکنید.
 
-### ✨ معرفی
-این پروژه یک ربات جامع و هوشمند است که به صورت خودکار اخبار را از منابع معتبر دریافت می‌کند، با استفاده از هوش مصنوعی (Gemini AI) پردازش‌های تخصصی روی آن‌ها انجام داده و در وبلاگ با ظاهری بسیار زیبا و هماهنگ با قالب تیره (Dark Theme) منتشر می‌کند. همچنین این ربات دارای سیستم پیشرفته نمایش **آمار زنده** (Live Statistics) از وضعیت حقوق بشر در ایران است.
+run_report.json تعداد نامزدها، خبرهای منتشرشده، تکراری، قدیمی، ردشده و خطاهای هر منبع را نشان می‌دهد. شکست منبع یا انتشار با وضعیت degraded و خروج غیرصفر قابل مشاهده است؛ موفقیت بخشی از منابع مانع پردازش سایر منابع نمی‌شود.
 
-### 🚀 ویژگی‌های کلیدی
+## کیفیت محتوا
 
-* **منابع خبری متنوع و استخراج هوشمند:** اخبار را از منابع معتبری نظیر *ایران اینترنشنال، هرانا (HRA News)، کانون حقوق بشر ایران (IranHRS)، ناظران حقوق بشر ایران (Iran-HRM)، سازمان حقوق بشر ایران (IranHR) و حقوق بشر در ایران (HumanRightsInIR)* دریافت کرده و متن کامل و تصاویر با کیفیت اصلی را استخراج می‌کند.
-* **پردازش هوش مصنوعی (Gemini AI):** خبر ارائه شده را به گونه‌ای بازنویسی می‌کند که از نظر سئو کاملاً یونیک باشد و توسط گوگل به عنوان محتوای تکراری (Duplicate Content) شناسایی نشود.
-* **برچسب‌گذاری هوشمند (Smart Labeling):** به طور خودکار با اسکن کلمات کلیدی، دسته بندی و لیبل‌های مناسب (نظیر *وضعیت زندانیان، واکنش‌های بین‌المللی، گزارش ویژه و...*) را به پست اختصاص می‌دهد.
-* **موتور آمار زنده (Live Stats Engine):** بررسی اتوماتیک اخبار و منابع مرجع (مانند هرانا) برای استخراج آمار زنده و بروزرسانی لحظه‌ای یک پست اختصاصی در وبلاگ (بخش آمار زنده).
-* **سیستم هوشمند ضد تکرار (Duplicate Detection):** مکانیزم پیشرفته و هوشمند برای بررسی متن کامل و تیترها جهت جلوگیری از انتشار اخبار تکراری و مشابه.
-* **قالب اختصاصی (Dark Theme Ready):** تولید کدهای کدهای HTML با استایل‌های پیشرفته که با قالب طراحی شده وبلاگ کاملاً هماهنگ است و دارای باکس زیبای "منبع خبر" می‌باشد.
+مدل پیش‌فرض همان gemini-2.5-flash-lite است و از REST API رسمی generateContent استفاده می‌شود. GEMINI_MODEL قابل تنظیم است. پاسخ JSON ساختاریافته، طول/نوع فیلدها، عنوان و slug و عددهای اضافه‌شده اعتبارسنجی می‌شوند. تیتر به‌تنهایی به خبر تبدیل نمی‌شود. خبر با متن یا تاریخ ناکافی رد می‌شود و در اجرای بعد امکان تلاش مجدد دارد؛ پاسخ نامعتبر AI منتشر نمی‌شود.
 
-### ⚙️ نحوه نصب و پیش‌نیازها
+این کنترل‌ها راستی‌آزمایی مستقل همهٔ ادعاها نیستند. نام‌ها، نسبت‌دادن گفته‌ها و ابهام منبع باید در بازنویسی حفظ شوند. خبر جدید با عنوان نهایی فارسی در یک درخواست ایجاد می‌شود؛ برای ساخت URL انگلیسی، پست منتشرشده بعداً patch نمی‌شود. تصاویر اصلی و قالب تیره حفظ شده‌اند و لینک منبع اصلی در خبر جدید قرار می‌گیرد.
 
-۱. ابتدا نیازمندی‌های پروژه (پکیج‌ها) را نصب کنید:
-```bash
-pip install -r requirements.txt
-```
+## آمار واقعی وبلاگ
 
-۲. فایل `.env` را ایجاد کرده و توکن‌ها و اطلاعات زیر را تنظیم کنید:
-```env
-BLOG_ID=your_blog_id
-GEMINI_API_KEY=your_api_key
-```
-* **نکته مهم:** حتماً فایل تایید هویت گوگل خود یعنی `credentials.json` (برای Blogger API) را داخل این پوشه قرار دهید.
+آمار، تعداد خبرهای وبلاگ با گزارش صریح وقوع اعدام یا بازداشت در ماه شمسی جاری به وقت تهران است؛ تعداد افراد یا مجموع وقایع کشور نیست. تعریف با بخش آمار قالب فعلی وبلاگ هم‌راستا است. حکم اعدام، لغو حکم، تهدید، تکذیب، بازداشت تاریخی در خبر آزادی/محاکمه و موارد مبهم، وقوع قطعی محسوب نمی‌شوند.
 
-### ▶️ نحوه اجرا
+هر خبر شمرده‌شده لینک و عبارت شاهد دارد. بازنشر کاملاً یکسان یک بار شمرده می‌شود؛ دو بازنویسی متفاوت ممکن است همچنان دو گزارش باشند. هیچ عدد ثابت یا تخمینی اضافه نمی‌شود. خطای خواندن هر صفحه مانع جایگزینی آمار قبلی با نتیجهٔ ناقص می‌شود. آمار حتی در اجرای بدون خبر جدید به‌روز می‌شود.
 
-**۱. اجرای یک‌باره (Manual Run):**
-مناسب برای زمانی که می‌خواهید به صورت دستی اجرای ربات را فقط یکبار انجام دهید تا اخبار جدید چک شوند:
-```bash
-python main.py --once
-```
+تنها رکورد با عنوان Live Statistics Storage (Do not delete) و برچسب آمار_زنده قابل به‌روزرسانی است؛ تمام پست‌های خبری قدیمی دست‌نخورده می‌مانند. قالب وبلاگ نیز آمار را از feed محاسبه می‌کند و با این تغییرات ویرایش نشده است.
 
-**۲. اجرای همیشگی و خودکار (Continuous Loop):**
-ربات روشن می‌ماند و طبق زمان‌بندی داخلی (پیش‌فرض هر ۵ ساعت) سایت‌ها را بررسی می‌کند:
-```bash
-python main.py
-```
+## توسعه
 
-**۳. اجرای خودکار بدون نیاز به سرور شخصی (Github Actions):**
-پروژه برای اجرای کاملاً خودکار و رایگان روی سرورهای گیت‌هاب پیکربندی شده است (در فایل `news_bot.yml`). برای این منظور کافیست متغیرهای زیر را در بخش **Settings > Secrets and variables > Actions** مخزن گیت‌هاب خود تعریف کنید:
-* `BLOG_ID`
-* `GEMINI_API_KEY`
-* `GOOGLE_CREDENTIALS_JSON` (محتوای کامل فایل جیسون احراز هویت)
-* `GOOGLE_TOKEN_PICKLE` (محتوای توکن احراز هویت کدگذاری شده با Base64)
+Bot checks روی PR تست‌های آفلاین و آزمون فقط‌خواندنی منابع زنده را اجرا می‌کند؛ هیچ secret یا مجوز انتشار ندارد.
+update_all_posts.py و test_update_post.py ابزارهای قدیمی تغییر پست‌ها هستند؛ workflow ربات آن‌ها را اجرا نمی‌کند. برای تست از unittest استفاده کنید.
 
----
-**License**: MIT  
-**Developed by**: AmirCode97
+پارامترهای مهم: CHECK_INTERVAL_HOURS، MAX_NEWS_PER_CHECK، MAX_NEWS_AGE_HOURS، GEMINI_MODEL و BLOG_URL.

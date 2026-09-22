@@ -35,6 +35,9 @@ blog2.html
 blog_source.txt
 single_post.html
 *.log
+run_report.json
+source_report.json
+*.json.tmp
 
 # OS
 .DS_Store

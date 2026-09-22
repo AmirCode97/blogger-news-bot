@@ -33,6 +33,8 @@ class BloggerPoster:
             if self.creds and self.creds.expired and self.creds.refresh_token:
                 self.creds.refresh(Request())
             else:
+                if os.getenv('GITHUB_ACTIONS') or os.getenv('CI'):
+                    raise RuntimeError('Blogger token is missing/invalid; renew BLOGGER_TOKEN_BASE64 locally with reauth.py')
                 flow = InstalledAppFlow.from_client_secrets_file(GOOGLE_CREDENTIALS_FILE, SCOPES)
                 self.creds = flow.run_local_server(port=8080, prompt='consent')
             
@@ -65,6 +67,26 @@ class BloggerPoster:
             self.service.posts().publish(blogId=self.blog_id, postId=post_id).execute()
             return True
         except: return False
+
+    def list_posts(self, start_date=None, labels=None):
+        """Read published posts only; all pages or an explicit failure (never partial stats)."""
+        posts = []
+        token = None
+        for _ in range(100):
+            options = {'blogId': self.blog_id, 'maxResults': 100, 'fetchBodies': True,
+                       'status': 'live', 'orderBy': 'published'}
+            if start_date:
+                options['startDate'] = start_date
+            if labels:
+                options['labels'] = labels
+            if token:
+                options['pageToken'] = token
+            response = self.service.posts().list(**options).execute(num_retries=2)
+            posts.extend(response.get('items', []))
+            token = response.get('nextPageToken')
+            if not token:
+                return posts
+        raise RuntimeError('Blogger pagination limit reached; refusing incomplete results')
 
     def update_post_title(self, post_id, new_title):
         try:

@@ -4,77 +4,67 @@ on:
   schedule:
     - cron: "0 */6 * * *"
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "*.py"
+      - "requirements.txt"
+      - ".github/workflows/news_bot.yml"
 
 permissions:
   contents: write
 
+concurrency:
+  group: blogger-news-production
+  cancel-in-progress: false
+
 jobs:
   fetch-and-post:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 35
+    env:
+      PYTHONUNBUFFERED: "1"
+      BLOG_ID: ${{ secrets.BLOG_ID }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      APP_EXTRA_CONFIG: ${{ secrets.APP_EXTRA_CONFIG }}
+      PROXY_URL: ${{ secrets.PROXY_URL }}
+      BLOGGER_TOKEN_BASE64: ${{ secrets.BLOGGER_TOKEN_BASE64 }}
+      MAX_NEWS_PER_CHECK: "20"
+      MAX_NEWS_AGE_HOURS: "72"
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
+          cache: pip
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Install Playwright browser
-        run: |
-          playwright install chromium
-          playwright install-deps chromium
-
-      - name: Create credentials file
-        env:
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-        run: |
-          echo "$GOOGLE_CREDENTIALS" > credentials.json
-
-      - name: Create .env file
-        env:
-          BLOG_ID: ${{ secrets.BLOG_ID }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          APP_EXTRA_CONFIG: ${{ secrets.APP_EXTRA_CONFIG }}
-          PROXY_URL: ${{ secrets.PROXY_URL }}
-        run: |
-          SAFE_CONFIG=$(echo "$APP_EXTRA_CONFIG" | tr '\n' ' ' | sed "s/\"/'/g")
-          cat > .env <<EOF
-          BLOG_ID=${BLOG_ID}
-          GOOGLE_CREDENTIALS_FILE=credentials.json
-          GEMINI_API_KEY=${GEMINI_API_KEY}
-          CHECK_INTERVAL_HOURS=6
-          MAX_NEWS_PER_CHECK=20
-          USE_PROXY=true
-          PROXY_URL=${PROXY_URL}
-          APP_EXTRA_CONFIG="${SAFE_CONFIG}"
-          EOF
-          sed -i 's/^[[:space:]]*//' .env
-
-      - name: Restore news cache
-        continue-on-error: true
-        uses: actions/cache@v4
+        run: pip install -r requirements.txt
+      - name: Restore legacy caches for first-run migration
+        uses: actions/cache/restore@v4
         with:
           path: news_cache.json
           key: news-cache-${{ github.run_id }}
           restore-keys: |
             news-cache-
-
+      - name: Restore durable state
+        id: state
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python state_store.py restore
+          echo "ready=true" >> "$GITHUB_OUTPUT"
       - name: Run News Bot
         run: python main.py --once
+      - name: Save durable state even after partial failure
+        if: always() && steps.state.outputs.ready == 'true'
         env:
-          PYTHONUNBUFFERED: 1
-          BLOGGER_TOKEN_BASE64: ${{ secrets.BLOGGER_TOKEN_BASE64 }}
-
-      - name: Save news cache
-        uses: actions/cache/save@v4
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python state_store.py save
+      - name: Upload run summary
         if: always()
+        uses: actions/upload-artifact@v4
         with:
-          path: news_cache.json
-          key: news-cache-${{ github.run_id }}
+          name: news-run-report
+          path: run_report.json
+          if-no-files-found: ignore
+          retention-days: 14
