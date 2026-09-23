@@ -12,6 +12,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from config import NEWS_SOURCES, USE_PROXY, PROXY_URL
 from article_utils import atomic_json, canonical_url, parse_datetime, plain_article_text, utc_now
+from article_images import article_image_candidates, verified_image
 
 def safe_print(value):
     print(re.sub(r'(https?://)[^:@/]+:[^:@/]+@', r'\1***:***@', str(value)))
@@ -204,9 +205,18 @@ class NewsFetcher:
                             break
                 except (ValueError, TypeError):
                     continue
-        image = soup.select_one('meta[property="og:image"]')
+        images = article_image_candidates(soup, url)
         date = soup.select_one('meta[property="article:published_time"], meta[name="date"], time[datetime]')
         published = parse_datetime(date.get('content') or date.get('datetime')) if date else None
         return {'success': len(body) >= 150, 'full_content': body,
-                'main_image': urljoin(url, image.get('content', '')) if image else None,
+                'main_image': images[0] if images else None, 'image_candidates': images,
                 'published': published.isoformat() if published else None}
+
+    def resolve_article_image(self, item, full):
+        candidates = full.get('image_candidates') or [full.get('main_image'), item.get('image_url')]
+        candidates = [url for url in candidates if url]
+        if not candidates:
+            # RSS/WordPress may supply full text without featured media.
+            detail = self.fetch_full_article(item['link'], item.get('source', ''))
+            candidates = detail.get('image_candidates') or [detail.get('main_image')]
+        return verified_image(candidates, self.session)
