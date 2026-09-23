@@ -1,4 +1,6 @@
 import json
+import base64
+import re
 from io import BytesIO
 from unittest.mock import Mock, patch
 
@@ -84,3 +86,20 @@ class ImageTests(IsolatedTest):
         self.assertEqual(source.get_text(' ', strip=True), 'منبع خبر: منبع')
         self.assertIsNone(source.find('a'))
         self.assertIsNotNone(footer.select_one('.news-related-labels a'))
+
+    def test_related_stories_still_render_after_legacy_script_removal(self):
+        recent = [
+            {'title': f'خبر مرتبط {i}', 'url': f'https://example.org/story-{i}',
+             'labels': ['حقوق بشر'], 'published': '2026-09-23T12:00:00Z',
+             'content': '<figure><img src="https://example.org/photo.jpg"></figure>'}
+            for i in range(3)
+        ]
+        html = build_post_html(
+            {'title': 'خبر منبع', 'link': 'https://example.org/new', 'source': 'منبع'},
+            'عنوان تازه', BODY, '', ['حقوق بشر'], recent)
+        encoded = re.search(r'var b64 = "([A-Za-z0-9+/=]+)"', html)
+        self.assertIsNotNone(encoded)
+        widget = base64.b64decode(encoded.group(1)).decode('utf-8')
+        self.assertIn('خبر مرتبط 0', widget)
+        self.assertIn('https://example.org/story-2', widget)
+        self.assertIn('photo.jpg', widget)
