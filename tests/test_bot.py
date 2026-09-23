@@ -143,7 +143,8 @@ class AITests(IsolatedTest):
                         {'supported': 'true', 'issues': []}, {'supported': True}]:
             ai = self.processor(json.dumps(verdict))
             with self.subTest(verdict=verdict), self.assertRaises(AIProcessingError):
-                ai._verify_grounding('تجمع کارگران', BODY, {'title': 'تجمع کارگران', 'content': BODY})
+                ai._verify_grounding('تجمع کارگران', BODY, {'title': 'تجمع کارگران', 'content': BODY,
+                                                          'english_slug': 'iran-workers-wages'})
 
     def test_failed_grounding_never_returns_rewrite(self):
         ai = self.processor(json.dumps({'title': 'تجمع کارگران برای پیگیری دستمزد',
@@ -163,12 +164,12 @@ class AITests(IsolatedTest):
             with self.subTest(bad=bad), self.assertRaises(AIProcessingError):
                 ai._parse_ai_response(bad)
 
-    def test_unused_slug_cannot_block_a_valid_story(self):
+    def test_unusable_slug_is_rejected_before_publication(self):
         ai = self.processor('')
         for value in [None, 'نامک فارسی', 'too many words without hyphens']:
-            data = ai._parse_ai_response(json.dumps({'title': 'تجمع کارگران برای پیگیری دستمزد',
-                                                     'english_slug': value, 'content': BODY}))
-            self.assertRegex(data['english_slug'], r'^news-[0-9a-f]{12}$')
+            with self.subTest(value=value), self.assertRaises(AIProcessingError):
+                ai._parse_ai_response(json.dumps({'title': 'تجمع کارگران برای پیگیری دستمزد',
+                                                  'english_slug': value, 'content': BODY}))
 
     def test_no_model_call_for_headline_only(self):
         ai = self.processor('')
@@ -177,7 +178,7 @@ class AITests(IsolatedTest):
         ai.session.post.assert_not_called()
 
     def test_new_numeric_claim_rejected(self):
-        ai = self.processor(json.dumps({'title': 'بازداشت ۹۹ نفر در تهران', 'english_slug': 'arrest-news', 'content': BODY}))
+        ai = self.processor(json.dumps({'title': 'بازداشت ۹۹ نفر در تهران', 'english_slug': 'tehran-worker-arrest', 'content': BODY}))
         with patch('ai_processor.time.sleep'), self.assertRaises(AIProcessingError):
             ai.process_news('تجمع کارگران', BODY)
 
@@ -251,7 +252,8 @@ class PipelineTests(IsolatedTest):
         fetcher.resolve_article_image.return_value = ''
         poster = Mock()
         poster.list_posts.return_value = []
-        poster.create_post.return_value = None if fail else {'id': 'new-post'}
+        poster.create_post_with_slug.side_effect = RuntimeError('insert failed') if fail else None
+        poster.create_post_with_slug.return_value = {'id': 'new-post'}
         ai = Mock()
         ai.process_news.return_value = ('کارگران خواستار پرداخت دستمزد شدند', 'workers-wages', BODY)
         return BloggerNewsBot(fetcher=fetcher, blogger=poster, ai=ai), poster
@@ -272,15 +274,27 @@ class PipelineTests(IsolatedTest):
         bot.ai.process_news.assert_not_called()
         poster.create_post.assert_not_called()
 
-    def test_success_inserts_final_title_without_editing_old_posts(self):
+    def test_success_uses_english_url_slug_and_persian_display_title(self):
         bot, poster = self.bot()
         result = self.run_bot(bot)
         self.assertEqual(result['published'], 1)
-        self.assertEqual(poster.create_post.call_args.kwargs['title'], 'کارگران خواستار پرداخت دستمزد شدند')
+        self.assertEqual(poster.create_post_with_slug.call_args.args[:2],
+                         ('workers-wages', 'کارگران خواستار پرداخت دستمزد شدند'))
+        self.assertIn('data-pending-slug="workers-wages"', poster.create_post_with_slug.call_args.args[2])
         poster.update_post_title.assert_not_called()
         poster.service.posts.return_value.update.assert_not_called()
         poster.service.posts.return_value.patch.assert_not_called()
         self.assertTrue(DuplicateDetector().is_duplicate('changed title', 'https://example.org/article')[0])
+
+    def test_only_new_slug_marked_post_can_be_repaired(self):
+        bot, poster = self.bot()
+        old = {'id': 'old', 'title': 'old-english-title', 'content': '<article data-source-url="https://example.org/old">old</article>'}
+        pending = {'id': 'new', 'title': 'workers-unpaid-wages', 'content':
+                   '<article data-pending-slug="workers-unpaid-wages" data-final-title="حقوق معوقه کارگران">خبر</article>'}
+        poster.update_post_title.return_value = {'title': 'حقوق معوقه کارگران'}
+        self.assertEqual(bot.repair_new_post_titles([old, pending]), 0)
+        poster.update_post_title.assert_called_once_with('new', 'حقوق معوقه کارگران')
+        self.assertEqual(pending['title'], 'حقوق معوقه کارگران')
 
     def test_publish_failure_is_visible_and_not_marked_seen(self):
         bot, poster = self.bot(fail=True)
@@ -307,6 +321,25 @@ class PipelineTests(IsolatedTest):
             update.assert_called_once()
 
 class StateTests(IsolatedTest):
+    def test_new_post_uses_slug_only_for_initial_permalink(self):
+        poster = BloggerPoster.__new__(BloggerPoster)
+        poster.create_post = Mock(return_value={'id': 'new', 'url':
+            'https://www.iranpol.news/2026/09/iran-workers-unpaid-wages.html'})
+        poster.update_post_title = Mock(return_value={'id': 'new', 'title': 'دستمزد معوقه کارگران'})
+        result = poster.create_post_with_slug('iran-workers-unpaid-wages',
+                                              'دستمزد معوقه کارگران', '<article>خبر</article>', ['کارگران'])
+        self.assertEqual(result['id'], 'new')
+        poster.create_post.assert_called_once_with(title='iran-workers-unpaid-wages',
+            content='<article>خبر</article>', labels=['کارگران'], is_draft=False)
+        poster.update_post_title.assert_called_once_with('new', 'دستمزد معوقه کارگران')
+
+    def test_failed_title_patch_is_reported_for_next_run_recovery(self):
+        poster = BloggerPoster.__new__(BloggerPoster)
+        poster.create_post = Mock(return_value={'id': 'new'})
+        poster.update_post_title = Mock(return_value=None)
+        with self.assertRaisesRegex(RuntimeError, 'recovery will retry'):
+            poster.create_post_with_slug('iran-workers-unpaid-wages', 'دستمزد معوقه کارگران', 'body')
+
     def test_blogger_list_matches_installed_api_contract(self):
         from googleapiclient.discovery import build_from_document
         from googleapiclient.discovery_cache import get_static_doc

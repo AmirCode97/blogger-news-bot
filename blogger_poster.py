@@ -62,6 +62,23 @@ class BloggerPoster:
             print(f"[Error] Posting: {e}")
             return None
 
+    def create_post_with_slug(self, slug, title, content, labels=None):
+        """Blogger's API has no custom-permalink field: publish under the slug first.
+
+        Once published, changing the title keeps its permalink. The article carries
+        recovery metadata so a failed title patch can be retried on the next run.
+        """
+        result = self.create_post(title=slug, content=content, labels=labels, is_draft=False)
+        if not result or not result.get('id'):
+            raise RuntimeError('Blogger insert failed; retry only after next-run reconciliation')
+        updated = self.update_post_title(result['id'], title)
+        if not updated or updated.get('title') != title:
+            raise RuntimeError(f"Blogger created post {result['id']} but title update failed; recovery will retry")
+        if 'blog-post' in result.get('url', '').rsplit('/', 1)[-1]:
+            print(f"[PERMALINK WARNING] Blogger returned a generic URL for post {result['id']}")
+        updated.setdefault('id', result['id'])
+        return updated
+
     def publish_draft(self, post_id):
         try:
             self.service.posts().publish(blogId=self.blog_id, postId=post_id).execute()
@@ -93,7 +110,7 @@ class BloggerPoster:
             post_body = {'title': new_title}
             return self.service.posts().patch(
                 blogId=self.blog_id, postId=post_id, body=post_body
-            ).execute()
+            ).execute(num_retries=2)
         except Exception as e:
             print(f"[Error] Updating post title: {e}")
             return None

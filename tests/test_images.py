@@ -80,3 +80,7 @@ class ImageTests(IsolatedTest):
         self.assertIn('direction:rtl', footer['style'])
         self.assertEqual([node.get('class') for node in footer.find_all('div', recursive=False)],
                          [['news-related-labels'], ['news-source-credit']])
+        source = footer.select_one('.news-source-credit')
+        self.assertEqual(source.get_text(' ', strip=True), 'منبع خبر: منبع')
+        self.assertIsNone(source.find('a'))
+        self.assertIsNotNone(footer.select_one('.news-related-labels a'))
