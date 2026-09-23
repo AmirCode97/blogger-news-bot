@@ -9,6 +9,7 @@ from PIL import Image
 
 from article_images import article_image_candidates, image_url, verified_image, ImageUnavailable
 from main import build_post_html
+from news_fetcher import NewsFetcher
 from test_bot import IsolatedTest, BODY
 
 
@@ -34,9 +35,85 @@ class ImageTests(IsolatedTest):
         self.assertEqual(article_image_candidates(soup, 'https://example.org/news'), [photo])
 
     def test_lazy_featured_image_and_relative_url(self):
-        soup = BeautifulSoup('<img class="wp-post-image" src="data:image/gif;base64,x" data-src="/photo.jpg">'
-                             '<div class="entry-content"><img width="20" height="20" src="/share.png"></div>', 'html.parser')
+        soup = BeautifulSoup('<article><h1>News</h1><img class="wp-post-image" src="data:image/gif;base64,x" data-src="/photo.jpg">'
+                             '<div class="entry-content"><img width="20" height="20" src="/share.png"></div></article>', 'html.parser')
         self.assertEqual(article_image_candidates(soup, 'https://example.org/news'), ['https://example.org/photo.jpg'])
+
+    def hrana_page(self, article_id, filename, schema=True):
+        # Reduced from the two reported HRANA pages: the sidebar precedes the story.
+        page = f'https://www.hra-news.org/2026/hranews/{article_id}/'
+        photo = f'https://www.hra-news.org/wp-content/uploads/2026/09/{filename}.jpg'
+        graph = [
+            {'@type': 'Article', '@id': page + '#article',
+             'mainEntityOfPage': {'@id': page}, 'image': {'@id': page + '#primaryimage'}},
+            {'@type': 'ImageObject', '@id': page + '#primaryimage', 'contentUrl': photo},
+        ]
+        html = ('<div class="left-sidebar"><div class="post-item">'
+                '<img class="wp-post-image" width="400" height="400" src="/unrelated-person.jpg">'
+                '</div></div><div class="centeral"><div class="single-page">'
+                '<h2 class="single-post-title">News</h2><img class="wp-post-image" src="' + photo.replace('.jpg', '-300x191.jpg') + '">'
+                '<div class="single-post-content"><p>' + BODY + '</p></div>'
+                '<div class="relatet-post"><img class="wp-post-image" src="/other-story.jpg"></div>'
+                '</div></div>')
+        if schema:
+            html += '<script type="application/ld+json">' + json.dumps({'@graph': graph}) + '</script>'
+        return page, photo, html
+
+    def test_reported_hrana_articles_resolve_primary_image_reference(self):
+        for article_id, filename in [('a-84c8eb3e', 'Kargar_4'), ('a-a93827db', 'Havades_6')]:
+            with self.subTest(article=article_id):
+                page, photo, html = self.hrana_page(article_id, filename)
+                candidates = article_image_candidates(BeautifulSoup(html, 'html.parser'), page)
+                self.assertEqual(candidates, [photo, photo.replace('.jpg', '-300x191.jpg')])
+
+    def test_hrana_scoped_featured_image_without_schema(self):
+        page, photo, html = self.hrana_page('a-84c8eb3e', 'Kargar_4', schema=False)
+        self.assertEqual(article_image_candidates(BeautifulSoup(html, 'html.parser'), page),
+                         [photo.replace('.jpg', '-300x191.jpg')])
+
+    def test_broken_hrana_photos_never_fall_back_to_sidebar(self):
+        page, _, html = self.hrana_page('a-84c8eb3e', 'Kargar_4')
+        candidates = article_image_candidates(BeautifulSoup(html, 'html.parser'), page)
+        session = Mock()
+        session.get.return_value = self.response(status=404)
+        with self.assertRaises(ImageUnavailable):
+            verified_image(candidates, session)
+        self.assertEqual(session.get.call_count, 2)
+        self.assertTrue(all('Kargar_4' in call.args[0] for call in session.get.call_args_list))
+
+    def test_hrana_rss_full_text_still_uses_correct_detail_photo(self):
+        page, photo, html = self.hrana_page('a-a93827db', 'Havades_6')
+        fetcher = NewsFetcher()
+        fetcher._make_request = Mock(return_value=Mock(status_code=200, content=html.encode()))
+        fetcher.session = Mock()
+        fetcher.session.get.return_value = self.response(url=photo)
+        item = {'link': page, 'source': 'هرانا - کارگران', 'image_url': None}
+        self.assertEqual(fetcher.resolve_article_image(item, {'success': True, 'full_content': BODY}), photo)
+        self.assertEqual(fetcher.session.get.call_args.args[0], photo)
+
+    def test_jsonld_references_across_scripts_ignore_other_articles_and_cycles(self):
+        nodes = [
+            {'@type': 'Article', '@id': 'https://example.org/other#article', 'image': '/wrong.jpg'},
+            {'@type': 'NewsArticle', '@id': '#article', 'image': [{'@id': '#loop'}, {'@id': '#photo'}]},
+            {'@type': 'ImageObject', '@id': '#loop', 'url': {'@id': '#loop'}},
+            {'@type': 'ImageObject', '@id': '#photo', 'url': '/right.jpg'},
+        ]
+        html = ''.join('<script type="application/ld+json">' + json.dumps(n) + '</script>' for n in nodes)
+        self.assertEqual(article_image_candidates(BeautifulSoup(html, 'html.parser'), 'https://example.org/news'),
+                         ['https://example.org/right.jpg'])
+
+    def test_unresolved_jsonld_reference_is_not_an_image_url(self):
+        html = '<script type="application/ld+json">' + json.dumps(
+            {'@type': 'Article', 'image': {'@id': '#missing'}}) + '</script>'
+        self.assertEqual(article_image_candidates(BeautifulSoup(html, 'html.parser'), 'https://example.org/news'), [])
+
+    def test_sidebar_and_related_body_images_are_excluded(self):
+        html = ('<aside><article><h1>Sidebar story</h1><img class="wp-post-image" src="/wrong.jpg"></article></aside>'
+                '<article><h1>Actual story</h1><div class="entry-content"><img src="/right.jpg">'
+                '<div class="related-posts"><img src="/related.jpg"></div></div></article>'
+                '<article><h2>Other story</h2><img class="wp-post-image" src="/other.jpg"></article>')
+        self.assertEqual(article_image_candidates(BeautifulSoup(html, 'html.parser'), 'https://example.org/news'),
+                         ['https://example.org/right.jpg'])
 
     def test_invalid_or_empty_urls_are_not_images(self):
         for value in ['', None, 'javascript:alert(1)', 'https://user:pass@example.org/img.jpg']:
