@@ -60,6 +60,14 @@ class ImageTests(IsolatedTest):
         with patch('article_images.MAX_IMAGE_BYTES', 10), self.assertRaises(ImageUnavailable):
             verified_image(['https://example.org/photo.jpg'], session)
 
+    def test_truncated_jpeg_is_rejected(self):
+        buffer = BytesIO()
+        Image.new('RGB', (640, 420), 'navy').save(buffer, format='JPEG')
+        session = Mock()
+        session.get.return_value = self.response(data=buffer.getvalue()[:-200])
+        with self.assertRaises(ImageUnavailable):
+            verified_image(['https://example.org/photo.jpg'], session)
+
     def test_output_uses_verified_image_without_nested_proxy(self):
         url = 'https://i0.wp.com/example.org/photo.jpg?fit=1280%2C852&ssl=1'
         html = build_post_html({'title': 'عنوان اصلی', 'link': 'https://example.org/news', 'source': 'منبع'},

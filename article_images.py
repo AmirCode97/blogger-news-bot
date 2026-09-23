@@ -88,6 +88,9 @@ def verified_image(candidates, session):
                     if picture.width < 200 or picture.height < 100:
                         continue
                     picture.verify()
+                # JPEG verify() only checks headers; decode to reject truncated files too.
+                with Image.open(BytesIO(data)) as picture:
+                    picture.load()
                 return image_url(response.url) or url
         except (requests.RequestException, OSError, ValueError, UnidentifiedImageError,
                 Image.DecompressionBombError, ImageUnavailable):
