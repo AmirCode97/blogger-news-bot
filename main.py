@@ -8,6 +8,7 @@ from html import escape
 from urllib.parse import quote
 
 import schedule
+from bs4 import BeautifulSoup
 from ai_processor import AIProcessor, AIProcessingError, sufficient_source
 from article_utils import atomic_json, canonical_url, normalize_text, parse_datetime, utc_now
 from blogger_poster import BloggerPoster
@@ -41,7 +42,7 @@ def labels_for(title, body, category):
         labels.append('وضعیت زندانیان')
     return labels or [category or 'حقوق بشر']
 
-def build_post_html(item, title, body, image, labels, related_posts=()):
+def build_post_html(item, title, body, image, labels, related_posts=(), english_slug=''):
     """Keep the dark article styling; escape all externally supplied text/attributes."""
     published = utc_now().isoformat()
     schema = {'@context': 'https://schema.org', '@type': 'NewsArticle', 'headline': title,
@@ -72,13 +73,13 @@ def build_post_html(item, title, body, image, labels, related_posts=()):
     return f'''<style>.post-featured-image,.post-thumbnail{{display:none!important}}</style>
 <script type="application/ld+json">{schema_json}</script>
 {figure}
-<article data-source-url="{escape(source_url, quote=True)}" data-source-title="{escape(item['title'], quote=True)}" data-source-published="{escape(item.get('published') or '', quote=True)}" style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:Vazir,sans-serif">
+<article data-source-url="{escape(source_url, quote=True)}" data-source-title="{escape(item['title'], quote=True)}" data-source-published="{escape(item.get('published') or '', quote=True)}" data-pending-slug="{escape(english_slug, quote=True)}" data-final-title="{escape(title, quote=True)}" style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:Vazir,sans-serif">
 {paragraphs}
 </article>
 <footer class="news-source-footer" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px;margin-top:35px;border-top:1px solid #d9dee7;padding:24px 0;direction:rtl">
 <div class="news-related-labels" style="direction:rtl;text-align:right;margin-left:auto"><strong>برچسب‌های مرتبط:</strong> {tags}</div>
 <div class="news-source-credit" style="direction:rtl;text-align:right;margin-right:auto;background:#f3f4f6;padding:12px 20px;border-right:3px solid #d9dee7;border-radius:10px;color:#53627a">
-منبع خبر: <a href="{escape(source_url, quote=True)}" rel="noopener noreferrer" target="_blank">{escape(item['source'])}</a>
+منبع خبر: {escape(item['source'])}
 </div></footer>
 {related}'''
 
@@ -87,6 +88,26 @@ class BloggerNewsBot:
         self.fetcher = fetcher or NewsFetcher()
         self.duplicate_detector = detector or DuplicateDetector()
         self.ai, self.blogger = ai, blogger
+
+    def repair_new_post_titles(self, recent):
+        """Retry only titles of posts created by this slug-first workflow."""
+        failures = 0
+        for post in recent:
+            article = BeautifulSoup(post.get('content', ''), 'html.parser').select_one(
+                'article[data-pending-slug][data-final-title]')
+            if not article or post.get('title') != article.get('data-pending-slug'):
+                continue
+            title = article.get('data-final-title', '')
+            if not title or not post.get('id'):
+                continue
+            updated = self.blogger.update_post_title(post['id'], title)
+            if updated and updated.get('title') == title:
+                post['title'] = title
+                print(f"[REPAIRED TITLE] {post['id']}")
+            else:
+                failures += 1
+                print(f"[TITLE REPAIR FAILED] {post['id']}")
+        return failures
 
     def fetch_and_process_news(self):
         report = {'started_at': utc_now().isoformat(), 'published': 0, 'duplicates': 0,
@@ -100,6 +121,7 @@ class BloggerNewsBot:
             self.blogger = self.blogger or BloggerPoster()
             # Read, never edit, recent existing posts to recover from missing state/ambiguous insert.
             recent = self.blogger.list_posts((utc_now() - timedelta(days=max(7, MAX_NEWS_AGE_HOURS / 24))).isoformat())
+            report['failed'] += self.repair_new_post_titles(recent)
             self.duplicate_detector.seed_from_posts(recent)
             recent = [p for p in recent if 'آمار_زنده' not in p.get('labels', [])]
             for item in items:
@@ -139,11 +161,8 @@ class BloggerNewsBot:
                     self.ai = self.ai or AIProcessor()
                     title, slug, body = self.ai.process_news(item['title'], source_text, item.get('language', 'fa'))
                     labels = labels_for(title, body, item.get('source_category'))
-                    html = build_post_html(item, title, body, image, labels, recent)
-                    # One insert with final Persian title/content. No patching of existing news posts.
-                    result = self.blogger.create_post(title=title, content=html, labels=labels, is_draft=False)
-                    if not result or not result.get('id'):
-                        raise RuntimeError('Blogger insert failed; retry only after next-run reconciliation')
+                    html = build_post_html(item, title, body, image, labels, recent, english_slug=slug)
+                    result = self.blogger.create_post_with_slug(slug, title, html, labels)
                     report['published'] += 1
                     self.duplicate_detector.mark_as_published(title, item['link'], source_text, result['id'],
                                                               item['title'], item['published'])
