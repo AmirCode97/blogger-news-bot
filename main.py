@@ -59,10 +59,10 @@ def build_post_html(item, title, body, image, labels, related_posts=(), english_
     paragraphs = '\n'.join(f'<p style="margin-bottom:18px">{escape(p)}</p>'
                            for p in deduplicate_text(body).split('\n\n') if p)
     tags = ' '.join(f'<a href="/search/label/{quote(label)}" style="color:#c0392b;margin-left:12px">#{escape(label)}</a>' for label in labels)
-    # Use the existing renderer for related links, without running its update_posts routine.
+    # Related-story rendering is separate from the publication workflow.
     related = ''
     if len(related_posts) >= 3:
-        from update_all_posts import build_related_posts_widget, extract_first_image, get_persian_date
+        from related_posts import build_related_posts_widget, extract_first_image, get_persian_date
         candidates = sorted(related_posts, key=lambda p: (len(set(labels).intersection(p.get('labels', []))), p.get('published', '')), reverse=True)[:3]
         cards = [{'title': escape(p.get('title', ''), quote=True),
                   'url': escape(canonical_url(p.get('url', '')), quote=True),
