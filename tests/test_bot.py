@@ -248,6 +248,7 @@ class PipelineTests(IsolatedTest):
         fetcher.source_health = [{'source': 'Example', 'ok': True}]
         fetcher.fetch_all_news.return_value = [item]
         fetcher.fetch_full_article.return_value = {'success': bool(source), 'full_content': source}
+        fetcher.resolve_article_image.return_value = ''
         poster = Mock()
         poster.list_posts.return_value = []
         poster.create_post.return_value = None if fail else {'id': 'new-post'}
@@ -286,6 +287,16 @@ class PipelineTests(IsolatedTest):
         result = self.run_bot(bot)
         self.assertEqual(result['status'], 'degraded')
         self.assertEqual(result['failed'], 1)
+        bot.fetcher.mark_as_seen.assert_not_called()
+
+    def test_broken_image_defers_publication_without_marking_seen(self):
+        from article_images import ImageUnavailable
+        bot, poster = self.bot()
+        bot.fetcher.resolve_article_image.side_effect = ImageUnavailable('broken source image')
+        result = self.run_bot(bot)
+        self.assertEqual(result['failed'], 1)
+        poster.create_post.assert_not_called()
+        bot.ai.process_news.assert_not_called()
         bot.fetcher.mark_as_seen.assert_not_called()
 
     def test_stats_update_even_when_no_new_news(self):

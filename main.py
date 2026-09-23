@@ -27,9 +27,9 @@ def deduplicate_text(text):
     return '\n\n'.join(paragraphs)
 
 def download_and_optimize_image(url):
-    if not canonical_url(url):
-        return ''
-    return 'https://wsrv.nl/?url=' + quote(url, safe='') + '&w=800&output=webp&q=75'
+    # Already checked by the fetcher. Keep the source CDN URL and its exact query.
+    from article_images import image_url
+    return image_url(url)
 
 def labels_for(title, body, category):
     text = title + ' ' + body
@@ -75,9 +75,9 @@ def build_post_html(item, title, body, image, labels, related_posts=()):
 <article data-source-url="{escape(source_url, quote=True)}" data-source-title="{escape(item['title'], quote=True)}" data-source-published="{escape(item.get('published') or '', quote=True)}" style="font-size:17px;line-height:2.2;color:#fff;text-align:justify;direction:rtl;font-family:Vazir,sans-serif">
 {paragraphs}
 </article>
-<footer style="margin-top:35px;border-top:1px solid #222;padding-top:20px;direction:rtl">
-<div>{tags}</div>
-<div style="background:#161616;padding:10px 20px;border-right:3px solid #c0392b;color:#ddd">
+<footer class="news-source-footer" style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:18px;margin-top:35px;border-top:1px solid #d9dee7;padding:24px 0;direction:rtl">
+<div class="news-related-labels" style="direction:rtl;text-align:right;margin-left:auto"><strong>برچسب‌های مرتبط:</strong> {tags}</div>
+<div class="news-source-credit" style="direction:rtl;text-align:right;margin-right:auto;background:#f3f4f6;padding:12px 20px;border-right:3px solid #d9dee7;border-radius:10px;color:#53627a">
 منبع خبر: <a href="{escape(source_url, quote=True)}" rel="noopener noreferrer" target="_blank">{escape(item['source'])}</a>
 </div></footer>
 {related}'''
@@ -135,10 +135,11 @@ class BloggerNewsBot:
                     if self.duplicate_detector.is_duplicate(item['title'], item['link'], source_text, item['published'])[0]:
                         report['duplicates'] += 1
                         continue
+                    image = self.fetcher.resolve_article_image(item, full)
                     self.ai = self.ai or AIProcessor()
                     title, slug, body = self.ai.process_news(item['title'], source_text, item.get('language', 'fa'))
                     labels = labels_for(title, body, item.get('source_category'))
-                    html = build_post_html(item, title, body, full.get('main_image') or item.get('image_url'), labels, recent)
+                    html = build_post_html(item, title, body, image, labels, recent)
                     # One insert with final Persian title/content. No patching of existing news posts.
                     result = self.blogger.create_post(title=title, content=html, labels=labels, is_draft=False)
                     if not result or not result.get('id'):
@@ -195,6 +196,11 @@ def main():
                 samples.append({'source': item['source'], 'url': item['link'],
                                 'source_date': full.get('published') or item.get('published'),
                                 'full_text_chars': len(full.get('full_content', '')), 'ok': full.get('success', False)})
+                try:
+                    samples[-1]['image_url'] = fetcher.resolve_article_image(item, full)
+                    samples[-1]['image_ok'] = bool(samples[-1]['image_url'])
+                except RuntimeError as exc:
+                    samples[-1].update(image_ok=False, image_error=str(exc), ok=False)
         report = {'sources': fetcher.source_health, 'samples': samples, 'candidates': len(items)}
         atomic_json('source_report.json', report)
         print(json.dumps(report, ensure_ascii=False, indent=2))
